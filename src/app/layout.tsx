@@ -1,15 +1,20 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import Script from "next/script";
+import { Montserrat } from "next/font/google";
+
+import PrelineScriptWrapper from "./components/PrelineScriptWrapper";
+
+import "./date-picker.css";
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const montserrat = Montserrat({
+  variable: "--font-montserrat",
   subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  preload: true,
+  display: "swap",
+  style: ["normal", "italic"],
+  weight: ["100", "200", "300", "400", "500", "600", "700", "800", "900"],
+  fallback: ["system-ui", "sans-serif"],
 });
 
 export const metadata: Metadata = {
@@ -23,11 +28,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" className="overflow-hidden">
+      <body className={`${montserrat.variable}  antialiased`}>
         {children}
+        <PrelineScriptWrapper />
+        <Script
+          src="./node_modules/lodash/lodash.min.js"
+          strategy="afterInteractive"
+        />
+        <Script
+          src="./node_modules/vanilla-calendar-pro/index.js"
+          strategy="afterInteractive"
+        />
+        <Script
+          src="./assets/vendor/preline/dist/preline.js"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
