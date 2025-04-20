@@ -1,10 +1,14 @@
 "use client";
 
-import { OrdersTable } from "@/app/components";
+import dynamic from "next/dynamic";
 import { UsersIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
-
 import { ApexOptions } from "apexcharts";
-import ReactApexChart from "react-apexcharts";
+
+import { OrdersTable } from "@/app/components";
+
+const ReactApexChart = dynamic(() => import("react-apexcharts"), {
+  ssr: false,
+});
 
 const chartSeries = [
   {
