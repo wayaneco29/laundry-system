@@ -81,7 +81,7 @@ const chartOptions: ApexOptions = {
   },
   yaxis: {
     labels: {
-      formatter: function (value: any) {
+      formatter: function (value) {
         return "$" + value + "k";
       },
       style: {
@@ -139,7 +139,8 @@ const donutChartOptions = {
     show: false,
   },
   chart: {
-    type: "donut",
+    // eslint-disable-next-line @typescript-eslint/prefer-as-const
+    type: "donut" as "donut",
     height: 270,
     sparkline: {
       enabled: true, // Remove whitespace
@@ -276,7 +277,7 @@ export default function DashboardPage() {
           </div>
           <div className="text-gray-700 font-bold text-lg">₱8,050.50</div>
           <ReactApexChart
-            options={donutChartOptions as any}
+            options={donutChartOptions}
             series={donutChartSeries}
             type="donut"
             height={264}

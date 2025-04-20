@@ -1,4 +1,3 @@
-import { error } from "console";
 import { twMerge } from "tailwind-merge";
 
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {

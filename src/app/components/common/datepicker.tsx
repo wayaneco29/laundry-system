@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import moment from "moment";
+import { twMerge } from "tailwind-merge";
 import ReactDatepicker, {
   ReactDatePickerCustomHeaderProps,
 } from "react-datepicker";
@@ -12,8 +13,6 @@ import {
 } from "@heroicons/react/24/solid";
 
 import "react-datepicker/dist/react-datepicker.css";
-import { twMerge } from "tailwind-merge";
-import { error } from "console";
 
 type CustomDatePickerProps = {
   value: Date | string;
@@ -31,7 +30,7 @@ export const Datepicker = ({
   error,
   placeholder,
 }: CustomDatePickerProps) => {
-  const inputDOB = useRef<HTMLInputElement>(undefined);
+  const inputDOB = useRef<ReactDatepicker | null>(null);
 
   const [dateType, setDateType] = useState<"D" | "M" | "Y">("D");
   const [currentMonth, setCurrentMonth] = useState(new Date().getMonth());
@@ -101,7 +100,7 @@ export const Datepicker = ({
         dateFormat="MMMM d, yyyy"
         placeholderText={placeholder}
         popperPlacement="bottom-start"
-        ref={inputDOB as any}
+        ref={inputDOB}
         showMonthYearPicker={dateType === "M"}
         showYearPicker={dateType === "Y"}
         calendarClassName="shadow-lg !border-none"

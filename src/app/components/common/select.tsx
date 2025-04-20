@@ -1,6 +1,5 @@
 "use client";
 
-import { error } from "console";
 import { SelectHTMLAttributes, PropsWithChildren } from "react";
 import { twMerge } from "tailwind-merge";
 

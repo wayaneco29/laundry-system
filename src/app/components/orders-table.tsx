@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import moment from "moment";
 import { twMerge } from "tailwind-merge";
 
@@ -15,7 +13,7 @@ const getRandomDate = () => {
   return randomDate;
 };
 
-const defaultValues = [
+const orders = [
   {
     customerName: "John Cena",
     branchName: "Liloan",
@@ -48,9 +46,6 @@ const defaultValues = [
 ];
 
 export const OrdersTable = () => {
-  const [orders, setOrders] =
-    useState<Array<Record<string, any>>>(defaultValues);
-
   return (
     <div className="-m-1.5 overflow-x-auto">
       <div className="p-1.5 min-w-full inline-block align-middle">
