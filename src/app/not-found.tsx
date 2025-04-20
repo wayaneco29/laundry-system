@@ -1,4 +1,4 @@
-import { SidebarContextProvider } from "@/context";
+import { SidebarContextProvider } from "@/app/context";
 import Image from "next/image";
 
 export default function GlobalNotFound() {
