@@ -126,7 +126,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
       </div>
       <main
         className={twMerge(
-          "bg-gray-50 h-screen z-10 flex flex-col overflow-auto transition-all duration-300 ",
+          "bg-gray-50 min-h-screen pb-4 z-10 flex flex-col transition-all duration-300 ",
           minimize ? "lg:ml-15" : "lg:ml-80"
         )}
       >
@@ -159,7 +159,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
             </div>
           </div>
         </nav>
-        <section>{children}</section>
+        <section className="w-full h-full">{children}</section>
         <footer></footer>
       </main>
       {/* End Sidebar */}

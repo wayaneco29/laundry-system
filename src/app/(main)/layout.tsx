@@ -1,6 +1,6 @@
 import { PropsWithChildren } from "react";
 
-import { SidebarContextProvider } from "@/context";
+import { SidebarContextProvider } from "@/app/context";
 
 export default function MainLayout(props: PropsWithChildren) {
   return <SidebarContextProvider>{props?.children}</SidebarContextProvider>;
