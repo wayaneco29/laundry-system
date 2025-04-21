@@ -86,7 +86,7 @@ const chartOptions: ApexOptions = {
   yaxis: {
     labels: {
       formatter: function (value) {
-        return "$" + value + "k";
+        return "₱" + value + "k";
       },
       style: {
         fontSize: "14px",
@@ -221,7 +221,7 @@ export default function DashboardPage() {
                 This Month Sales
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                P28,970
+                ₱28,970
               </div>
             </div>
             <div className="p-3 rounded-full bg-orange-400 h-fit">
@@ -236,7 +236,7 @@ export default function DashboardPage() {
                 Todays Sales
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                P13,240
+                ₱13,240
               </div>
             </div>
             <div className="p-3 rounded-full bg-orange-400 h-fit">
@@ -251,7 +251,7 @@ export default function DashboardPage() {
                 Total Expenses
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                P14,580
+                ₱14,580
               </div>
             </div>
             <div className="p-3 rounded-full bg-red-500 h-fit">
@@ -288,12 +288,10 @@ export default function DashboardPage() {
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 mt-9">
-        <div className="bg-white rounded-md shadow-md p-4">
-          <div className="text-gray-700 mb-4 text-lg">Latest Transaction</div>
-          <div className="flex flex-col">
-            <OrdersTable />
-          </div>
+      <div className="bg-white rounded-md shadow-md p-4">
+        <div className="text-gray-700 mb-4 text-lg">Latest Transaction</div>
+        <div className="flex flex-col">
+          <OrdersTable />
         </div>
       </div>
     </div>
