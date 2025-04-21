@@ -34,7 +34,7 @@ export const MainCustomerIdPage = ({
                 </div>
                 <Button>Update</Button>
               </div>
-              <div className="grid grid-cols-3 gap-x-2 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4">
                 <div className="col-span-1">
                   <Controller
                     control={control}
@@ -75,7 +75,7 @@ export const MainCustomerIdPage = ({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3 gap-x-2 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4">
                 <div className="col-span-1">
                   <Controller
                     control={control}
@@ -99,7 +99,7 @@ export const MainCustomerIdPage = ({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-3">
+              <div className="grid grid-cols-1 lg:grid-cols-3">
                 <div className="col-span-2">
                   <Controller
                     control={control}
