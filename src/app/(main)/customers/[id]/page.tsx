@@ -1,8 +1,12 @@
 import { getCustomer } from "@/app/actions/customer/get_customer";
 import { MainCustomerIdPage } from "./components/main";
 
-export default async function Page({ params }: { params: { id: string } }) {
-  const { id } = params;
+export default async function Page({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
+  const { id } = await params;
   const { data } = await getCustomer(id);
 
   return (
