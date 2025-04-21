@@ -250,7 +250,7 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
                     p_middle_name: newData?.middle_name,
                     p_last_name: newData?.last_name,
                     p_phone: newData?.phone,
-                    p_email: newData?.email,
+                    p_email: newData?.email || "",
                     p_address: newData?.address,
                     p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
                   });
