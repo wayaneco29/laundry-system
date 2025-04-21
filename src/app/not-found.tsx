@@ -4,7 +4,7 @@ import Image from "next/image";
 export default function GlobalNotFound() {
   return (
     <SidebarContextProvider>
-      <div className="flex flex-col items-center justify-center h-[calc(100vh-500px)] px-4">
+      <div className="flex flex-col items-center justify-center mt-10 sm:mt-40 xl:mt-60 px-4">
         <div className="w-40 h-40 lg:w-80 lg:h-80 relative">
           <Image
             className=""

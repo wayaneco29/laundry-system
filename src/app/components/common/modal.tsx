@@ -36,8 +36,8 @@ export const Modal = ({
           )}
         >
           <div className="w-full flex flex-col bg-white shadow-2xs rounded-lg pointer-events-auto">
-            <div className="flex justify-between items-center p-4  bg-blue-400 rounded-tl-lg rounded-tr-lg">
-              <h3 className="font-medium text-white">{title}</h3>
+            <div className="flex justify-between items-center px-4 py-5 bg-blue-400 rounded-tl-lg rounded-tr-lg">
+              <h3 className="font-medium text-white text-lg">{title}</h3>
               <button
                 type="button"
                 className="cursor-pointer"
