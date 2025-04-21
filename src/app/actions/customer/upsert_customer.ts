@@ -9,7 +9,7 @@ type UpsertCustomerType = {
   p_middle_name?: string;
   p_last_name: string;
   p_phone: string;
-  p_email: any;
+  p_email: string;
   p_address: string;
   p_staff_id: string;
 };

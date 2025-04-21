@@ -19,6 +19,7 @@ type MainCustomerIdPageProps = {
 export const MainCustomerIdPage = ({
   customer_info,
 }: MainCustomerIdPageProps) => {
+  console.log({ customer_info });
   const { control } = useForm({
     defaultValues: customer_info,
   });
