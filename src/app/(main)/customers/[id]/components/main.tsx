@@ -26,6 +26,7 @@ export const MainCustomerIdPage = ({
   const {
     handleSubmit,
     control,
+    reset,
     formState: { isSubmitting, isDirty },
   } = useForm({
     defaultValues: customer_info,
@@ -41,6 +42,7 @@ export const MainCustomerIdPage = ({
       })
     ),
   });
+
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="mt-4 text-gray-700">
@@ -66,7 +68,7 @@ export const MainCustomerIdPage = ({
                         p_address: data?.address,
                       });
 
-                      console.log({ error });
+                      if (error) throw error;
                     } catch (error) {
                       console.error(error);
                     }
@@ -82,6 +84,7 @@ export const MainCustomerIdPage = ({
                     name="first_name"
                     render={({ field }) => (
                       <Input
+                        disabled={isSubmitting}
                         placeholder="First Name"
                         label="First Name"
                         {...field}
@@ -95,6 +98,7 @@ export const MainCustomerIdPage = ({
                     name="middle_name"
                     render={({ field }) => (
                       <Input
+                        disabled={isSubmitting}
                         placeholder="Middle Name"
                         label="Middle Name"
                         {...field}
@@ -108,6 +112,7 @@ export const MainCustomerIdPage = ({
                     name="last_name"
                     render={({ field }) => (
                       <Input
+                        disabled={isSubmitting}
                         placeholder="Last Name"
                         label="Last Name"
                         {...field}
@@ -123,6 +128,7 @@ export const MainCustomerIdPage = ({
                     name="phone"
                     render={({ field }) => (
                       <Input
+                        disabled={isSubmitting}
                         placeholder="Phone Number"
                         label="Phone Number"
                         {...field}
@@ -135,7 +141,12 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="email"
                     render={({ field }) => (
-                      <Input placeholder="Email" label="Email" {...field} />
+                      <Input
+                        disabled={isSubmitting}
+                        placeholder="Email"
+                        label="Email"
+                        {...field}
+                      />
                     )}
                   />
                 </div>
@@ -146,7 +157,12 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="address"
                     render={({ field }) => (
-                      <Input placeholder="Address" label="Address" {...field} />
+                      <Input
+                        disabled={isSubmitting}
+                        placeholder="Address"
+                        label="Address"
+                        {...field}
+                      />
                     )}
                   />
                 </div>
@@ -177,26 +193,6 @@ export const MainCustomerIdPage = ({
                     </tr>
                   </thead>
                   <tbody className="group/body divide-y divide-gray-100">
-                    {/* {data?.map((customer, index) => (
-                <tr
-                  key={index}
-                  onClick={() => router.push(`/customers/${customer?.id}`)}
-                  className="group/row bg-white hover:bg-gray-50 cursor-pointer"
-                >
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {customer?.full_name}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {customer?.phone}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {customer?.email}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {customer?.address}
-                  </td>
-                </tr>
-              ))} */}
                     <tr className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200">
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                         October 17, 2025

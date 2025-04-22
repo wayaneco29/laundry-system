@@ -21,10 +21,12 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
   const {
     reset,
     control,
+    watch,
     handleSubmit,
     formState: { isSubmitting, isDirty },
   } = useForm({
     defaultValues: {
+      isUpdate: false,
       branch: "",
       first_name: "",
       middle_name: "",
@@ -35,6 +37,7 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
     },
     resolver: yupResolver(
       Yup.object().shape({
+        isUpdate: Yup.boolean(),
         staff_id: Yup.string().nullable(),
         branch: Yup.string().required("Branch is required"),
         first_name: Yup.string().required("First Name is required"),
@@ -47,9 +50,12 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
     ),
   });
 
+  const isUpdate = watch("isUpdate");
+
   const handleModalClose = () => {
     setShowModal(false);
     reset({
+      isUpdate: false,
       staff_id: null,
       branch: "",
       first_name: "",
@@ -106,6 +112,7 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
                   className="group/row hover:bg-gray-50 bg-white cursor-pointer"
                   onClick={() => {
                     reset({
+                      isUpdate: true,
                       branch: "25ff64ce-2610-4b48-a9ed-468bb0d803f3",
                       staff_id: staff?.staff_id,
                       first_name: staff?.first_name,
@@ -142,7 +149,7 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
       </div>
       <Modal
         show={showModal}
-        title="Add Staff"
+        title={isUpdate ? "Update Staff" : "Add Staff"}
         isSubmitting={isSubmitting}
         onClose={handleModalClose}
       >
@@ -292,8 +299,6 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
                     p_address: newData?.address,
                     p_created_by: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
                   });
-
-                  console.log(error);
 
                   if (error) throw error;
 

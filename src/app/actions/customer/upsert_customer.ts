@@ -21,6 +21,7 @@ export const upsertCustomer = async (payload: UpsertCustomerType) => {
 
     if (error) throw error;
 
+    revalidateTag("getCustomer");
     revalidateTag("getAllCustomers");
 
     return { data, error: null };
