@@ -12,7 +12,7 @@ export const getCustomer = async (customerId: string) => {
         const { data, error } = await supabase
           .from("view_customers")
           .select("*")
-          .eq("id", customerId)
+          .eq("customer_id", customerId)
           .single();
 
         return { data, error };

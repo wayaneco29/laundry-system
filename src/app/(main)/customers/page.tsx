@@ -1,4 +1,4 @@
-import { getAllCustomers } from "@/app/actions/customer/get_all_customers";
+import { getAllCustomers } from "@/app/actions";
 import { MainCustomerPage } from "./components/main";
 
 export default async function Page() {

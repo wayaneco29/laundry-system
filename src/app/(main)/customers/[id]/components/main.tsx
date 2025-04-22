@@ -1,12 +1,16 @@
 "use client";
 
 import { useForm, Controller } from "react-hook-form";
+import * as Yup from "yup";
+import { twMerge } from "tailwind-merge";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Button, Input } from "@/app/components/common";
-import { twMerge } from "tailwind-merge";
+import { upsertCustomer } from "@/app/actions";
 
 type MainCustomerIdPageProps = {
   customer_info: {
+    customer_id: string;
     first_name: string;
     middle_name: string;
     last_name: string;
@@ -19,8 +23,23 @@ type MainCustomerIdPageProps = {
 export const MainCustomerIdPage = ({
   customer_info,
 }: MainCustomerIdPageProps) => {
-  const { control } = useForm({
+  const {
+    handleSubmit,
+    control,
+    formState: { isSubmitting, isDirty },
+  } = useForm({
     defaultValues: customer_info,
+    resolver: yupResolver(
+      Yup.object().shape({
+        customer_id: Yup.string().nullable(),
+        first_name: Yup.string().required("First Name is required"),
+        middle_name: Yup.string(),
+        last_name: Yup.string().required("Last Name is required"),
+        phone: Yup.string().required("Phone Number is required"),
+        email: Yup.string().email("Email is invalid"),
+        address: Yup.string().required("Address is required"),
+      })
+    ),
   });
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
@@ -32,7 +51,29 @@ export const MainCustomerIdPage = ({
                 <div className="text-blue-400 mb-4 font-medium">
                   Personal Information
                 </div>
-                <Button>Update</Button>
+                <Button
+                  disabled={isSubmitting || !isDirty}
+                  onClick={handleSubmit(async (data) => {
+                    try {
+                      const { error } = await upsertCustomer({
+                        p_customer_id: data?.customer_id as string,
+                        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                        p_first_name: data?.first_name,
+                        p_middle_name: data?.middle_name,
+                        p_last_name: data?.last_name,
+                        p_phone: data?.phone,
+                        p_email: data?.email || "",
+                        p_address: data?.address,
+                      });
+
+                      console.log({ error });
+                    } catch (error) {
+                      console.error(error);
+                    }
+                  })}
+                >
+                  Update
+                </Button>
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4">
                 <div className="col-span-1">

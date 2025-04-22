@@ -14,6 +14,7 @@ import {
   ArrowLeftStartOnRectangleIcon,
   Bars3Icon,
   ArchiveBoxIcon,
+  BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
 import { twMerge } from "tailwind-merge";
 
@@ -41,6 +42,11 @@ const ROUTES = [
     path: "/staffs",
     label: "Staffs",
     icon: UsersIcon,
+  },
+  {
+    path: "/branches",
+    label: "Branches",
+    icon: BuildingOffice2Icon,
   },
   {
     path: "/promos",

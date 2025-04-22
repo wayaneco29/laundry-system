@@ -4,22 +4,20 @@ import { useState } from "react";
 
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
-import { useRouter } from "next/navigation";
-
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Button, Input, Modal } from "@/app/components/common";
-import { upsertCustomer, customerRevalidateTag } from "@/app/actions";
+import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 
-type MainCustomerPageProps = {
-  customer_list: Array<Record<string, string>>;
+import { upsertStaff } from "@/app/actions";
+
+type MainStaffPageProps = {
+  staff_list: Array<Record<string, any>>;
 };
 
-export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
+export function MainStaffPage({ staff_list }: MainStaffPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const router = useRouter();
 
-  console.log(customer_list);
   const {
     reset,
     control,
@@ -27,7 +25,7 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
     formState: { isSubmitting, isDirty },
   } = useForm({
     defaultValues: {
-      customer_id: null,
+      branch: "",
       first_name: "",
       middle_name: "",
       last_name: "",
@@ -37,7 +35,8 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
     },
     resolver: yupResolver(
       Yup.object().shape({
-        customer_id: Yup.string().nullable(),
+        staff_id: Yup.string().nullable(),
+        branch: Yup.string().required("Branch is required"),
         first_name: Yup.string().required("First Name is required"),
         middle_name: Yup.string(),
         last_name: Yup.string().required("Last Name is required"),
@@ -50,19 +49,28 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
 
   const handleModalClose = () => {
     setShowModal(false);
-    reset();
+    reset({
+      staff_id: null,
+      branch: "",
+      first_name: "",
+      middle_name: "",
+      last_name: "",
+      phone: "",
+      email: "",
+      address: "",
+    });
   };
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 text-2xl font-medium">Customers</h1>
+        <h1 className="text-gray-700 text-2xl font-medium">Staffs</h1>
         <button
           type="button"
           className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
           onClick={() => setShowModal(true)}
         >
-          Add Customer
+          Add Staff
         </button>
       </div>
       <div className="mt-4">
@@ -71,68 +79,96 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
           <table className="w-full text-left text-sm text-gray-500">
             <thead className="group/head text-xs uppercase text-gray-700">
               <tr>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Customer Name
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
+                  Staff Name
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
+                  Branch
+                </th>
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
                   Phone Number
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
                   Email
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
                   Address
+                </th>
+                <th className="right-0 bg-blue-400 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10">
+                  <span className="sr-only">Action</span>
                 </th>
               </tr>
             </thead>
             <tbody className="group/body divide-y divide-gray-100">
-              {customer_list?.length ? (
-                customer_list?.map((customer, index) => (
-                  <tr
-                    key={index}
-                    onClick={() => {
-                      customerRevalidateTag("getCustomer");
-                      router.push(`/customers/${customer?.customer_id}`);
-                    }}
-                    className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200"
-                  >
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {customer?.full_name}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {customer?.phone}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {customer?.email}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {customer?.address}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <div className="table-row relative h-15 border border-gray-200">
-                  <div className="absolute flex items-center justify-center inset-0">
-                    NO DATA
-                  </div>
-                </div>
-              )}
+              {staff_list?.map((staff, index) => (
+                <tr
+                  key={index}
+                  className="group/row hover:bg-gray-50 bg-white cursor-pointer"
+                  onClick={() => {
+                    reset({
+                      branch: "25ff64ce-2610-4b48-a9ed-468bb0d803f3",
+                      staff_id: staff?.staff_id,
+                      first_name: staff?.first_name,
+                      middle_name: staff?.middle_name,
+                      last_name: staff?.last_name,
+                      phone: staff?.phone,
+                      email: staff?.email,
+                      address: staff?.address,
+                    });
+
+                    setShowModal(true);
+                  }}
+                >
+                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                    {staff?.full_name}
+                  </td>
+                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                    {staff?.branch}
+                  </td>
+                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                    {staff?.phone}
+                  </td>
+                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                    {staff?.email}
+                  </td>
+                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                    {staff?.address}
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
       </div>
       <Modal
         show={showModal}
-        title="Add Customer"
+        title="Add Staff"
         isSubmitting={isSubmitting}
         onClose={handleModalClose}
       >
         <Controller
           control={control}
-          name="customer_id"
+          name="staff_id"
           render={() => <Input hidden />}
         />
-        <div className="grid grid-cols-1 mb-4">
+        <div className="grid grid-cols-1 gap-x-2 mb-4">
+          <div className="col-span-1">
+            <Controller
+              control={control}
+              name="branch"
+              render={({ field, formState: { errors } }) => (
+                <Input
+                  disabled={isSubmitting}
+                  label="Branch"
+                  placeholder="Branch"
+                  error={!!errors.branch}
+                  {...field}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-x-2 mb-4">
           <div className="col-span-1">
             <Controller
               control={control}
@@ -149,7 +185,7 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
             />
           </div>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
           <div className="col-span-1">
             <Controller
               control={control}
@@ -174,7 +210,7 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
                   disabled={isSubmitting}
                   label="Last Name"
                   placeholder="Last Name"
-                  error={!!errors.last_name}
+                  error={!!errors?.last_name}
                   {...field}
                 />
               )}
@@ -244,16 +280,20 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
               disabled={isSubmitting || !isDirty}
               onClick={handleSubmit(async (newData) => {
                 try {
-                  const { error } = await upsertCustomer({
-                    p_customer_id: newData?.customer_id || null,
+                  const { error } = await upsertStaff({
+                    p_staff_id: newData?.staff_id || null,
+                    // p_branch_id: newData?.branch,
+                    p_branch_id: "25ff64ce-2610-4b48-a9ed-468bb0d803f3",
                     p_first_name: newData?.first_name,
                     p_middle_name: newData?.middle_name,
                     p_last_name: newData?.last_name,
                     p_phone: newData?.phone,
                     p_email: newData?.email || "",
                     p_address: newData?.address,
-                    p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                    p_created_by: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
                   });
+
+                  console.log(error);
 
                   if (error) throw error;
 

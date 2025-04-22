@@ -1,4 +1,4 @@
-import { getCustomer } from "@/app/actions/customer/get_customer";
+import { getCustomer } from "@/app/actions";
 import { MainCustomerIdPage } from "./components/main";
 
 export default async function Page({
