@@ -26,7 +26,6 @@ export const MainCustomerIdPage = ({
   const {
     handleSubmit,
     control,
-    reset,
     formState: { isSubmitting, isDirty },
   } = useForm({
     defaultValues: customer_info,
@@ -45,6 +44,9 @@ export const MainCustomerIdPage = ({
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
+      <div className="flex justify-between items-center">
+        <h1 className="text-gray-700 text-2xl font-medium">Customer Detail</h1>
+      </div>
       <div className="mt-4 text-gray-700">
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-y-4 md:gap-y-8 2xl:gap-x-8">
           <div className="col-span-1">

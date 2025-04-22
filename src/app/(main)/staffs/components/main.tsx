@@ -7,12 +7,11 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Button, Input, Modal } from "@/app/components/common";
-import { EllipsisHorizontalIcon } from "@heroicons/react/24/solid";
 
 import { upsertStaff } from "@/app/actions";
 
 type MainStaffPageProps = {
-  staff_list: Array<Record<string, any>>;
+  staff_list: Array<Record<string, string>>;
 };
 
 export function MainStaffPage({ staff_list }: MainStaffPageProps) {
@@ -106,43 +105,51 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
               </tr>
             </thead>
             <tbody className="group/body divide-y divide-gray-100">
-              {staff_list?.map((staff, index) => (
-                <tr
-                  key={index}
-                  className="group/row hover:bg-gray-50 bg-white cursor-pointer"
-                  onClick={() => {
-                    reset({
-                      isUpdate: true,
-                      branch: "25ff64ce-2610-4b48-a9ed-468bb0d803f3",
-                      staff_id: staff?.staff_id,
-                      first_name: staff?.first_name,
-                      middle_name: staff?.middle_name,
-                      last_name: staff?.last_name,
-                      phone: staff?.phone,
-                      email: staff?.email,
-                      address: staff?.address,
-                    });
+              {staff_list?.length ? (
+                staff_list?.map((staff, index) => (
+                  <tr
+                    key={index}
+                    className="group/row hover:bg-gray-50 bg-white cursor-pointer"
+                    onClick={() => {
+                      reset({
+                        isUpdate: true,
+                        branch: "25ff64ce-2610-4b48-a9ed-468bb0d803f3",
+                        staff_id: staff?.staff_id,
+                        first_name: staff?.first_name,
+                        middle_name: staff?.middle_name,
+                        last_name: staff?.last_name,
+                        phone: staff?.phone,
+                        email: staff?.email,
+                        address: staff?.address,
+                      });
 
-                    setShowModal(true);
-                  }}
-                >
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {staff?.full_name}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {staff?.branch}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {staff?.phone}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {staff?.email}
-                  </td>
-                  <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                    {staff?.address}
-                  </td>
-                </tr>
-              ))}
+                      setShowModal(true);
+                    }}
+                  >
+                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                      {staff?.full_name}
+                    </td>
+                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                      {staff?.branch}
+                    </td>
+                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                      {staff?.phone}
+                    </td>
+                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                      {staff?.email}
+                    </td>
+                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                      {staff?.address}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <div className="table-row relative h-15 border border-gray-200">
+                  <div className="absolute flex items-center justify-center inset-0">
+                    NO DATA
+                  </div>
+                </div>
+              )}
             </tbody>
           </table>
         </div>
