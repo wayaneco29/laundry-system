@@ -7,5 +7,5 @@ export default {
     "./pages/**/*.{js,ts,jsx,tsx}",
     "node_modules/preline/dist/*.js",
   ],
-  plugins: [plugin],
+  plugins: [plugin, require("@tailwindcss/forms")],
 };

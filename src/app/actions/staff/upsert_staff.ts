@@ -21,6 +21,7 @@ export const upsertStaff = async (payload: UpsertStaffType) => {
   try {
     const { data, error } = await supabase.rpc("upsert_staff", payload);
 
+    console.log(data, error);
     if (error) throw error;
 
     revalidateTag("getAllStaffs");

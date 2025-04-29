@@ -134,8 +134,37 @@ const chartOptions: ApexOptions = {
       },
     },
   },
+  // tooltip: {
+  //   enabled: true,
+  //   y: {
+  //     formatter: function (value: string) {
+  //       const currentDate = new Date();
+  //       const monthNames = [
+  //         "Jan",
+  //         "Feb",
+  //         "Mar",
+  //         "Apr",
+  //         "May",
+  //         "Jun",
+  //         "Jul",
+  //         "Aug",
+  //         "Sep",
+  //         "Oct",
+  //         "Nov",
+  //         "Dec",
+  //       ];
+  //       const currentMonth = monthNames[currentDate.getMonth()];
+  //       const currentYear = currentDate.getFullYear();
+
+  //       return `Month: ${value} | Today: ${currentMonth} ${currentYear}`;
+  //     },
+  //   },
+  //   cssClass: "text-gray-700",
+  // },
 };
+
 const donutChartSeries = [1000, 200, 2500];
+
 const donutChartOptions = {
   colors: ["#FF9F29", "#487FFF", "#45B369"],
   labels: ["Detergent", "Water", "Electricity"],

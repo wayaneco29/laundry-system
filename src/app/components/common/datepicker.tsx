@@ -94,7 +94,7 @@ export const Datepicker = ({
       <ReactDatepicker
         wrapperClassName="!block"
         className={twMerge(
-          "block w-full border disabled:cursor-not-allowed py-2.5 sm:py-3 px-4 border-primary-500 disabled:opacity-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500  p-2.5 text-sm rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none",
+          "block w-full border disabled:cursor-not-allowed !py-3 !px-4 border-primary-500 disabled:opacity-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500  p-2.5 text-sm rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none",
           error && "border-red-400 focus:border-red-400 focus:ring-red-400"
         )}
         dateFormat="MMMM d, yyyy"

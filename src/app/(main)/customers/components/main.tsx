@@ -19,7 +19,6 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const router = useRouter();
 
-  console.log(customer_list);
   const {
     reset,
     control,

@@ -4,79 +4,68 @@ import { useState } from "react";
 
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
+import { useRouter } from "next/navigation";
+
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Button, Input, Modal } from "@/app/components/common";
-
-import { upsertStaff } from "@/app/actions";
+import { Button, Datepicker, Input, Modal } from "@/app/components/common";
+import { customerRevalidateTag } from "@/app/actions";
+import moment from "moment";
 import { BranchProvider } from "@/app/providers";
 
-type MainStaffPageProps = {
-  staff_list: Array<Record<string, string>>;
+type MainPromoPageProps = {
+  promo_list: Array<Record<string, string>>;
 };
 
-export function MainStaffPage({ staff_list }: MainStaffPageProps) {
+export function MainPromoPage({ promo_list }: MainPromoPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const router = useRouter();
 
   const {
     reset,
     control,
-    watch,
     handleSubmit,
-    formState: { isSubmitting, isDirty },
+    watch,
+    formState: { isSubmitting, isDirty, errors },
   } = useForm({
     defaultValues: {
-      isUpdate: false,
-      branch_id: "",
-      first_name: "",
-      middle_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-      address: "",
+      id: null,
+      name: "",
+      code: "",
+      description: "",
+      valid_until: "",
+      branches: [],
     },
     resolver: yupResolver(
       Yup.object().shape({
-        isUpdate: Yup.boolean(),
-        staff_id: Yup.string().nullable(),
-        branch_id: Yup.string().required("Branch is required"),
-        first_name: Yup.string().required("First Name is required"),
-        middle_name: Yup.string(),
-        last_name: Yup.string().required("Last Name is required"),
-        phone: Yup.string().required("Phone Number is required"),
-        email: Yup.string().email("Email is invalid").notRequired(),
-        address: Yup.string().required("Address is required"),
+        id: Yup.string().nullable(),
+        name: Yup.string().required("First Name is required"),
+        code: Yup.string(),
+        description: Yup.string().required("Last Name is required"),
+        valid_until: Yup.string().required("Phone Number is required"),
+        branches: Yup.array().of(Yup.string()).min(1, "This field is required"),
       })
     ),
   });
 
-  const isUpdate = watch("isUpdate");
+  console.log(errors);
+  console.log("branches", watch("branches"));
 
   const handleModalClose = () => {
     setShowModal(false);
-    reset({
-      isUpdate: false,
-      staff_id: null,
-      branch_id: "",
-      first_name: "",
-      middle_name: "",
-      last_name: "",
-      phone: "",
-      email: "",
-      address: "",
-    });
+    reset();
   };
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 text-2xl font-medium">Staffs</h1>
+        <h1 className="text-gray-700 text-2xl font-medium">Promos</h1>
         <button
           type="button"
           className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
           onClick={() => setShowModal(true)}
         >
-          Add Staff
+          Add Promo
         </button>
       </div>
       <div className="mt-4">
@@ -85,62 +74,54 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
           <table className="w-full text-left text-sm text-gray-500">
             <thead className="group/head text-xs uppercase text-gray-700">
               <tr>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
-                  Staff Name
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                  Name
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
-                  Branch
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                  Code
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
-                  Phone Number
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                  Description
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
-                  Email
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                  Valid Until
                 </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
-                  Address
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                  Branches
                 </th>
-                <th className="right-0 bg-blue-400 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-10">
-                  <span className="sr-only">Action</span>
+                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                  Status
                 </th>
               </tr>
             </thead>
             <tbody className="group/body divide-y divide-gray-100">
-              {staff_list?.length ? (
-                staff_list?.map((staff, index) => (
+              {promo_list?.length ? (
+                promo_list?.map((promo, index) => (
                   <tr
                     key={index}
-                    className="group/row hover:bg-gray-50 bg-white cursor-pointer border border-gray-200"
                     onClick={() => {
-                      reset({
-                        isUpdate: true,
-                        branch_id: staff?.branch_id,
-                        staff_id: staff?.staff_id,
-                        first_name: staff?.first_name,
-                        middle_name: staff?.middle_name,
-                        last_name: staff?.last_name,
-                        phone: staff?.phone,
-                        email: staff?.email,
-                        address: staff?.address,
-                      });
-
-                      setShowModal(true);
+                      customerRevalidateTag("getCustomer");
+                      router.push(`/customers/${promo?.id}`);
                     }}
+                    className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200"
                   >
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {staff?.full_name}
+                      {promo?.name}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {staff?.branch_name}
+                      {promo?.code}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {staff?.phone}
+                      {promo?.description}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {staff?.email}
+                      {moment(promo?.valid_until).format("MMMM DD, YYYY")}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {staff?.address}
+                      {promo?.branches}
+                    </td>
+                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                      {promo?.status}
                     </td>
                   </tr>
                 ))
@@ -157,60 +138,26 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
       </div>
       <Modal
         show={showModal}
-        title={isUpdate ? "Update Staff" : "Add Staff"}
+        title="Add Promo"
         isSubmitting={isSubmitting}
         onClose={handleModalClose}
       >
         <Controller
           control={control}
-          name="staff_id"
+          name="id"
           render={() => <Input hidden />}
         />
-        <div className="grid grid-cols-1 gap-x-2 mb-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
           <div className="col-span-1">
             <Controller
               control={control}
-              name="branch_id"
-              render={({ field, formState: { errors } }) => (
-                <BranchProvider
-                  disabled={isSubmitting}
-                  label="Branch"
-                  placeholder="Branch"
-                  error={!!errors.branch_id}
-                  {...field}
-                />
-              )}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 gap-x-2 mb-4">
-          <div className="col-span-1">
-            <Controller
-              control={control}
-              name="first_name"
+              name="name"
               render={({ field, formState: { errors } }) => (
                 <Input
                   disabled={isSubmitting}
-                  label="First Name"
-                  placeholder="First Name"
-                  error={!!errors.first_name}
-                  {...field}
-                />
-              )}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-          <div className="col-span-1">
-            <Controller
-              control={control}
-              name="middle_name"
-              render={({ field, formState: { errors } }) => (
-                <Input
-                  disabled={isSubmitting}
-                  label="Middle Name"
-                  placeholder="Middle Name"
-                  error={!!errors.middle_name}
+                  label="Name"
+                  placeholder="Name"
+                  error={!!errors.name}
                   {...field}
                 />
               )}
@@ -219,47 +166,14 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
           <div className="col-span-1">
             <Controller
               control={control}
-              name="last_name"
+              name="code"
               render={({ field, formState: { errors } }) => (
                 <Input
                   disabled={isSubmitting}
-                  label="Last Name"
-                  placeholder="Last Name"
-                  error={!!errors?.last_name}
+                  label="Code"
+                  placeholder="Code"
+                  error={!!errors.code}
                   {...field}
-                />
-              )}
-            />
-          </div>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-          <div className="col-span-1">
-            <Controller
-              control={control}
-              name="phone"
-              render={({ field, formState: { errors } }) => (
-                <Input
-                  disabled={isSubmitting}
-                  label="Phone Number"
-                  placeholder="Phone Number"
-                  error={!!errors.phone}
-                  {...field}
-                />
-              )}
-            />
-          </div>
-          <div className="col-span-1">
-            <Controller
-              control={control}
-              name="email"
-              render={({ field, formState: { errors } }) => (
-                <Input
-                  disabled={isSubmitting}
-                  label="Email"
-                  placeholder="Email"
-                  error={!!errors?.email}
-                  {...field}
-                  value={field?.value || ""}
                 />
               )}
             />
@@ -269,14 +183,75 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
           <div className="col-span-1">
             <Controller
               control={control}
-              name="address"
+              name="description"
               render={({ field, formState: { errors } }) => (
                 <Input
                   disabled={isSubmitting}
-                  label="Address"
-                  placeholder="Address"
-                  error={!!errors?.address}
+                  label="Description"
+                  placeholder="Description"
+                  error={!!errors.description}
                   {...field}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
+          <div className="col-span-1">
+            <Controller
+              control={control}
+              name="valid_until"
+              render={({ field, formState: { errors } }) => (
+                <Datepicker
+                  disabled={isSubmitting}
+                  label="Valid Until"
+                  placeholder="Valid Until"
+                  error={!!errors.valid_until}
+                  {...field}
+                />
+              )}
+            />
+          </div>
+          <div className="col-span-1">
+            <Controller
+              control={control}
+              name="valid_until"
+              render={({ field, formState: { errors } }) => (
+                <Datepicker
+                  disabled={isSubmitting}
+                  label="Valid Until"
+                  placeholder="Valid Until"
+                  error={!!errors.valid_until}
+                  {...field}
+                />
+              )}
+            />
+          </div>
+        </div>
+        <div className="grid grid-cols-1 mb-4">
+          <div className="col-span-1">
+            <Controller
+              control={control}
+              name="branches"
+              render={({
+                field: { value = [], onChange, ...field },
+                formState: { errors },
+              }) => (
+                <BranchProvider
+                  isMulti={true}
+                  disabled={isSubmitting}
+                  label="Branches"
+                  placeholder="Branches"
+                  error={!!errors?.branches}
+                  {...field}
+                  value={value as Array<string>}
+                  onChange={(newValue) => {
+                    // const branchIds = (
+                    //   Array.isArray(newValue) ? newValue : []
+                    // )?.map(({ value: xValue }: { value: string }) => xValue);
+
+                    onChange(newValue);
+                  }}
                 />
               )}
             />
@@ -295,21 +270,19 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
               disabled={isSubmitting || !isDirty}
               onClick={handleSubmit(async (newData) => {
                 try {
-                  const { error } = await upsertStaff({
-                    p_staff_id: newData?.staff_id || null,
-                    p_branch_id: newData?.branch_id,
-                    p_first_name: newData?.first_name,
-                    p_middle_name: newData?.middle_name,
-                    p_last_name: newData?.last_name,
-                    p_phone: newData?.phone,
-                    p_email: newData?.email || "",
-                    p_address: newData?.address,
-                    p_created_by: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
-                  });
-
-                  if (error) throw error;
-
-                  handleModalClose();
+                  console.log(newData);
+                  // const { error } = await upsertCustomer({
+                  //   p_customer_id: newData?.customer_id || null,
+                  //   p_first_name: newData?.first_name,
+                  //   p_middle_name: newData?.middle_name,
+                  //   p_last_name: newData?.last_name,
+                  //   p_phone: newData?.phone,
+                  //   p_email: newData?.email || "",
+                  //   p_address: newData?.address,
+                  //   p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  // });
+                  // if (error) throw error;
+                  // handleModalClose();
                 } catch (_error) {
                   console.error(_error);
                 }

@@ -23,7 +23,7 @@ export const Modal = ({
       <div
         id="custom-modal"
         className={twMerge(
-          "hs-overlay size-full fixed top-0 start-0  overflow-x-hidden overflow-y-auto pointer-events-none",
+          "hs-overlay size-full fixed top-0 start-0 overflow-visible overflow-x-hidden overflow-y-auto pointer-events-none",
           show
             ? "open opened z-80"
             : "ease-in-out transition-all duration-200 opacity-0 pointer-events-none -z-50"

@@ -7,6 +7,8 @@ import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Button, Input } from "@/app/components/common";
 import { upsertCustomer } from "@/app/actions";
+import { ArrowLongLeftIcon } from "@heroicons/react/24/solid";
+import { useRouter } from "next/navigation";
 
 type MainCustomerIdPageProps = {
   customer_info: {
@@ -23,9 +25,12 @@ type MainCustomerIdPageProps = {
 export const MainCustomerIdPage = ({
   customer_info,
 }: MainCustomerIdPageProps) => {
+  const router = useRouter();
+
   const {
     handleSubmit,
     control,
+    reset,
     formState: { isSubmitting, isDirty },
   } = useForm({
     defaultValues: customer_info,
@@ -46,6 +51,9 @@ export const MainCustomerIdPage = ({
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
         <h1 className="text-gray-700 text-2xl font-medium">Customer Detail</h1>
+        <Button className="mr-4" onClick={() => router.back()}>
+          <ArrowLongLeftIcon className="size-5" /> Back
+        </Button>
       </div>
       <div className="mt-4 text-gray-700">
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-y-4 md:gap-y-8 2xl:gap-x-8">
@@ -71,6 +79,15 @@ export const MainCustomerIdPage = ({
                       });
 
                       if (error) throw error;
+
+                      reset({
+                        customer_id: data?.customer_id,
+                        first_name: data?.first_name,
+                        middle_name: data?.middle_name,
+                        last_name: data?.last_name,
+                        email: data?.email,
+                        address: data?.address,
+                      });
                     } catch (error) {
                       console.error(error);
                     }
@@ -153,8 +170,8 @@ export const MainCustomerIdPage = ({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3">
-                <div className="col-span-2">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+                <div className="col-span-1 lg:col-span-2">
                   <Controller
                     control={control}
                     name="address"
