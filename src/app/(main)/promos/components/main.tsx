@@ -1,17 +1,26 @@
 "use client";
 
 import { useState } from "react";
-
+import moment from "moment";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
-import { useRouter } from "next/navigation";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Button, Datepicker, Input, Modal } from "@/app/components/common";
-import { customerRevalidateTag } from "@/app/actions";
-import moment from "moment";
+import {
+  Button,
+  Datepicker,
+  Input,
+  Modal,
+  Select,
+} from "@/app/components/common";
+
+import { customerRevalidateTag, upsertPromo } from "@/app/actions";
 import { BranchProvider } from "@/app/providers";
+
+import { convertToString } from "@/app/utils";
+import { PROMO_STATUS_DROPDOWN } from "@/app/constants";
+import { twMerge } from "tailwind-merge";
 
 type MainPromoPageProps = {
   promo_list: Array<Record<string, string>>;
@@ -19,41 +28,50 @@ type MainPromoPageProps = {
 
 export function MainPromoPage({ promo_list }: MainPromoPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
-  const router = useRouter();
 
   const {
     reset,
     control,
     handleSubmit,
     watch,
-    formState: { isSubmitting, isDirty, errors },
+    formState: { isSubmitting, isDirty },
   } = useForm({
     defaultValues: {
       id: null,
+      isUpdate: false,
       name: "",
       code: "",
       description: "",
       valid_until: "",
-      branches: [],
+      status: "Active",
     },
     resolver: yupResolver(
       Yup.object().shape({
         id: Yup.string().nullable(),
-        name: Yup.string().required("First Name is required"),
-        code: Yup.string(),
-        description: Yup.string().required("Last Name is required"),
-        valid_until: Yup.string().required("Phone Number is required"),
-        branches: Yup.array().of(Yup.string()).min(1, "This field is required"),
+        isUpdate: Yup.boolean(),
+        name: Yup.string().required("This field is required"),
+        code: Yup.string().required("This field is required"),
+        description: Yup.string().required("This field is required"),
+        status: Yup.string().required("This field is required"),
+        valid_until: Yup.string().required("This field is required"),
       })
     ),
   });
 
-  console.log(errors);
-  console.log("branches", watch("branches"));
+  const isUpdate = watch("isUpdate", false);
 
   const handleModalClose = () => {
+    reset({
+      id: null,
+      isUpdate: false,
+      name: "",
+      code: "",
+      description: "",
+      valid_until: "",
+      status: "Active",
+    });
+
     setShowModal(false);
-    reset();
   };
 
   return (
@@ -100,8 +118,18 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                   <tr
                     key={index}
                     onClick={() => {
-                      customerRevalidateTag("getCustomer");
-                      router.push(`/customers/${promo?.id}`);
+                      customerRevalidateTag("getPromos");
+                      reset({
+                        // branches: promo?.branches as unknown as Array<string>,
+                        isUpdate: true,
+                        code: promo?.code,
+                        description: promo?.description,
+                        id: promo?.id,
+                        name: promo?.name,
+                        status: promo?.status,
+                        valid_until: promo?.valid_until,
+                      });
+                      setShowModal(true);
                     }}
                     className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200"
                   >
@@ -118,10 +146,19 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                       {moment(promo?.valid_until).format("MMMM DD, YYYY")}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {promo?.branches}
+                      {promo?.branches_names?.toString()}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {promo?.status}
+                      <span
+                        className={twMerge(
+                          "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium  text-white",
+                          promo?.status === "Active" && "bg-green-500",
+                          promo?.status === "Expired" && "bg-red-400",
+                          promo?.status === "Closed" && "bg-yellow-500"
+                        )}
+                      >
+                        {promo?.status}
+                      </span>
                     </td>
                   </tr>
                 ))
@@ -215,20 +252,24 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
           <div className="col-span-1">
             <Controller
               control={control}
-              name="valid_until"
-              render={({ field, formState: { errors } }) => (
-                <Datepicker
-                  disabled={isSubmitting}
-                  label="Valid Until"
-                  placeholder="Valid Until"
-                  error={!!errors.valid_until}
+              name="status"
+              render={({ field: { onChange, ...field } }) => (
+                <Select
+                  label="Status"
+                  placeholder="Status"
+                  isDisabled={!isUpdate}
+                  options={PROMO_STATUS_DROPDOWN}
                   {...field}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onChange={({ value }: any) => {
+                    onChange(value);
+                  }}
                 />
               )}
             />
           </div>
         </div>
-        <div className="grid grid-cols-1 mb-4">
+        {/* <div className="grid grid-cols-1 mb-4">
           <div className="col-span-1">
             <Controller
               control={control}
@@ -246,17 +287,17 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                   {...field}
                   value={value as Array<string>}
                   onChange={(newValue) => {
-                    // const branchIds = (
-                    //   Array.isArray(newValue) ? newValue : []
-                    // )?.map(({ value: xValue }: { value: string }) => xValue);
+                    const branchIds = convertToString(
+                      newValue as Array<{ label: string; value: string }>
+                    );
 
-                    onChange(newValue);
+                    onChange(branchIds);
                   }}
                 />
               )}
             />
           </div>
-        </div>
+        </div> */}
         <div className="mt-8">
           <div className="flex justify-end items-center gap-x-2">
             <Button
@@ -270,19 +311,18 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               disabled={isSubmitting || !isDirty}
               onClick={handleSubmit(async (newData) => {
                 try {
-                  console.log(newData);
-                  // const { error } = await upsertCustomer({
-                  //   p_customer_id: newData?.customer_id || null,
-                  //   p_first_name: newData?.first_name,
-                  //   p_middle_name: newData?.middle_name,
-                  //   p_last_name: newData?.last_name,
-                  //   p_phone: newData?.phone,
-                  //   p_email: newData?.email || "",
-                  //   p_address: newData?.address,
-                  //   p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
-                  // });
-                  // if (error) throw error;
-                  // handleModalClose();
+                  const { error } = await upsertPromo({
+                    p_promo_id: newData?.id as string,
+                    p_name: newData?.name,
+                    p_code: newData?.code,
+                    p_description: newData?.description,
+                    p_valid_until: newData?.valid_until,
+                    p_status: newData?.status,
+                    p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  });
+                  if (error) throw error;
+
+                  handleModalClose();
                 } catch (_error) {
                   console.error(_error);
                 }

@@ -5,23 +5,37 @@ import ReactSelect, { Props } from "react-select";
 type SelectProps = Props & {
   label?: string;
   placeholder?: string;
+  value?: Array<string> | string;
 };
 
 export const Select = ({
   label,
   placeholder = "Select option...",
   options,
+  value,
   ...props
 }: SelectProps) => {
+  const composeValues = () => {
+    const customizedValue = options?.[Array.isArray(value) ? "filter" : "find"](
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (option: any) =>
+        Array.isArray(value)
+          ? value?.includes(option?.value)
+          : option?.value === value
+    );
+
+    return customizedValue;
+  };
+
   return (
     <div className="relative w-full">
       {label && (
         <label className="block text-sm font-medium mb-2">{label}</label>
       )}
       <ReactSelect
-        menuPortalTarget={document.body}
+        menuPortalTarget={document?.body}
         options={options}
-        value={props?.value}
+        value={composeValues()}
         placeholder={placeholder}
         styles={{
           control(base, props) {

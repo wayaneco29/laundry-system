@@ -26,7 +26,6 @@ export const getAllPromos = async () => {
 
   try {
     const data = await fetchPromos();
-    console.log(data);
 
     return {
       data,

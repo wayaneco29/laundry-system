@@ -3,22 +3,25 @@
 import { createClient } from "@/app/utils/supabase/server";
 import { revalidateTag } from "next/cache";
 
-type UpsertBranchType = {
-  p_branch_id: string | null;
+type UpsertPromoType = {
+  p_promo_id: string | null;
   p_name: string;
+  p_code: string;
   p_description: string;
-  p_address: string;
+  p_valid_until: string;
+  p_status: string;
   p_staff_id: string;
 };
 
-export const upsertBranch = async (payload: UpsertBranchType) => {
+export const upsertPromo = async (payload: UpsertPromoType) => {
   const supabase = await createClient();
   try {
-    const { data, error } = await supabase.rpc("upsert_branch", payload);
+    const { data, error } = await supabase.rpc("upsert_promo", payload);
 
     if (error) throw error;
 
-    revalidateTag("getAllBranches");
+    revalidateTag("getAllPromos");
+
     return { data, error: null };
   } catch (_error) {
     return {
