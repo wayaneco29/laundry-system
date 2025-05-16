@@ -4,6 +4,7 @@ import { useState } from "react";
 import moment from "moment";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
+import { twMerge } from "tailwind-merge";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -16,11 +17,7 @@ import {
 } from "@/app/components/common";
 
 import { customerRevalidateTag, upsertPromo } from "@/app/actions";
-import { BranchProvider } from "@/app/providers";
-
-import { convertToString } from "@/app/utils";
 import { PROMO_STATUS_DROPDOWN } from "@/app/constants";
-import { twMerge } from "tailwind-merge";
 
 type MainPromoPageProps = {
   promo_list: Array<Record<string, string>>;
