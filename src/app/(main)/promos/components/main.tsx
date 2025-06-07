@@ -18,6 +18,7 @@ import {
 
 import { customerRevalidateTag, upsertPromo } from "@/app/actions";
 import { PROMO_STATUS_DROPDOWN } from "@/app/constants";
+import { PlusIcon } from "@heroicons/react/20/solid";
 
 type MainPromoPageProps = {
   promo_list: Array<Record<string, string>>;
@@ -80,12 +81,11 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
           className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
           onClick={() => setShowModal(true)}
         >
-          Add Promo
+          <PlusIcon className="h-5 w-5" /> Add Promo
         </button>
       </div>
       <div className="mt-4">
         <div className="relative overflow-auto rounded-sm">
-          <div className="absolute left-0 top-0 -z-10 h-full w-full rounded-sm bg-white drop-shadow-md"></div>
           <table className="w-full text-left text-sm text-gray-500">
             <thead className="group/head text-xs uppercase text-gray-700">
               <tr>
@@ -100,9 +100,6 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                 </th>
                 <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                   Valid Until
-                </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Branches
                 </th>
                 <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                   Status
@@ -141,9 +138,6 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                       {moment(promo?.valid_until).format("MMMM DD, YYYY")}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {promo?.branches_names?.toString()}
                     </td>
                     <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                       <span

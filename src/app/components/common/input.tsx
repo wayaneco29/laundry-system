@@ -3,16 +3,18 @@ import { twMerge } from "tailwind-merge";
 type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
   error?: boolean;
   label?: string;
+  containerClassName?: string;
 };
 
 export const Input = ({
   label,
   error,
+  containerClassName = "",
   className = "",
   ...props
 }: InputProps) => {
   return (
-    <div>
+    <div className={containerClassName}>
       <label className="block text-sm font-medium mb-2">{label}</label>
       <input
         className={twMerge(

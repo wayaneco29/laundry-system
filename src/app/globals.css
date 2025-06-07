@@ -23,6 +23,7 @@
 #custom-sidebar-backdrop,
 #custom-modal-backdrop {
   inset: 0;
+  z-index: 10;
   @apply bg-gray-900/50;
 }
 

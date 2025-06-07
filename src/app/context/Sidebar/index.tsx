@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, PropsWithChildren, useEffect, useState } from "react";
+import {
+  createContext,
+  useContext,
+  PropsWithChildren,
+  useEffect,
+  useState,
+} from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -13,6 +19,7 @@ import {
   DocumentChartBarIcon,
   ArrowLeftStartOnRectangleIcon,
   Bars3Icon,
+  BriefcaseIcon,
   ArchiveBoxIcon,
   BuildingOffice2Icon,
 } from "@heroicons/react/24/outline";
@@ -52,6 +59,11 @@ const ROUTES = [
     path: "/promos",
     label: "Promos",
     icon: TagIcon,
+  },
+  {
+    path: "/services",
+    label: "Services",
+    icon: BriefcaseIcon,
   },
   {
     path: "/inventory",
@@ -178,4 +190,16 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
       )}
     </SidebarContext.Provider>
   );
+};
+
+export const useSidebarContext = () => {
+  const context = useContext(SidebarContext);
+
+  if (context === undefined) {
+    throw new Error(
+      "useSidebarContext must be used within a SidebarContextProvider"
+    );
+  }
+
+  return context;
 };
