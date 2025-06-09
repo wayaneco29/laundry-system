@@ -2,7 +2,6 @@
 
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
-import { twMerge } from "tailwind-merge";
 import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Button, Input, Modal } from "@/app/components/common";

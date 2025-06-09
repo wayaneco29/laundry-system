@@ -7,6 +7,7 @@ import { OrderModal } from "./order-modal";
 import { useRouter } from "next/navigation";
 
 type OrdersPageProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
 };
 

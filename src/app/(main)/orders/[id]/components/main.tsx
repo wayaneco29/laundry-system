@@ -8,6 +8,7 @@ import { useRouter } from "next/navigation";
 import { twMerge } from "tailwind-merge";
 
 type MainOrderIdPageProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 };
 export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
@@ -56,25 +57,26 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
               <table className="table w-full">
                 <thead className="group/head text-xs uppercase text-gray-700">
                   <tr>
-                    <th className="text-start bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
+                    <th className="text-start bg-gray-200 px-6 py-4 bg-primary-500 text-black sticky top-0 z-10 text-nowrap">
                       #
                     </th>
-                    <th className="text-start bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
+                    <th className="text-start bg-gray-200 px-6 py-4 bg-primary-500 text-black sticky top-0 z-10 text-nowrap">
                       Service
                     </th>
-                    <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-60">
+                    <th className="bg-gray-200 px-6 py-4 bg-primary-500 text-black sticky top-0 z-10 text-nowrap w-60">
                       Price / KG
                     </th>
-                    <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-40">
+                    <th className="bg-gray-200 px-6 py-4 bg-primary-500 text-black sticky top-0 z-10 text-nowrap w-40">
                       Quantity
                     </th>
-                    <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-40">
+                    <th className="bg-gray-200 px-6 py-4 bg-primary-500 text-black sticky top-0 z-10 text-nowrap w-40">
                       Total
                     </th>
                   </tr>
                 </thead>
                 <tbody className="relative group/body divide-y divide-gray-100">
                   {data?.items?.length ? (
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     data?.items?.map((items: any, index: number) => (
                       <tr
                         key={index}
@@ -86,13 +88,13 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                         <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                           {items?.name}
                         </td>
-                        <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                        <td className="text-nowrap text-center px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                           {items?.price}
                         </td>
-                        <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                        <td className="text-nowrap text-center px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                           {items?.quantity}
                         </td>
-                        <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
+                        <td className="text-nowrap text-center px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                           <strong>₱ {items?.total || 0}</strong>
                         </td>
                       </tr>
@@ -109,9 +111,11 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
             </div>
           </div>
           <div className="mt-8">
-            <div className="flex justify-between">
+            <div className="flex justify-between items-center">
               <div className="flex gap-4">
-                <Button>Pay Now</Button>
+                {data?.payment_status === "Unpaid" && (
+                  <Button>Add Payment</Button>
+                )}
                 <Button className="bg-green-500 hover:bg-green-600">
                   Print Receipt
                 </Button>

@@ -45,7 +45,9 @@ export const OrderModal = ({ showModal, onClose }: OrderModalProps) => {
           <Select
             label="Customer"
             placeholder="Select customer"
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             getOptionLabel={(option: any) => option?.full_name}
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             getOptionValue={(option: any) => option?.customer_id}
             options={customerList}
           />

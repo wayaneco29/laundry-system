@@ -1,11 +1,13 @@
 "use client";
 
 import ReactSelect, { Props } from "react-select";
+import { twMerge } from "tailwind-merge";
 
 type SelectProps = Props & {
   label?: string;
   placeholder?: string;
   value?: Array<string> | string;
+  containerClassName?: string;
 };
 
 export const Select = ({
@@ -13,6 +15,7 @@ export const Select = ({
   placeholder = "Select option...",
   options,
   value,
+  containerClassName = "",
   ...props
 }: SelectProps) => {
   const composeValues = () => {
@@ -28,7 +31,7 @@ export const Select = ({
   };
 
   return (
-    <div className="relative w-full">
+    <div className={twMerge("relative w-full", containerClassName)}>
       {label && (
         <label className="block text-sm font-medium mb-2">{label}</label>
       )}

@@ -116,7 +116,9 @@ export const ServiceModal = ({
                 label="Branch"
                 placeholder="Branch"
                 error={!!errors?.branchId}
+                value={value}
                 {...field}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 onChange={(newValue: any) => {
                   onChange(newValue?.value);
                 }}

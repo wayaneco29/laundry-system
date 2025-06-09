@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 
 import { Button, Input } from "@/app/components/common";
 import { PaymentModal } from "../../components/payment-modal";
@@ -10,12 +10,14 @@ import { addOrder } from "@/app/actions";
 import moment from "moment";
 
 type MainAddPageProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
 };
 
 export const MainAddPage = ({ data }: MainAddPageProps) => {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedServices, setSelectedServices] = useState<Array<any>>([]);
 
   const grossTotal = selectedServices?.reduce(
@@ -94,6 +96,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
 
                       return (
                         <div
+                          key={service?.id}
                           className={`flex-1 bg-gray-100 rounded-md h-[100px] border border-dashed ${
                             existing && "!bg-green-100"
                           }`}
