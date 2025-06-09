@@ -320,7 +320,7 @@ export default function DashboardPage() {
       <div className="bg-white rounded-md shadow-md p-4">
         <div className="text-gray-700 mb-4 text-lg">Latest Transaction</div>
         <div className="flex flex-col">
-          <OrdersTable />
+          <OrdersTable data={[]} />
         </div>
       </div>
     </div>
