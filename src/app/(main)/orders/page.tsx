@@ -6,3 +6,5 @@ export default async function Page() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return <OrdersPage data={data as Array<any>} />;
 }
+
+export const dynamic = "force-dynamic";
