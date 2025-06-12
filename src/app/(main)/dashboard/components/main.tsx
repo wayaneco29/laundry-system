@@ -5,7 +5,7 @@ import { UsersIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
 import { ApexOptions } from "apexcharts";
 
 import { OrdersTable } from "@/app/components";
-import { getMonthlyCustomers } from "@/app/actions";
+import { getMonthlyCustomers, MonthlySalesData } from "@/app/actions";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -214,9 +214,13 @@ const donutChartOptions = {
 };
 type MainDashboardPage = {
   monthlyCustomersCount: number;
+  todayCustomersCount: number;
+  monthlySalesData: MonthlySalesData | null;
 };
 export function MainDashboardPage({
   monthlyCustomersCount,
+  todayCustomersCount,
+  monthlySalesData,
 }: MainDashboardPage) {
   return (
     <div className="p-4 lg:p-8">
@@ -243,24 +247,39 @@ export function MainDashboardPage({
               <div className="text-gray-700 text-sm font-medium">
                 Todays Customers
               </div>
-              <div className="text-gray-700 text-xl font-bold mt-2">42</div>
+              <div className="text-gray-700 text-xl font-bold mt-2">{todayCustomersCount}</div>
             </div>
             <div className="p-3 rounded-full bg-violet-400 h-fit">
               <UsersIcon height={25} />
             </div>
           </div>
         </div>
-        <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-orange-100 to-white">
+        <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-green-100 to-white">
           <div className="flex justify-between">
             <div>
               <div className="text-gray-700 text-sm font-medium">
-                This Month Sales
+                This Month Paid Sales
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                ₱28,970
+                ₱{monthlySalesData?.paidSales?.toLocaleString() || '0'}
               </div>
             </div>
-            <div className="p-3 rounded-full bg-orange-400 h-fit">
+            <div className="p-3 rounded-full bg-green-400 h-fit">
+              <CurrencyDollarIcon height={25} />
+            </div>
+          </div>
+        </div>
+        <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-red-100 to-white">
+          <div className="flex justify-between">
+            <div>
+              <div className="text-gray-700 text-sm font-medium">
+                This Month Unpaid Sales
+              </div>
+              <div className="text-gray-700 text-xl font-bold mt-2">
+                ₱{monthlySalesData?.unpaidSales?.toLocaleString() || '0'}
+              </div>
+            </div>
+            <div className="p-3 rounded-full bg-red-400 h-fit">
               <CurrencyDollarIcon height={25} />
             </div>
           </div>
