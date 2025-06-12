@@ -288,9 +288,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
             status={order?.order_status}
             type="order"
             orderId={order?.order_id}
-            onClick={() =>
-              handleOrderStatusClick(order?.order_id, order?.order_status)
-            }
+            onClick={() => handleOrderStatusClick(order?.order_id)}
             isLoading={loadingOrders.has(order?.order_id)}
           />
         </div>
@@ -403,12 +401,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
                       status={order?.order_status}
                       type="order"
                       orderId={order?.order_id}
-                      onClick={() =>
-                        handleOrderStatusClick(
-                          order?.order_id,
-                          order?.order_status
-                        )
-                      }
+                      onClick={() => handleOrderStatusClick(order?.order_id)}
                       isLoading={loadingOrders.has(order?.order_id)}
                     />
                   </div>
