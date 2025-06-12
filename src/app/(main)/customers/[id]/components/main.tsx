@@ -4,10 +4,10 @@ import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { twMerge } from "tailwind-merge";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { ArrowLeft, User, Phone, Mail, MapPin, Save, History, Building2, Package } from "lucide-react";
 
 import { Button, Input } from "@/app/components/common";
 import { upsertCustomer } from "@/app/actions";
-import { ArrowLongLeftIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 
 type MainCustomerIdPageProps = {
@@ -50,21 +50,31 @@ export const MainCustomerIdPage = ({
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 text-2xl font-medium">Customer Detail</h1>
-        <Button className="mr-4" onClick={() => router.back()}>
-          <ArrowLongLeftIcon className="size-5" /> Back
+        <div className="flex items-center gap-3">
+          <div className="bg-blue-100 p-3 rounded-full">
+            <User className="w-6 h-6 text-blue-600" />
+          </div>
+          <div>
+            <h1 className="text-gray-700 text-2xl font-medium">Customer Detail</h1>
+            <p className="text-gray-500 text-sm">Manage customer information and view transaction history</p>
+          </div>
+        </div>
+        <Button className="mr-4 inline-flex items-center gap-2" onClick={() => router.back()}>
+          <ArrowLeft className="w-4 h-4" /> Back
         </Button>
       </div>
       <div className="mt-4 text-gray-700">
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-y-4 md:gap-y-8 2xl:gap-x-8">
           <div className="col-span-1">
-            <div className="bg-white rounded-md shadow-md p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-blue-400 mb-4 font-medium">
+            <div className="bg-white rounded-md shadow-md p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 text-blue-600 font-medium">
+                  <User className="w-5 h-5" />
                   Personal Information
                 </div>
                 <Button
                   disabled={isSubmitting || !isDirty}
+                  className="inline-flex items-center gap-2"
                   onClick={handleSubmit(async (data) => {
                     try {
                       const { error } = await upsertCustomer({
@@ -93,6 +103,7 @@ export const MainCustomerIdPage = ({
                     }
                   })}
                 >
+                  <Save className="w-4 h-4" />
                   Update
                 </Button>
               </div>
@@ -102,12 +113,16 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="first_name"
                     render={({ field }) => (
-                      <Input
-                        disabled={isSubmitting}
-                        placeholder="First Name"
-                        label="First Name"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          disabled={isSubmitting}
+                          placeholder="Enter first name"
+                          label="First Name"
+                          {...field}
+                          className="pl-10"
+                        />
+                        <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   />
                 </div>
@@ -116,12 +131,16 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="middle_name"
                     render={({ field }) => (
-                      <Input
-                        disabled={isSubmitting}
-                        placeholder="Middle Name"
-                        label="Middle Name"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          disabled={isSubmitting}
+                          placeholder="Enter middle name"
+                          label="Middle Name"
+                          {...field}
+                          className="pl-10"
+                        />
+                        <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   />
                 </div>
@@ -130,12 +149,16 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="last_name"
                     render={({ field }) => (
-                      <Input
-                        disabled={isSubmitting}
-                        placeholder="Last Name"
-                        label="Last Name"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          disabled={isSubmitting}
+                          placeholder="Enter last name"
+                          label="Last Name"
+                          {...field}
+                          className="pl-10"
+                        />
+                        <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   />
                 </div>
@@ -146,12 +169,16 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="phone"
                     render={({ field }) => (
-                      <Input
-                        disabled={isSubmitting}
-                        placeholder="Phone Number"
-                        label="Phone Number"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          disabled={isSubmitting}
+                          placeholder="Enter phone number"
+                          label="Phone Number"
+                          {...field}
+                          className="pl-10"
+                        />
+                        <Phone className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   />
                 </div>
@@ -160,12 +187,16 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="email"
                     render={({ field }) => (
-                      <Input
-                        disabled={isSubmitting}
-                        placeholder="Email"
-                        label="Email"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          disabled={isSubmitting}
+                          placeholder="Enter email address"
+                          label="Email"
+                          {...field}
+                          className="pl-10"
+                        />
+                        <Mail className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   />
                 </div>
@@ -176,12 +207,16 @@ export const MainCustomerIdPage = ({
                     control={control}
                     name="address"
                     render={({ field }) => (
-                      <Input
-                        disabled={isSubmitting}
-                        placeholder="Address"
-                        label="Address"
-                        {...field}
-                      />
+                      <div className="relative">
+                        <Input
+                          disabled={isSubmitting}
+                          placeholder="Enter full address"
+                          label="Address"
+                          {...field}
+                          className="pl-10"
+                        />
+                        <MapPin className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                      </div>
                     )}
                   />
                 </div>
@@ -189,9 +224,10 @@ export const MainCustomerIdPage = ({
             </div>
           </div>
           <div className="col-span-1">
-            <div className="bg-white rounded-md shadow-md p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-blue-400 mb-4 font-medium">
+            <div className="bg-white rounded-md shadow-md p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-2 text-blue-600 font-medium">
+                  <History className="w-5 h-5" />
                   Latest Transactions
                 </div>
               </div>
@@ -217,8 +253,16 @@ export const MainCustomerIdPage = ({
                         October 17, 2025
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="font-bold">Manduae City, Cebu</div>
-                        <div className="mt-1">Wash, Dry and Fold</div>
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <div className="font-bold">Manduae City, Cebu</div>
+                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
+                              <Package className="w-3 h-3" />
+                              Wash, Dry and Fold
+                            </div>
+                          </div>
+                        </div>
                       </td>
                       <td className="text-nowrap text-center px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                         <span
@@ -238,10 +282,18 @@ export const MainCustomerIdPage = ({
                         January 17, 2024
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="font-bold">
-                          Brgy. Sambag 2, Colon, Cebu
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <div className="font-bold">
+                              Brgy. Sambag 2, Colon, Cebu
+                            </div>
+                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
+                              <Package className="w-3 h-3" />
+                              Wash, Dry and Fold
+                            </div>
+                          </div>
                         </div>
-                        <div className="mt-1">Wash, Dry and Fold</div>
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                         <span
@@ -261,10 +313,18 @@ export const MainCustomerIdPage = ({
                         January 17, 2024
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="font-bold">
-                          Brgy. Sambag 2, Colon, Cebu
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <div className="font-bold">
+                              Brgy. Sambag 2, Colon, Cebu
+                            </div>
+                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
+                              <Package className="w-3 h-3" />
+                              Wash, Dry and Fold
+                            </div>
+                          </div>
                         </div>
-                        <div className="mt-1">Wash, Dry and Fold</div>
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                         <span
@@ -284,10 +344,18 @@ export const MainCustomerIdPage = ({
                         January 17, 2024
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="font-bold">
-                          Brgy. Sambag 2, Colon, Cebu
+                        <div className="flex items-center gap-2">
+                          <Building2 className="w-4 h-4 text-blue-500" />
+                          <div>
+                            <div className="font-bold">
+                              Brgy. Sambag 2, Colon, Cebu
+                            </div>
+                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
+                              <Package className="w-3 h-3" />
+                              Wash, Dry and Fold
+                            </div>
+                          </div>
                         </div>
-                        <div className="mt-1">Wash, Dry and Fold</div>
                       </td>
                       <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                         <span
