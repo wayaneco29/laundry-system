@@ -1,15 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { twMerge } from "tailwind-merge";
-import { 
-  Package, 
-  Plus, 
-  DollarSign, 
-  Hash, 
-  Edit3,
-  Building2 
-} from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { ServiceModal } from "./service-modal";
 import { ServiceTable } from "./service-table";
@@ -57,8 +49,8 @@ export function MainServicePage({ services_list }: MainServicePageProps) {
       </div>
       <div className="mt-4">
         <div className="flex flex-col">
-          <ServiceTable 
-            data={services_list} 
+          <ServiceTable
+            data={services_list}
             onEdit={(service) => {
               setInitialValue({
                 isUpdate: true,

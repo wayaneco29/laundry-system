@@ -23,6 +23,7 @@ import { useRouter } from "next/navigation";
 import { updatePaymentStatus, updateOrderStatus } from "@/app/actions";
 
 type MainOrderIdPageProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
 };
 
@@ -389,6 +390,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                   </thead>
                   <tbody className="divide-y divide-slate-200">
                     {data?.items?.length ? (
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
                       data.items.map((item: any, index: number) => (
                         <tr
                           key={index}
@@ -514,6 +516,7 @@ const InfoCard = ({
   value,
   highlight = false,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   icon: any;
   label: string;
   value: string;

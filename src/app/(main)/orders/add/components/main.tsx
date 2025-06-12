@@ -21,6 +21,7 @@ import { addOrder, getAllCustomers } from "@/app/actions";
 import moment from "moment";
 
 type MainAddPageProps = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
 };
 
@@ -28,8 +29,10 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
   const router = useRouter();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedServices, setSelectedServices] = useState<Array<any>>([]);
   const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [customers, setCustomers] = useState<Array<any>>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
@@ -92,7 +95,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
     setIsConfirming(true);
 
     try {
-      const { data, error } = await addOrder({
+      const { error } = await addOrder({
         p_branch_id: "23ad1191-ca30-4138-9887-00566975876c",
         p_customer_id: selectedCustomer, // Use selected customer ID
         p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
@@ -137,7 +140,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
   const removeService = (index: number) => {
     setSelectedServices((prev) => prev.filter((_, i) => i !== index));
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toggleService = (service: any) => {
     const existing = selectedServices.find((x) => x.id === service.id);
 
@@ -150,7 +153,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
       ]);
     }
   };
-
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const handleCustomerChange = (selectedOption: any) => {
     setSelectedCustomer(selectedOption?.value || "");
   };

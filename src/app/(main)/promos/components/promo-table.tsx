@@ -1,16 +1,15 @@
 "use client";
 
 import moment from "moment";
-import { twMerge } from "tailwind-merge";
-import { 
-  Tag, 
-  Calendar, 
-  Hash, 
+import {
+  Tag,
+  Calendar,
+  Hash,
   Edit3,
   FileText,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
 } from "lucide-react";
 
 type PromoTableProps = {
@@ -46,6 +45,7 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
   };
 
   // Mobile Card Component
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const MobilePromoCard = ({ promo, index }: { promo: any; index: number }) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
       {/* Header with promo name and ID */}
@@ -82,7 +82,9 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
       {/* Valid Until and Status */}
       <div className="space-y-2 pt-2 border-t border-slate-100">
         <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-600">Valid Until:</span>
+          <span className="text-xs font-medium text-slate-600">
+            Valid Until:
+          </span>
           <div className="flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md">
             <Calendar className="w-3 h-3 text-slate-500" />
             <span className="text-xs font-medium text-slate-700">
@@ -90,10 +92,14 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
             </span>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-slate-600">Status:</span>
-          <div className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border ${getStatusColor(promo?.status)}`}>
+          <div
+            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border ${getStatusColor(
+              promo?.status
+            )}`}
+          >
             {getStatusIcon(promo?.status)}
             <span>{promo?.status}</span>
           </div>
@@ -110,11 +116,7 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
           <div className="space-y-3">
             {!!data?.length ? (
               data?.map((promo, index) => (
-                <MobilePromoCard
-                  key={promo.id}
-                  promo={promo}
-                  index={index}
-                />
+                <MobilePromoCard key={promo.id} promo={promo} index={index} />
               ))
             ) : (
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center text-slate-500">
@@ -177,12 +179,18 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
                   <div className="col-span-2 flex items-center justify-center">
                     <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg text-slate-700 font-medium text-sm">
                       <Calendar className="w-4 h-4 text-slate-500" />
-                      <span>{moment(promo?.valid_until).format("MMM DD, YYYY")}</span>
+                      <span>
+                        {moment(promo?.valid_until).format("MMM DD, YYYY")}
+                      </span>
                     </div>
                   </div>
 
                   <div className="col-span-2 flex items-center justify-center">
-                    <div className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border ${getStatusColor(promo?.status)}`}>
+                    <div
+                      className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border ${getStatusColor(
+                        promo?.status
+                      )}`}
+                    >
                       {getStatusIcon(promo?.status)}
                       <span>{promo?.status}</span>
                     </div>

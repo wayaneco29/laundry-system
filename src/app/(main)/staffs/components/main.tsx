@@ -1,19 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import moment from "moment";
-import { 
-  Users, 
-  Plus, 
-  Eye, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Hash, 
-  Edit3,
-  UserCircle2 
-} from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { UpsertStaffModal } from "./upsert-staff-modal";
 import { StaffTable } from "./staff-table";
@@ -58,8 +46,8 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
       </div>
       <div className="mt-4">
         <div className="flex flex-col">
-          <StaffTable 
-            data={staff_list} 
+          <StaffTable
+            data={staff_list}
             onEdit={(staff) => {
               setInitialValues({
                 isUpdate: true,

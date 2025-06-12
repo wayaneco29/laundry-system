@@ -5,12 +5,11 @@ import { UsersIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
 import { ApexOptions } from "apexcharts";
 
 import { OrdersTable } from "@/app/components";
-import { getMonthlyCustomers, MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
+import { MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
 });
-
 
 const chartOptions: ApexOptions = {
   chart: {
@@ -262,7 +261,9 @@ export function MainDashboardPage({
               <div className="text-gray-700 text-sm font-medium">
                 Todays Customers
               </div>
-              <div className="text-gray-700 text-xl font-bold mt-2">{todayCustomersCount}</div>
+              <div className="text-gray-700 text-xl font-bold mt-2">
+                {todayCustomersCount}
+              </div>
             </div>
             <div className="p-3 rounded-full bg-violet-400 h-fit">
               <UsersIcon height={25} />
@@ -276,7 +277,7 @@ export function MainDashboardPage({
                 This Month Paid Sales
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                ₱{monthlySalesData?.paidSales?.toLocaleString() || '0'}
+                ₱{monthlySalesData?.paidSales?.toLocaleString() || "0"}
               </div>
             </div>
             <div className="p-3 rounded-full bg-green-400 h-fit">
@@ -291,7 +292,7 @@ export function MainDashboardPage({
                 This Month Unpaid Sales
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                ₱{monthlySalesData?.unpaidSales?.toLocaleString() || '0'}
+                ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
               </div>
             </div>
             <div className="p-3 rounded-full bg-red-400 h-fit">
@@ -306,7 +307,7 @@ export function MainDashboardPage({
                 This Month Total Sales
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                ₱{monthlySalesData?.totalSales?.toLocaleString() || '0'}
+                ₱{monthlySalesData?.totalSales?.toLocaleString() || "0"}
               </div>
             </div>
             <div className="p-3 rounded-full bg-blue-400 h-fit">
@@ -337,14 +338,18 @@ export function MainDashboardPage({
             <div className="text-gray-700">Yearly</div>
           </div>
           <div className="text-gray-700 font-bold text-lg">
-            ₱{chartData?.totalYearSales?.toLocaleString() || '0'}
+            ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
           </div>
           <ReactApexChart
             options={dynamicChartOptions}
-            series={[{
-              name: "This year",
-              data: chartData?.monthlyData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            }]}
+            series={[
+              {
+                name: "This year",
+                data: chartData?.monthlyData || [
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                ],
+              },
+            ]}
             type="area"
             height={264}
           />

@@ -3,14 +3,7 @@
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import {
-  Package,
-  DollarSign,
-  Building2,
-  CheckCircle,
-  Save,
-  X,
-} from "lucide-react";
+import { Package, DollarSign, CheckCircle, Save, X } from "lucide-react";
 
 import { Modal, Button, Select, Input } from "@/app/components/common";
 import { SERVICE_STATUS_DROPDOWN } from "@/app/constants";

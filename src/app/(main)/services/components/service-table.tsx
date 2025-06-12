@@ -1,13 +1,12 @@
 "use client";
 
-import { twMerge } from "tailwind-merge";
-import { 
-  Package, 
-  DollarSign, 
-  Hash, 
+import {
+  Package,
+  DollarSign,
+  Hash,
   Edit3,
   CheckCircle,
-  XCircle
+  XCircle,
 } from "lucide-react";
 
 type ServiceTableProps = {
@@ -28,7 +27,14 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
   };
 
   // Mobile Card Component
-  const MobileServiceCard = ({ service, index }: { service: any; index: number }) => (
+  const MobileServiceCard = ({
+    service,
+    index,
+  }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    service: any;
+    index: number;
+  }) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
       {/* Header with service name and ID */}
       <div className="flex items-start justify-between">
@@ -66,10 +72,14 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
             </span>
           </div>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <span className="text-xs font-medium text-slate-600">Status:</span>
-          <div className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border ${getStatusColor(service?.status)}`}>
+          <div
+            className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-lg border ${getStatusColor(
+              service?.status
+            )}`}
+          >
             {service?.status === "Active" ? (
               <CheckCircle className="w-3 h-3" />
             ) : (
@@ -154,7 +164,11 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
                   </div>
 
                   <div className="col-span-2 flex items-center justify-center">
-                    <div className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border ${getStatusColor(service?.status)}`}>
+                    <div
+                      className={`inline-flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-lg border ${getStatusColor(
+                        service?.status
+                      )}`}
+                    >
                       {service?.status === "Active" ? (
                         <CheckCircle className="w-4 h-4" />
                       ) : (
@@ -177,7 +191,9 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
             ) : (
               <div className="p-8 text-center text-slate-500">
                 <Package className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <div className="text-lg font-medium mb-2">No services found</div>
+                <div className="text-lg font-medium mb-2">
+                  No services found
+                </div>
                 <p>Services will appear here when available.</p>
               </div>
             )}

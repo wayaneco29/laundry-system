@@ -1,12 +1,6 @@
 "use client";
 
-import { 
-  Building2, 
-  MapPin, 
-  FileText, 
-  Hash, 
-  Eye 
-} from "lucide-react";
+import { Building2, MapPin, FileText, Hash, Eye } from "lucide-react";
 
 type BranchTableProps = {
   data: Array<Record<string, string>>;
@@ -15,7 +9,14 @@ type BranchTableProps = {
 
 export const BranchTable = ({ data, onView }: BranchTableProps) => {
   // Mobile Card Component
-  const MobileBranchCard = ({ branch, index }: { branch: any; index: number }) => (
+  const MobileBranchCard = ({
+    branch,
+    index,
+  }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    branch: any;
+    index: number;
+  }) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
       {/* Header with branch name and ID */}
       <div className="flex items-start justify-between">
@@ -147,7 +148,9 @@ export const BranchTable = ({ data, onView }: BranchTableProps) => {
             ) : (
               <div className="p-8 text-center text-slate-500">
                 <Building2 className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <div className="text-lg font-medium mb-2">No branches found</div>
+                <div className="text-lg font-medium mb-2">
+                  No branches found
+                </div>
                 <p>Branches will appear here when available.</p>
               </div>
             )}

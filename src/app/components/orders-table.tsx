@@ -1,10 +1,8 @@
 "use client";
 
 import moment from "moment";
-import { twMerge } from "tailwind-merge";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Modal, Select } from "./common";
 import {
   ChevronDown,
   Edit3,
@@ -14,8 +12,6 @@ import {
   Hash,
   Loader2,
   MapPin,
-  Phone,
-  CreditCard,
 } from "lucide-react";
 
 import { updatePaymentStatus, updateOrderStatus } from "../actions";
@@ -121,7 +117,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
     }
   };
 
-  const handleOrderStatusClick = (orderId: string, currentStatus: string) => {
+  const handleOrderStatusClick = (orderId: string) => {
     setEditingCell(`${orderId}-order_status`);
   };
 
@@ -240,6 +236,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
   };
 
   // Mobile Card Component
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const MobileOrderCard = ({ order, index }: { order: any; index: number }) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
       {/* Header with customer name and order number */}

@@ -2,14 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { 
-  Building2, 
-  Plus, 
-  Eye, 
-  MapPin, 
-  FileText, 
-  Hash 
-} from "lucide-react";
+import { Plus } from "lucide-react";
 
 import { UpsertBranchModal } from "./upsert-branch-modal";
 import { BranchTable } from "./branch-table";
@@ -46,8 +39,8 @@ export function MainBranchesPage({ branch_list }: BranchesPageProps) {
       </div>
       <div className="mt-4">
         <div className="flex flex-col">
-          <BranchTable 
-            data={branch_list} 
+          <BranchTable
+            data={branch_list}
             onView={(branch) => {
               customerRevalidateTag("getBranch");
               router?.push(`/branches/${branch?.id}`);

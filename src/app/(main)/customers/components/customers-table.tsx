@@ -1,13 +1,6 @@
 "use client";
 
-import { 
-  User, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Hash, 
-  Eye 
-} from "lucide-react";
+import { User, Phone, Mail, MapPin, Hash, Eye } from "lucide-react";
 
 type CustomersTableProps = {
   data: Array<Record<string, string>>;
@@ -16,7 +9,14 @@ type CustomersTableProps = {
 
 export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
   // Mobile Card Component
-  const MobileCustomerCard = ({ customer, index }: { customer: any; index: number }) => (
+  const MobileCustomerCard = ({
+    customer,
+    index,
+  }: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    customer: any;
+    index: number;
+  }) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
       {/* Header with customer name and ID */}
       <div className="flex items-start justify-between">
@@ -162,7 +162,9 @@ export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
             ) : (
               <div className="p-8 text-center text-slate-500">
                 <User className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <div className="text-lg font-medium mb-2">No customers found</div>
+                <div className="text-lg font-medium mb-2">
+                  No customers found
+                </div>
                 <p>Customers will appear here when available.</p>
               </div>
             )}

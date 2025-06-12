@@ -1,16 +1,15 @@
 "use client";
 
 import moment from "moment";
-import { 
-  Users, 
-  Phone, 
-  Mail, 
-  MapPin, 
-  Calendar, 
-  Hash, 
+import {
+  Users,
+  Phone,
+  Mail,
+  MapPin,
+  Calendar,
+  Hash,
   Edit3,
   UserCircle2,
-  User
 } from "lucide-react";
 
 type StaffTableProps = {
@@ -20,6 +19,7 @@ type StaffTableProps = {
 
 export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
   // Mobile Card Component
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const MobileStaffCard = ({ staff, index }: { staff: any; index: number }) => (
     <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
       {/* Header with staff name and ID */}
@@ -65,9 +65,7 @@ export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
 
       {/* Employment Date */}
       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-        <span className="text-xs font-medium text-slate-600">
-          Date Hired:
-        </span>
+        <span className="text-xs font-medium text-slate-600">Date Hired:</span>
         <div className="flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md">
           <Calendar className="w-3 h-3 text-slate-500" />
           <span className="text-xs font-medium text-slate-700">
@@ -161,7 +159,9 @@ export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
                   <div className="col-span-2 flex items-center justify-center">
                     <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg text-slate-700 font-medium text-sm">
                       <Calendar className="w-4 h-4 text-slate-500" />
-                      <span>{moment(staff?.employment_date).format("MMM DD, YYYY")}</span>
+                      <span>
+                        {moment(staff?.employment_date).format("MMM DD, YYYY")}
+                      </span>
                     </div>
                   </div>
 
@@ -176,7 +176,9 @@ export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
             ) : (
               <div className="p-8 text-center text-slate-500">
                 <Users className="w-16 h-16 text-slate-300 mx-auto mb-4" />
-                <div className="text-lg font-medium mb-2">No staff members found</div>
+                <div className="text-lg font-medium mb-2">
+                  No staff members found
+                </div>
                 <p>Staff members will appear here when available.</p>
               </div>
             )}
