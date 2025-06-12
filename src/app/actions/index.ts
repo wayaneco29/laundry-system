@@ -7,3 +7,4 @@ export * from "./service";
 export * from "./order";
 
 export * from "./customerRevalidateTag";
+export * from "./dashboard";

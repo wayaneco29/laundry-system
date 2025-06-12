@@ -3,6 +3,7 @@
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
+import { Package, DollarSign, Building2, CheckCircle, Save, X } from "lucide-react";
 
 import { Modal, Button, Select, Input } from "@/app/components/common";
 import { SERVICE_STATUS_DROPDOWN } from "@/app/constants";
@@ -65,7 +66,12 @@ export const ServiceModal = ({
   return (
     <Modal
       show={showModal}
-      title="Add Promo"
+      title={
+        <div className="flex items-center gap-2">
+          <Package className="w-5 h-5 text-blue-600" />
+          {isUpdate ? "Update Service" : "Add Service"}
+        </div>
+      }
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
     >
@@ -76,13 +82,17 @@ export const ServiceModal = ({
             control={control}
             name="name"
             render={({ field, formState: { errors } }) => (
-              <Input
-                disabled={isSubmitting}
-                label="Name"
-                placeholder="Name"
-                error={!!errors.name}
-                {...field}
-              />
+              <div className="relative">
+                <Input
+                  disabled={isSubmitting}
+                  label="Service Name"
+                  placeholder="Enter service name"
+                  error={!!errors.name}
+                  {...field}
+                  className="pl-10"
+                />
+                <Package className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+              </div>
             )}
           />
         </div>
@@ -91,13 +101,17 @@ export const ServiceModal = ({
             control={control}
             name="price"
             render={({ field, formState: { errors } }) => (
-              <Input
-                disabled={isSubmitting}
-                label="Price"
-                placeholder="Price"
-                error={!!errors.price}
-                {...field}
-              />
+              <div className="relative">
+                <Input
+                  disabled={isSubmitting}
+                  label="Price per KG"
+                  placeholder="Enter price"
+                  error={!!errors.price}
+                  {...field}
+                  className="pl-10"
+                />
+                <DollarSign className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+              </div>
             )}
           />
         </div>
@@ -111,18 +125,22 @@ export const ServiceModal = ({
               field: { value = [], onChange, ...field },
               formState: { errors },
             }) => (
-              <BranchProvider
-                disabled={isSubmitting}
-                label="Branch"
-                placeholder="Branch"
-                error={!!errors?.branchId}
-                value={value}
-                {...field}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={(newValue: any) => {
-                  onChange(newValue?.value);
-                }}
-              />
+              <div className="relative">
+                <BranchProvider
+                  disabled={isSubmitting}
+                  label="Branch"
+                  placeholder="Select branch"
+                  error={!!errors?.branchId}
+                  value={value}
+                  {...field}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onChange={(newValue: any) => {
+                    onChange(newValue?.value);
+                  }}
+                  className="pl-10"
+                />
+                <Building2 className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+              </div>
             )}
           />
         </div>
@@ -131,17 +149,21 @@ export const ServiceModal = ({
             control={control}
             name="status"
             render={({ field: { onChange, ...field } }) => (
-              <Select
-                label="Status"
-                placeholder="Status"
-                isDisabled={!isUpdate}
-                options={SERVICE_STATUS_DROPDOWN}
-                {...field}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={({ value }: any) => {
-                  onChange(value);
-                }}
-              />
+              <div className="relative">
+                <Select
+                  label="Status"
+                  placeholder="Select status"
+                  isDisabled={!isUpdate}
+                  options={SERVICE_STATUS_DROPDOWN}
+                  {...field}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onChange={({ value }: any) => {
+                    onChange(value);
+                  }}
+                  className="pl-10"
+                />
+                <CheckCircle className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+              </div>
             )}
           />
         </div>
@@ -150,13 +172,15 @@ export const ServiceModal = ({
         <div className="flex justify-end items-center gap-x-2">
           <Button
             disabled={isSubmitting}
-            className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white"
+            className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
             onClick={handleModalClose}
           >
+            <X className="w-4 h-4" />
             Cancel
           </Button>
           <Button
             disabled={isSubmitting || !isDirty}
+            className="inline-flex items-center gap-2"
             onClick={handleSubmit(async (newData) => {
               try {
                 const { error } = await upsertService({
@@ -176,6 +200,7 @@ export const ServiceModal = ({
               }
             })}
           >
+            <Save className="w-4 h-4" />
             Save
           </Button>
         </div>

@@ -271,7 +271,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
       <div className="flex items-center justify-between text-xs text-slate-600">
         <div className="flex items-center gap-1">
           <Calendar className="w-3 h-3 text-slate-400" />
-          <span>{moment(order?.date_ordered).format("MMM DD, YYYY")}</span>
+          <span>{moment(order?.order_date).format("MMM DD, YYYY")}</span>
         </div>
         <div className="flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md">
           <MapPin className="w-3 h-3 text-slate-500" />
@@ -385,7 +385,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
                     <div className="flex items-center gap-2 text-slate-600 text-sm">
                       <Calendar className="w-4 h-4 text-slate-400" />
                       <span>
-                        {moment(order?.date_ordered).format("MMMM DD, YYYY")}
+                        {moment(order?.order_date).format("MMMM DD, YYYY")}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-slate-500 text-sm font-mono">

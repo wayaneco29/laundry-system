@@ -5,6 +5,19 @@ import moment from "moment";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { twMerge } from "tailwind-merge";
+import { 
+  Tag, 
+  Plus, 
+  Calendar, 
+  Hash, 
+  Edit3,
+  FileText,
+  CheckCircle,
+  XCircle,
+  Clock,
+  Save,
+  X 
+} from "lucide-react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
 
@@ -18,7 +31,7 @@ import {
 
 import { customerRevalidateTag, upsertPromo } from "@/app/actions";
 import { PROMO_STATUS_DROPDOWN } from "@/app/constants";
-import { PlusIcon } from "@heroicons/react/20/solid";
+import { PromoTable } from "./promo-table";
 
 type MainPromoPageProps = {
   promo_list: Array<Record<string, string>>;
@@ -75,98 +88,50 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 text-2xl font-medium">Promos</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            Promo Management
+          </h1>
+          <p className="text-slate-600">
+            Manage promotional campaigns and special offers
+          </p>
+        </div>
         <button
           type="button"
-          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 disabled:opacity-50 disabled:pointer-events-none"
           onClick={() => setShowModal(true)}
         >
-          <PlusIcon className="h-5 w-5" /> Add Promo
+          <Plus className="size-4" /> Add Promo
         </button>
       </div>
       <div className="mt-4">
-        <div className="relative overflow-auto rounded-sm">
-          <table className="w-full text-left text-sm text-gray-500">
-            <thead className="group/head text-xs uppercase text-gray-700">
-              <tr>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Name
-                </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Code
-                </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Description
-                </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Valid Until
-                </th>
-                <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
-                  Status
-                </th>
-              </tr>
-            </thead>
-            <tbody className="group/body divide-y divide-gray-100">
-              {promo_list?.length ? (
-                promo_list?.map((promo, index) => (
-                  <tr
-                    key={index}
-                    onClick={() => {
-                      customerRevalidateTag("getPromos");
-                      reset({
-                        // branches: promo?.branches as unknown as Array<string>,
-                        isUpdate: true,
-                        code: promo?.code,
-                        description: promo?.description,
-                        id: promo?.id,
-                        name: promo?.name,
-                        status: promo?.status,
-                        valid_until: promo?.valid_until,
-                      });
-                      setShowModal(true);
-                    }}
-                    className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200"
-                  >
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {promo?.name}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {promo?.code}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {promo?.description}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      {moment(promo?.valid_until).format("MMMM DD, YYYY")}
-                    </td>
-                    <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                      <span
-                        className={twMerge(
-                          "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium  text-white",
-                          promo?.status === "Active" && "bg-green-500",
-                          promo?.status === "Expired" && "bg-red-400",
-                          promo?.status === "Closed" && "bg-yellow-500"
-                        )}
-                      >
-                        {promo?.status}
-                      </span>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <div className="table-row relative h-15 border border-gray-200">
-                  <div className="absolute flex items-center justify-center inset-0">
-                    NO DATA
-                  </div>
-                </div>
-              )}
-            </tbody>
-          </table>
+        <div className="flex flex-col">
+          <PromoTable 
+            data={promo_list} 
+            onEdit={(promo) => {
+              customerRevalidateTag("getPromos");
+              reset({
+                isUpdate: true,
+                code: promo?.code,
+                description: promo?.description,
+                id: promo?.id,
+                name: promo?.name,
+                status: promo?.status,
+                valid_until: promo?.valid_until,
+              });
+              setShowModal(true);
+            }}
+          />
         </div>
       </div>
       <Modal
         show={showModal}
-        title="Add Promo"
+        title={
+          <div className="flex items-center gap-2">
+            <Tag className="w-5 h-5 text-blue-600" />
+            {isUpdate ? "Update Promo" : "Add Promo"}
+          </div>
+        }
         isSubmitting={isSubmitting}
         onClose={handleModalClose}
       >
@@ -181,13 +146,17 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               control={control}
               name="name"
               render={({ field, formState: { errors } }) => (
-                <Input
-                  disabled={isSubmitting}
-                  label="Name"
-                  placeholder="Name"
-                  error={!!errors.name}
-                  {...field}
-                />
+                <div className="relative">
+                  <Input
+                    disabled={isSubmitting}
+                    label="Promo Name"
+                    placeholder="Enter promo name"
+                    error={!!errors.name}
+                    {...field}
+                    className="pl-10"
+                  />
+                  <Tag className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                </div>
               )}
             />
           </div>
@@ -196,13 +165,17 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               control={control}
               name="code"
               render={({ field, formState: { errors } }) => (
-                <Input
-                  disabled={isSubmitting}
-                  label="Code"
-                  placeholder="Code"
-                  error={!!errors.code}
-                  {...field}
-                />
+                <div className="relative">
+                  <Input
+                    disabled={isSubmitting}
+                    label="Promo Code"
+                    placeholder="Enter promo code"
+                    error={!!errors.code}
+                    {...field}
+                    className="pl-10"
+                  />
+                  <Hash className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                </div>
               )}
             />
           </div>
@@ -213,13 +186,17 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               control={control}
               name="description"
               render={({ field, formState: { errors } }) => (
-                <Input
-                  disabled={isSubmitting}
-                  label="Description"
-                  placeholder="Description"
-                  error={!!errors.description}
-                  {...field}
-                />
+                <div className="relative">
+                  <Input
+                    disabled={isSubmitting}
+                    label="Description"
+                    placeholder="Enter promo description"
+                    error={!!errors.description}
+                    {...field}
+                    className="pl-10"
+                  />
+                  <FileText className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                </div>
               )}
             />
           </div>
@@ -230,13 +207,17 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               control={control}
               name="valid_until"
               render={({ field, formState: { errors } }) => (
-                <Datepicker
-                  disabled={isSubmitting}
-                  label="Valid Until"
-                  placeholder="Valid Until"
-                  error={!!errors.valid_until}
-                  {...field}
-                />
+                <div className="relative">
+                  <Datepicker
+                    disabled={isSubmitting}
+                    label="Valid Until"
+                    placeholder="Select expiry date"
+                    error={!!errors.valid_until}
+                    {...field}
+                    className="pl-10"
+                  />
+                  <Calendar className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                </div>
               )}
             />
           </div>
@@ -245,17 +226,21 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               control={control}
               name="status"
               render={({ field: { onChange, ...field } }) => (
-                <Select
-                  label="Status"
-                  placeholder="Status"
-                  isDisabled={!isUpdate}
-                  options={PROMO_STATUS_DROPDOWN}
-                  {...field}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={({ value }: any) => {
-                    onChange(value);
-                  }}
-                />
+                <div className="relative">
+                  <Select
+                    label="Status"
+                    placeholder="Select status"
+                    isDisabled={!isUpdate}
+                    options={PROMO_STATUS_DROPDOWN}
+                    {...field}
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    onChange={({ value }: any) => {
+                      onChange(value);
+                    }}
+                    className="pl-10"
+                  />
+                  <CheckCircle className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
+                </div>
               )}
             />
           </div>
@@ -293,13 +278,15 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
           <div className="flex justify-end items-center gap-x-2">
             <Button
               disabled={isSubmitting}
-              className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white"
+              className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
               onClick={handleModalClose}
             >
+              <X className="w-4 h-4" />
               Cancel
             </Button>
             <Button
               disabled={isSubmitting || !isDirty}
+              className="inline-flex items-center gap-2"
               onClick={handleSubmit(async (newData) => {
                 try {
                   const { error } = await upsertPromo({
@@ -319,6 +306,7 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                 }
               })}
             >
+              <Save className="w-4 h-4" />
               Save
             </Button>
           </div>
