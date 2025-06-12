@@ -81,7 +81,6 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
     });
   };
 
-  console.log("branch_info", branch_info?.branch_stocks);
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">

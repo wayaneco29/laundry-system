@@ -13,11 +13,9 @@ type UpsertBranchStocksType = {
 
 export const upsertBranchStocks = async (payload: UpsertBranchStocksType) => {
   const supabase = await createClient();
-  console.log("upsertBranchStocks", payload);
   try {
     const { data, error } = await supabase.rpc("upsert_branch_stocks", payload);
 
-    console.log("upsertBranchStocks", error);
     if (error) throw error;
 
     revalidateTag("getAllBranches");

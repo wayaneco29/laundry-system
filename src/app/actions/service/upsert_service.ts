@@ -17,7 +17,6 @@ export const upsertService = async (payload: UpsertServiceType) => {
   try {
     const { data, error } = await supabase.rpc("upsert_service", payload);
 
-    console.log({ data, error });
     if (error) throw error;
 
     revalidateTag("getService");

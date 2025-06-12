@@ -105,8 +105,6 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
 
       if (error) throw error;
 
-      console.log(data);
-
       // Clear selected services and customer after successful order
       setSelectedServices([]);
       setSelectedCustomer("");

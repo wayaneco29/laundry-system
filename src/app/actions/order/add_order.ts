@@ -19,7 +19,6 @@ export const addOrder = async (payload: AddOrderPayload) => {
   try {
     const { data, error } = await supabase.rpc("add_customer_order", payload);
 
-    console.log({ data, error });
     if (error) throw error?.message;
 
     return {

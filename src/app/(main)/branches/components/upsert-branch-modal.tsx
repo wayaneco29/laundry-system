@@ -146,7 +146,6 @@ export const UpsertBranchModal = ({
             className="inline-flex items-center gap-2"
             onClick={handleSubmit(async (newData) => {
               try {
-                console.log(newData);
                 const { error } = await upsertBranch({
                   p_branch_id: newData?.id || null,
                   p_name: newData?.name,
