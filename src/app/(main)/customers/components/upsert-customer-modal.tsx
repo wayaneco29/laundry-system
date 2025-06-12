@@ -55,17 +55,18 @@ export const UpsertCustomerModal = ({
       show={showModal}
       title={
         <div className="flex items-center gap-2">
-          <User className="w-5 h-5 text-blue-600" />
+          <User className="w-5 h-5" />
           Add Customer
         </div>
       }
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
+      size="xl"
     >
       <Controller
         control={control}
         name="customer_id"
-        render={() => <Input hidden />}
+        render={() => <Input containerClassName="hidden" />}
       />
       <div className="grid grid-cols-1 mb-4">
         <div className="col-span-1">
@@ -73,17 +74,14 @@ export const UpsertCustomerModal = ({
             control={control}
             name="first_name"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="First Name"
-                  placeholder="Enter first name"
-                  error={!!errors.first_name}
-                  {...field}
-                  className="pl-10"
-                />
-                <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="First Name"
+                placeholder="Enter first name"
+                error={!!errors.first_name}
+                icon={<User />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -94,17 +92,14 @@ export const UpsertCustomerModal = ({
             control={control}
             name="middle_name"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Middle Name"
-                  placeholder="Enter middle name"
-                  error={!!errors.middle_name}
-                  {...field}
-                  className="pl-10"
-                />
-                <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Middle Name"
+                placeholder="Enter middle name"
+                error={!!errors.middle_name}
+                icon={<User />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -113,17 +108,14 @@ export const UpsertCustomerModal = ({
             control={control}
             name="last_name"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Last Name"
-                  placeholder="Enter last name"
-                  error={!!errors.last_name}
-                  {...field}
-                  className="pl-10"
-                />
-                <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Last Name"
+                placeholder="Enter last name"
+                error={!!errors.last_name}
+                icon={<User />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -134,17 +126,14 @@ export const UpsertCustomerModal = ({
             control={control}
             name="phone"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Phone Number"
-                  placeholder="Enter phone number"
-                  error={!!errors.phone}
-                  {...field}
-                  className="pl-10"
-                />
-                <Phone className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Phone Number"
+                placeholder="Enter phone number"
+                error={!!errors.phone}
+                icon={<Phone />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -153,18 +142,15 @@ export const UpsertCustomerModal = ({
             control={control}
             name="email"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Email"
-                  placeholder="Enter email address"
-                  error={!!errors?.email}
-                  {...field}
-                  value={field?.value || ""}
-                  className="pl-10"
-                />
-                <Mail className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Email"
+                placeholder="Enter email address"
+                error={!!errors?.email}
+                icon={<Mail />}
+                {...field}
+                value={field?.value || ""}
+              />
             )}
           />
         </div>
@@ -175,17 +161,14 @@ export const UpsertCustomerModal = ({
             control={control}
             name="address"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Address"
-                  placeholder="Enter full address"
-                  error={!!errors?.address}
-                  {...field}
-                  className="pl-10"
-                />
-                <MapPin className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Address"
+                placeholder="Enter full address"
+                error={!!errors?.address}
+                icon={<MapPin />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -193,16 +176,18 @@ export const UpsertCustomerModal = ({
       <div className="mt-8">
         <div className="flex justify-end items-center gap-x-2">
           <Button
+            variant="outline"
             disabled={isSubmitting}
-            className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
+            leftIcon={<X />}
             onClick={handleModalClose}
           >
-            <X className="w-4 h-4" />
             Cancel
           </Button>
           <Button
+            variant="primary"
             disabled={isSubmitting || !isDirty}
-            className="inline-flex items-center gap-2"
+            loading={isSubmitting}
+            leftIcon={<Save />}
             onClick={handleSubmit(async (newData) => {
               try {
                 const { error } = await upsertCustomer({
@@ -224,7 +209,6 @@ export const UpsertCustomerModal = ({
               }
             })}
           >
-            <Save className="w-4 h-4" />
             Save
           </Button>
         </div>

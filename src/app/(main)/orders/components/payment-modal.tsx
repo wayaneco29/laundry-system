@@ -11,7 +11,13 @@ type PaymentModalProps = {
 
 export const PaymentModal = ({ show, onClose }: PaymentModalProps) => {
   return (
-    <Modal show={show} onClose={onClose} title="Payment" isSubmitting>
+    <Modal 
+      show={show} 
+      onClose={onClose} 
+      title="Payment" 
+      isSubmitting={false}
+      size="md"
+    >
       <div className="flex flex-wrap gap-4">
         <div>
           <label>Customer Name</label>
@@ -20,12 +26,14 @@ export const PaymentModal = ({ show, onClose }: PaymentModalProps) => {
       </div>
       <div className="flex justify-end gap-x-4 mt-5 pt-5">
         <Button
-          className="bg-transparent text-red-500 border-red-400 hover:bg-gray-100 focus:bg-gray-100"
+          variant="outline"
           onClick={onClose}
         >
           Cancel
         </Button>
-        <Button>Pay</Button>
+        <Button variant="primary">
+          Pay
+        </Button>
       </div>
     </Modal>
   );

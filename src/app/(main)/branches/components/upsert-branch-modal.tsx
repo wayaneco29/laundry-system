@@ -60,31 +60,33 @@ export const UpsertBranchModal = ({
       show={showModal}
       title={
         <div className="flex items-center gap-2">
-          <Building2 className="w-5 h-5 text-blue-600" />
+          <Building2 className="w-5 h-5" />
           {isUpdate ? "Update Branch" : "Add Branch"}
         </div>
       }
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
+      size="lg"
     >
-      <Controller control={control} name="id" render={() => <Input hidden />} />
+      <Controller
+        control={control}
+        name="id"
+        render={() => <Input containerClassName="hidden" />}
+      />
       <div className="grid grid-cols-1 mb-4">
         <div className="col-span-1">
           <Controller
             control={control}
             name="name"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Branch Name"
-                  placeholder="Enter branch name"
-                  error={!!errors.name}
-                  {...field}
-                  className="pl-10"
-                />
-                <Building2 className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Branch Name"
+                placeholder="Enter branch name"
+                error={!!errors.name}
+                icon={<Building2 />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -95,17 +97,14 @@ export const UpsertBranchModal = ({
             control={control}
             name="description"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Description"
-                  placeholder="Enter branch description"
-                  error={!!errors.description}
-                  {...field}
-                  className="pl-10"
-                />
-                <FileText className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Description"
+                placeholder="Enter branch description"
+                error={!!errors.description}
+                icon={<FileText />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -116,17 +115,14 @@ export const UpsertBranchModal = ({
             control={control}
             name="address"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Address"
-                  placeholder="Enter full address"
-                  error={!!errors.address}
-                  {...field}
-                  className="pl-10"
-                />
-                <MapPin className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Address"
+                placeholder="Enter full address"
+                error={!!errors.address}
+                icon={<MapPin />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -134,16 +130,18 @@ export const UpsertBranchModal = ({
       <div className="mt-8">
         <div className="flex justify-end items-center gap-x-2">
           <Button
+            variant="outline"
             disabled={isSubmitting}
-            className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
+            leftIcon={<X />}
             onClick={handleModalClose}
           >
-            <X className="w-4 h-4" />
             Cancel
           </Button>
           <Button
+            variant="primary"
             disabled={isSubmitting || !isDirty}
-            className="inline-flex items-center gap-2"
+            loading={isSubmitting}
+            leftIcon={<Save />}
             onClick={handleSubmit(async (newData) => {
               try {
                 const { error } = await upsertBranch({
@@ -162,7 +160,6 @@ export const UpsertBranchModal = ({
               }
             })}
           >
-            <Save className="w-4 h-4" />
             Save
           </Button>
         </div>

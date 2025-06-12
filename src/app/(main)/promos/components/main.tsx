@@ -5,18 +5,18 @@ import moment from "moment";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { twMerge } from "tailwind-merge";
-import { 
-  Tag, 
-  Plus, 
-  Calendar, 
-  Hash, 
+import {
+  Tag,
+  Plus,
+  Calendar,
+  Hash,
   Edit3,
   FileText,
   CheckCircle,
   XCircle,
   Clock,
   Save,
-  X 
+  X,
 } from "lucide-react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -106,8 +106,8 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
       </div>
       <div className="mt-4">
         <div className="flex flex-col">
-          <PromoTable 
-            data={promo_list} 
+          <PromoTable
+            data={promo_list}
             onEdit={(promo) => {
               customerRevalidateTag("getPromos");
               reset({
@@ -138,7 +138,7 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
         <Controller
           control={control}
           name="id"
-          render={() => <Input hidden />}
+          render={() => <Input containerClassName="hidden" />}
         />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
           <div className="col-span-1">
@@ -148,14 +148,13 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               render={({ field, formState: { errors } }) => (
                 <div className="relative">
                   <Input
+                    icon={<Tag />}
                     disabled={isSubmitting}
                     label="Promo Name"
                     placeholder="Enter promo name"
                     error={!!errors.name}
                     {...field}
-                    className="pl-10"
                   />
-                  <Tag className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                 </div>
               )}
             />
@@ -167,14 +166,13 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               render={({ field, formState: { errors } }) => (
                 <div className="relative">
                   <Input
+                    icon={<Hash />}
                     disabled={isSubmitting}
                     label="Promo Code"
                     placeholder="Enter promo code"
                     error={!!errors.code}
                     {...field}
-                    className="pl-10"
                   />
-                  <Hash className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                 </div>
               )}
             />
@@ -188,14 +186,13 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               render={({ field, formState: { errors } }) => (
                 <div className="relative">
                   <Input
+                    icon={<FileText />}
                     disabled={isSubmitting}
                     label="Description"
                     placeholder="Enter promo description"
                     error={!!errors.description}
                     {...field}
-                    className="pl-10"
                   />
-                  <FileText className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                 </div>
               )}
             />
@@ -209,14 +206,13 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               render={({ field, formState: { errors } }) => (
                 <div className="relative">
                   <Datepicker
+                    icon={<Calendar />}
                     disabled={isSubmitting}
                     label="Valid Until"
                     placeholder="Select expiry date"
                     error={!!errors.valid_until}
                     {...field}
-                    className="pl-10"
                   />
-                  <Calendar className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                 </div>
               )}
             />
@@ -228,6 +224,7 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
               render={({ field: { onChange, ...field } }) => (
                 <div className="relative">
                   <Select
+                    icon={<CheckCircle />}
                     label="Status"
                     placeholder="Select status"
                     isDisabled={!isUpdate}
@@ -237,9 +234,7 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                     onChange={({ value }: any) => {
                       onChange(value);
                     }}
-                    className="pl-10"
                   />
-                  <CheckCircle className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                 </div>
               )}
             />
@@ -277,14 +272,15 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
         <div className="mt-8">
           <div className="flex justify-end items-center gap-x-2">
             <Button
+              leftIcon={<X />}
               disabled={isSubmitting}
               className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
               onClick={handleModalClose}
             >
-              <X className="w-4 h-4" />
               Cancel
             </Button>
             <Button
+              leftIcon={<Save />}
               disabled={isSubmitting || !isDirty}
               className="inline-flex items-center gap-2"
               onClick={handleSubmit(async (newData) => {
@@ -306,7 +302,6 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                 }
               })}
             >
-              <Save className="w-4 h-4" />
               Save
             </Button>
           </div>

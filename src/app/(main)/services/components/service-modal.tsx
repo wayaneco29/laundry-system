@@ -3,7 +3,14 @@
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { Package, DollarSign, Building2, CheckCircle, Save, X } from "lucide-react";
+import {
+  Package,
+  DollarSign,
+  Building2,
+  CheckCircle,
+  Save,
+  X,
+} from "lucide-react";
 
 import { Modal, Button, Select, Input } from "@/app/components/common";
 import { SERVICE_STATUS_DROPDOWN } from "@/app/constants";
@@ -68,31 +75,33 @@ export const ServiceModal = ({
       show={showModal}
       title={
         <div className="flex items-center gap-2">
-          <Package className="w-5 h-5 text-blue-600" />
+          <Package className="w-5 h-5" />
           {isUpdate ? "Update Service" : "Add Service"}
         </div>
       }
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
+      size="lg"
     >
-      <Controller control={control} name="id" render={() => <Input hidden />} />
+      <Controller
+        control={control}
+        name="id"
+        render={() => <Input containerClassName="hidden" />}
+      />
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
         <div className="col-span-1">
           <Controller
             control={control}
             name="name"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Service Name"
-                  placeholder="Enter service name"
-                  error={!!errors.name}
-                  {...field}
-                  className="pl-10"
-                />
-                <Package className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Service Name"
+                placeholder="Enter service name"
+                error={!!errors.name}
+                icon={<Package />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -101,17 +110,14 @@ export const ServiceModal = ({
             control={control}
             name="price"
             render={({ field, formState: { errors } }) => (
-              <div className="relative">
-                <Input
-                  disabled={isSubmitting}
-                  label="Price per KG"
-                  placeholder="Enter price"
-                  error={!!errors.price}
-                  {...field}
-                  className="pl-10"
-                />
-                <DollarSign className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Input
+                disabled={isSubmitting}
+                label="Price per KG"
+                placeholder="Enter price"
+                error={!!errors.price}
+                icon={<DollarSign />}
+                {...field}
+              />
             )}
           />
         </div>
@@ -125,22 +131,18 @@ export const ServiceModal = ({
               field: { value = [], onChange, ...field },
               formState: { errors },
             }) => (
-              <div className="relative">
-                <BranchProvider
-                  disabled={isSubmitting}
-                  label="Branch"
-                  placeholder="Select branch"
-                  error={!!errors?.branchId}
-                  value={value}
-                  {...field}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={(newValue: any) => {
-                    onChange(newValue?.value);
-                  }}
-                  className="pl-10"
-                />
-                <Building2 className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <BranchProvider
+                disabled={isSubmitting}
+                label="Branch"
+                placeholder="Select branch"
+                error={!!errors?.branchId}
+                value={value}
+                {...field}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onChange={(newValue: any) => {
+                  onChange(newValue?.value);
+                }}
+              />
             )}
           />
         </div>
@@ -149,21 +151,18 @@ export const ServiceModal = ({
             control={control}
             name="status"
             render={({ field: { onChange, ...field } }) => (
-              <div className="relative">
-                <Select
-                  label="Status"
-                  placeholder="Select status"
-                  isDisabled={!isUpdate}
-                  options={SERVICE_STATUS_DROPDOWN}
-                  {...field}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={({ value }: any) => {
-                    onChange(value);
-                  }}
-                  className="pl-10"
-                />
-                <CheckCircle className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
-              </div>
+              <Select
+                icon={<CheckCircle />}
+                label="Status"
+                placeholder="Select status"
+                isDisabled={!isUpdate}
+                options={SERVICE_STATUS_DROPDOWN}
+                {...field}
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                onChange={({ value }: any) => {
+                  onChange(value);
+                }}
+              />
             )}
           />
         </div>
@@ -171,16 +170,18 @@ export const ServiceModal = ({
       <div className="mt-8">
         <div className="flex justify-end items-center gap-x-2">
           <Button
+            variant="outline"
             disabled={isSubmitting}
-            className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
+            leftIcon={<X />}
             onClick={handleModalClose}
           >
-            <X className="w-4 h-4" />
             Cancel
           </Button>
           <Button
+            variant="primary"
             disabled={isSubmitting || !isDirty}
-            className="inline-flex items-center gap-2"
+            loading={isSubmitting}
+            leftIcon={<Save />}
             onClick={handleSubmit(async (newData) => {
               try {
                 const { error } = await upsertService({
@@ -200,7 +201,6 @@ export const ServiceModal = ({
               }
             })}
           >
-            <Save className="w-4 h-4" />
             Save
           </Button>
         </div>

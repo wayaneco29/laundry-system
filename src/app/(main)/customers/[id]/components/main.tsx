@@ -4,7 +4,17 @@ import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import { twMerge } from "tailwind-merge";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { ArrowLeft, User, Phone, Mail, MapPin, Save, History, Building2, Package } from "lucide-react";
+import {
+  ArrowLeft,
+  User,
+  Phone,
+  Mail,
+  MapPin,
+  Save,
+  History,
+  Building2,
+  Package,
+} from "lucide-react";
 
 import { Button, Input } from "@/app/components/common";
 import { upsertCustomer } from "@/app/actions";
@@ -55,12 +65,20 @@ export const MainCustomerIdPage = ({
             <User className="w-6 h-6 text-blue-600" />
           </div>
           <div>
-            <h1 className="text-gray-700 text-2xl font-medium">Customer Detail</h1>
-            <p className="text-gray-500 text-sm">Manage customer information and view transaction history</p>
+            <h1 className="text-gray-700 text-2xl font-medium">
+              Customer Detail
+            </h1>
+            <p className="text-gray-500 text-sm">
+              Manage customer information and view transaction history
+            </p>
           </div>
         </div>
-        <Button className="mr-4 inline-flex items-center gap-2" onClick={() => router.back()}>
-          <ArrowLeft className="w-4 h-4" /> Back
+        <Button
+          leftIcon={<ArrowLeft className="w-4 h-4" />}
+          className="flex flex-row items-center gap-2"
+          onClick={() => router.back()}
+        >
+          <span>Back</span>
         </Button>
       </div>
       <div className="mt-4 text-gray-700">
@@ -73,6 +91,7 @@ export const MainCustomerIdPage = ({
                   Personal Information
                 </div>
                 <Button
+                  leftIcon={<Save className="w-4 h-4" />}
                   disabled={isSubmitting || !isDirty}
                   className="inline-flex items-center gap-2"
                   onClick={handleSubmit(async (data) => {
@@ -103,7 +122,6 @@ export const MainCustomerIdPage = ({
                     }
                   })}
                 >
-                  <Save className="w-4 h-4" />
                   Update
                 </Button>
               </div>
@@ -115,13 +133,13 @@ export const MainCustomerIdPage = ({
                     render={({ field }) => (
                       <div className="relative">
                         <Input
+                          icon={<User />}
                           disabled={isSubmitting}
                           placeholder="Enter first name"
                           label="First Name"
                           {...field}
                           className="pl-10"
                         />
-                        <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                       </div>
                     )}
                   />
@@ -133,13 +151,13 @@ export const MainCustomerIdPage = ({
                     render={({ field }) => (
                       <div className="relative">
                         <Input
+                          icon={<User />}
                           disabled={isSubmitting}
                           placeholder="Enter middle name"
                           label="Middle Name"
                           {...field}
                           className="pl-10"
                         />
-                        <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                       </div>
                     )}
                   />
@@ -151,13 +169,13 @@ export const MainCustomerIdPage = ({
                     render={({ field }) => (
                       <div className="relative">
                         <Input
+                          icon={<User />}
                           disabled={isSubmitting}
                           placeholder="Enter last name"
                           label="Last Name"
                           {...field}
                           className="pl-10"
                         />
-                        <User className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                       </div>
                     )}
                   />
@@ -171,13 +189,13 @@ export const MainCustomerIdPage = ({
                     render={({ field }) => (
                       <div className="relative">
                         <Input
+                          icon={<Phone />}
                           disabled={isSubmitting}
                           placeholder="Enter phone number"
                           label="Phone Number"
                           {...field}
                           className="pl-10"
                         />
-                        <Phone className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                       </div>
                     )}
                   />
@@ -189,13 +207,13 @@ export const MainCustomerIdPage = ({
                     render={({ field }) => (
                       <div className="relative">
                         <Input
+                          icon={<Mail />}
                           disabled={isSubmitting}
                           placeholder="Enter email address"
                           label="Email"
                           {...field}
                           className="pl-10"
                         />
-                        <Mail className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                       </div>
                     )}
                   />
@@ -209,13 +227,13 @@ export const MainCustomerIdPage = ({
                     render={({ field }) => (
                       <div className="relative">
                         <Input
+                          icon={<MapPin />}
                           disabled={isSubmitting}
                           placeholder="Enter full address"
                           label="Address"
                           {...field}
                           className="pl-10"
                         />
-                        <MapPin className="absolute left-3 top-[2.2rem] w-4 h-4 text-gray-400" />
                       </div>
                     )}
                   />

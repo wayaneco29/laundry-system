@@ -4,3 +4,4 @@ export * from "./button";
 export * from "./select";
 export * from "./datepicker";
 export * from "./dropdown";
+export * from "./use-modal";

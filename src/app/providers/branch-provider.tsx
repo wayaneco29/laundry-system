@@ -6,6 +6,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import { getAllBranches } from "../actions";
 
 import { Select } from "../components/common";
+import { Building } from "lucide-react";
 
 type BranchProviderProps = Props & {
   multiple?: boolean;
@@ -35,5 +36,12 @@ export function BranchProvider({ placeholder, ...props }: BranchProviderProps) {
     })();
   }, []);
 
-  return <Select options={branchList} placeholder={placeholder} {...props} />;
+  return (
+    <Select
+      icon={<Building />}
+      options={branchList}
+      placeholder={placeholder}
+      {...props}
+    />
+  );
 }

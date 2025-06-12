@@ -14,6 +14,7 @@ import {
 import { UpsertBranchModal } from "./upsert-branch-modal";
 import { BranchTable } from "./branch-table";
 import { customerRevalidateTag } from "@/app/actions";
+import { Button } from "@/app/components/common";
 
 type BranchesPageProps = {
   branch_list: Array<Record<string, string>>;
@@ -35,13 +36,13 @@ export function MainBranchesPage({ branch_list }: BranchesPageProps) {
             Manage your business locations and their information
           </p>
         </div>
-        <button
-          type="button"
-          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+        <Button
+          variant="outline"
+          leftIcon={<Plus />}
           onClick={() => setShowModal(true)}
         >
-          <Plus className="size-4" /> Add Branch
-        </button>
+          Add Branch
+        </Button>
       </div>
       <div className="mt-4">
         <div className="flex flex-col">

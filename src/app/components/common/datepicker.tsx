@@ -21,6 +21,7 @@ type CustomDatePickerProps = {
   label: string;
   placeholder?: string;
   error: boolean;
+  icon?: React.ReactNode;
 };
 
 export const Datepicker = ({
@@ -29,6 +30,7 @@ export const Datepicker = ({
   label,
   error,
   placeholder,
+  icon = null,
 }: CustomDatePickerProps) => {
   const inputDOB = useRef<ReactDatepicker | null>(null);
 
@@ -91,52 +93,63 @@ export const Datepicker = ({
   return (
     <div>
       <label className="block text-sm font-medium mb-2">{label}</label>
-      <ReactDatepicker
-        wrapperClassName="!block"
-        className={twMerge(
-          "block w-full border disabled:cursor-not-allowed !py-3 !px-4 border-primary-500 disabled:opacity-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500  p-2.5 text-sm rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none",
-          error && "border-red-400 focus:border-red-400 focus:ring-red-400"
+      <div className="flex items-center w-full relative">
+        {icon && (
+          <div className="flex items-center justify-center h-full absolute left-2.5 w-5">
+            <div className="text-gray-400 flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">
+              {icon}
+            </div>
+          </div>
         )}
-        dateFormat="MMMM d, yyyy"
-        placeholderText={placeholder}
-        popperPlacement="bottom-start"
-        ref={inputDOB}
-        showMonthYearPicker={dateType === "M"}
-        showYearPicker={dateType === "Y"}
-        calendarClassName="shadow-lg !border-none"
-        selected={value ? formattedDate(value as Date) : null}
-        renderCustomHeader={renderCustomHeader}
-        popperClassName="custom-popper"
-        onCalendarClose={() => setDateType("D")}
-        shouldCloseOnSelect={!["M", "Y"].includes(dateType)}
-        maxDate={formattedDate(new Date())}
-        onChange={(date) => {
-          if (dateType === "Y") {
+        <ReactDatepicker
+          wrapperClassName="!block w-full"
+          className={twMerge(
+            "block w-full border disabled:cursor-not-allowed !py-3 !px-4 border-primary-500 disabled:opacity-50 border-gray-200 text-gray-900 focus:border-primary-500 focus:ring-primary-500  p-2.5 text-sm rounded-lg focus:ring-2 focus:ring-blue-400 focus:outline-none",
+            error && "border-red-400 focus:border-red-400 focus:ring-red-400",
+            icon ? "!pl-[35px]" : "pl-0"
+          )}
+          dateFormat="MMMM d, yyyy"
+          placeholderText={placeholder}
+          popperPlacement="bottom-start"
+          ref={inputDOB}
+          showMonthYearPicker={dateType === "M"}
+          showYearPicker={dateType === "Y"}
+          calendarClassName="shadow-lg !border-none"
+          selected={value ? formattedDate(value as Date) : null}
+          renderCustomHeader={renderCustomHeader}
+          popperClassName="custom-popper"
+          onCalendarClose={() => setDateType("D")}
+          shouldCloseOnSelect={!["M", "Y"].includes(dateType)}
+          maxDate={formattedDate(new Date())}
+          onChange={(date) => {
+            if (dateType === "Y") {
+              setCurrentYear(date!.getFullYear());
+              setDateType("M");
+            } else if (dateType === "M") {
+              setDateType("D");
+            }
+
+            setCurrentMonth(date!.getMonth());
             setCurrentYear(date!.getFullYear());
-            setDateType("M");
-          } else if (dateType === "M") {
-            setDateType("D");
+
+            onChange(moment(date).format("YYYY-MM-DD"));
+          }}
+          onMonthChange={(date) => {
+            setCurrentMonth(date.getMonth());
+            setCurrentYear(date.getFullYear());
+          }}
+          dayClassName={(date) =>
+            isCurrentMonthDate(date)
+              ? moment(date).format("YYYY-MM-DD") === value
+                ? "!bg-primary-500 py-1 !w-10 !h-10 font-bold items-center justify-center !inline-flex"
+                : "!bg-transparent py-1 !w-10 !h-10 font-bold !text-gray-700 hover:!bg-gray-100 items-center justify-center !inline-flex"
+              : moment(value).format("YYYY-MM") ===
+                moment(date).format("YYYY-MM")
+              ? "!text-gray-700 py-1 !w-10 !h-10 font-bold items-center justify-center !inline-flex"
+              : "!text-gray-400 py-1 !w-10 !h-10 font-bold items-center justify-center !inline-flex"
           }
-
-          setCurrentMonth(date!.getMonth());
-          setCurrentYear(date!.getFullYear());
-
-          onChange(moment(date).format("YYYY-MM-DD"));
-        }}
-        onMonthChange={(date) => {
-          setCurrentMonth(date.getMonth());
-          setCurrentYear(date.getFullYear());
-        }}
-        dayClassName={(date) =>
-          isCurrentMonthDate(date)
-            ? moment(date).format("YYYY-MM-DD") === value
-              ? "!bg-primary-500 py-1 !w-10 !h-10 font-bold items-center justify-center !inline-flex"
-              : "!bg-transparent py-1 !w-10 !h-10 font-bold !text-gray-700 hover:!bg-gray-100 items-center justify-center !inline-flex"
-            : moment(value).format("YYYY-MM") === moment(date).format("YYYY-MM")
-            ? "!text-gray-700 py-1 !w-10 !h-10 font-bold items-center justify-center !inline-flex"
-            : "!text-gray-400 py-1 !w-10 !h-10 font-bold items-center justify-center !inline-flex"
-        }
-      />
+        />
+      </div>
     </div>
   );
 };

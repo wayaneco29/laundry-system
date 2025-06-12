@@ -39,6 +39,7 @@ export const OrderModal = ({ showModal, onClose }: OrderModalProps) => {
       onClose={() => {
         onClose();
       }}
+      size="lg"
     >
       <div className="grid grid-cols-1 mb-4">
         <div className="col-span-1">
