@@ -5,6 +5,7 @@ import { useState } from "react";
 import { OrdersTable } from "@/app/components";
 import { OrderModal } from "./order-modal";
 import { useRouter } from "next/navigation";
+import { PlusIcon } from "lucide-react";
 
 type OrdersPageProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,13 +20,20 @@ export function OrdersPage({ data }: OrdersPageProps) {
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 text-2xl font-medium">Orders</h1>
+        <div>
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">
+            Order Management
+          </h1>
+          <p className="text-slate-600">
+            Manage and track your orders efficiently
+          </p>
+        </div>
         <button
           type="button"
-          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 disabled:opacity-50 disabled:pointer-events-none"
           onClick={() => router.push("/orders/add")}
         >
-          Add Order
+          <PlusIcon className="size-4" /> Add Order
         </button>
       </div>
       <div className="mt-4">

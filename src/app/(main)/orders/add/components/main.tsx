@@ -1,24 +1,38 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
+import {
+  Search,
+  ShoppingCart,
+  Plus,
+  Minus,
+  X,
+  Check,
+  Trash2,
+  User,
+  Package,
+  Loader2,
+} from "lucide-react";
 
-import { Button, Input } from "@/app/components/common";
+import { Button, Input, Select } from "@/app/components/common";
 import { PaymentModal } from "../../components/payment-modal";
-import { CheckIcon } from "@heroicons/react/20/solid";
-import { XMarkIcon } from "@heroicons/react/24/solid";
-import { addOrder } from "@/app/actions";
+import { addOrder, getAllCustomers } from "@/app/actions";
 import moment from "moment";
 
 type MainAddPageProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
 };
 
 export const MainAddPage = ({ data }: MainAddPageProps) => {
+  const router = useRouter();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedServices, setSelectedServices] = useState<Array<any>>([]);
+  const [isConfirming, setIsConfirming] = useState<boolean>(false);
+  const [customers, setCustomers] = useState<Array<any>>([]);
+  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
 
   const grossTotal = selectedServices?.reduce(
     (acc, service) => acc + (service?.price * (service?.quantity || 0) || 0),
@@ -31,11 +45,56 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
     );
   }, [data, searchServices]);
 
+  // Fetch customers on component mount
+  useEffect(() => {
+    const fetchCustomers = async () => {
+      try {
+        setLoadingCustomers(true);
+        const { data: customersData, error } = await getAllCustomers();
+
+        if (error) {
+          console.error("Error fetching customers:", error);
+          return;
+        }
+
+        setCustomers(customersData || []);
+      } catch (error) {
+        console.error("Error fetching customers:", error);
+      } finally {
+        setLoadingCustomers(false);
+      }
+    };
+
+    fetchCustomers();
+  }, []);
+
+  // Format customers for Select component
+  const customerOptions = useMemo(() => {
+    return customers.map((customer) => ({
+      value: customer.customer_id,
+      label: `${customer.first_name} ${customer.last_name}`,
+    }));
+  }, [customers]);
+
   const handleConfirmOrder = async () => {
+    // Validate customer selection
+    if (!selectedCustomer) {
+      alert("Please select a customer before confirming the order.");
+      return;
+    }
+
+    // Validate services selection
+    if (selectedServices.length === 0) {
+      alert("Please select at least one service before confirming the order.");
+      return;
+    }
+
+    setIsConfirming(true);
+
     try {
       const { data, error } = await addOrder({
         p_branch_id: "23ad1191-ca30-4138-9887-00566975876c",
-        p_customer_id: "0d0a7abf-67ce-487f-80c5-36f5c64ebae6",
+        p_customer_id: selectedCustomer, // Use selected customer ID
         p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
         p_items: selectedServices,
         p_order_date: moment().toISOString(),
@@ -47,223 +106,365 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
       if (error) throw error;
 
       console.log(data);
+
+      // Clear selected services and customer after successful order
+      setSelectedServices([]);
+      setSelectedCustomer("");
+
+      // Add a small delay for better UX (optional)
+      setTimeout(() => {
+        // Redirect to orders page
+        router.push("/orders");
+      }, 500);
     } catch (_error) {
       console.error(_error);
+      alert("Failed to create order. Please try again.");
+    } finally {
+      setIsConfirming(false);
     }
   };
 
+  const updateQuantity = (index: number, newQuantity: number) => {
+    if (newQuantity < 0) return;
+
+    const clonedServices = [...selectedServices];
+    clonedServices[index] = {
+      ...clonedServices[index],
+      quantity: newQuantity,
+      total: clonedServices[index].price * newQuantity,
+    };
+    setSelectedServices(clonedServices);
+  };
+
+  const removeService = (index: number) => {
+    setSelectedServices((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const toggleService = (service: any) => {
+    const existing = selectedServices.find((x) => x.id === service.id);
+
+    if (existing) {
+      setSelectedServices((prev) => prev.filter((x) => x.id !== service.id));
+    } else {
+      setSelectedServices((prev) => [
+        ...prev,
+        { ...service, quantity: 1, total: service.price },
+      ]);
+    }
+  };
+
+  const handleCustomerChange = (selectedOption: any) => {
+    setSelectedCustomer(selectedOption?.value || "");
+  };
+
   return (
-    <div className="relative">
-      <div className="flex flex-col gap-4 p-4 lg:p-8">
-        <div className="flex justify-between items-center">
-          <h1 className="text-gray-700 text-2xl font-medium">Add Order</h1>
-        </div>
-        {/* <div className="mt-4">
-          <div className="relative overflow-auto bg-white text-gray-600 rounded-sm text-gray-600lg:p-8">
-            <div className="p-4">
-              <div className="flex items-baseline-last gap-8">
-                <Input
-                  label="Select Customer"
-                  placeholder="Select Customer"
-                  containerClassName="w-full max-w-lg"
-                />
-                <Button className="w-fit" onClick={() => setShowModal(true)}>
-                  Add Services
-                </Button>
-              </div>
+    <div className="min-h-screen bg-gray-50">
+      {/* Header */}
+      <div className="bg-white shadow-sm">
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+                Add Order
+              </h1>
+              <p className="mt-1 text-sm text-gray-500">
+                Create and manage new orders efficiently
+              </p>
+            </div>
+            <div className="mt-4 sm:mt-0 text-sm text-gray-500">
+              {selectedServices.length} service
+              {selectedServices.length !== 1 ? "s" : ""} selected
             </div>
           </div>
-        </div> */}
-        <div className="mt-4">
-          <div className="p-4">
-            <div className="grid grid-cols-3 gap-4">
-              <div className="col-span-2">
-                <div className="bg-white text-gray-600 p-8 rounded-md  h-[calc(100vh-265px)] shadow-md">
-                  <div className="font-medium mb-4">
-                    <Input
-                      placeholder="Search services"
-                      value={searchServices}
-                      onChange={(event) =>
-                        setSearchServices(event.target.value)
-                      }
-                    />
+        </div>
+      </div>
+
+      <div className="px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+          {/* Services Selection - Left Panel */}
+          <div className="xl:col-span-2 order-2 xl:order-1">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+              {/* Header with blue background */}
+              <div className="bg-blue-500 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <Package className="w-5 h-5 text-white" />
+                  <h2 className="text-lg font-semibold text-white">
+                    AVAILABLE SERVICES
+                  </h2>
+                </div>
+              </div>
+
+              {/* Search Section */}
+              <div className="p-6 bg-gray-50">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Input
+                    placeholder="Search services..."
+                    value={searchServices}
+                    onChange={(event) => setSearchServices(event.target.value)}
+                    className="pl-10 w-full bg-white"
+                    disabled={isConfirming}
+                  />
+                </div>
+              </div>
+
+              {/* Loading Overlay for Services Grid */}
+              <div className="relative">
+                {isConfirming && (
+                  <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
+                    <div className="flex flex-col items-center space-y-3">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+                      <p className="text-sm text-gray-600 font-medium">
+                        Processing order...
+                      </p>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-3 gap-4">
+                )}
+
+                {/* Services Grid */}
+                <div className="p-6 pt-0">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
                     {servicesList?.map((service) => {
-                      const existing = selectedServices?.some(
-                        (x) => x?.id === service?.id
+                      const isSelected = selectedServices.some(
+                        (x) => x.id === service.id
                       );
 
                       return (
                         <div
-                          key={service?.id}
-                          className={`flex-1 bg-gray-100 rounded-md h-[100px] border border-dashed ${
-                            existing && "!bg-green-100"
-                          }`}
-                          onClick={() => {
-                            if (existing) {
-                              setSelectedServices((prev) =>
-                                prev?.filter(
-                                  (xPrev) => xPrev?.id !== service?.id
-                                )
-                              );
-                            } else {
-                              setSelectedServices((prev) => [...prev, service]);
+                          key={service.id}
+                          onClick={() =>
+                            !isConfirming && toggleService(service)
+                          }
+                          className={`
+                            relative p-4 rounded-lg cursor-pointer transition-all duration-200
+                            ${
+                              isConfirming
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                             }
-                          }}
+                            ${
+                              isSelected
+                                ? "bg-green-100 shadow-md"
+                                : "bg-white shadow-sm hover:shadow-md"
+                            }
+                          `}
                         >
-                          <div className="flex items-center justify-center h-full cursor-pointer">
-                            <span className="font-medium relative">
-                              {existing && (
-                                <CheckIcon className="absolute size-5 mr-2 -left-6" />
-                              )}
-                              {service?.name}
-                            </span>
+                          <div className="flex items-center justify-between">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="font-medium text-gray-900 truncate">
+                                {service.name}
+                              </h3>
+                              <p className="text-sm text-gray-500 mt-1">
+                                ₱{service.price}/kg
+                              </p>
+                            </div>
+
+                            {isSelected && (
+                              <div className="ml-2 p-1 bg-green-500 rounded-full">
+                                <Check className="w-3 h-3 text-white" />
+                              </div>
+                            )}
                           </div>
                         </div>
                       );
                     })}
                   </div>
-                </div>
-              </div>
-              <div className="col-span-1 bg-white text-gray-600 rounded-md shadow-md">
-                <div className="flex flex-col h-full">
-                  <div className="p-4">
-                    <Input
-                      placeholder="Select Customer"
-                      containerClassName="w-full max-w-lg"
-                    />
-                  </div>
-                  <div className="text-black flex-1">
-                    <div className="relative overflow-auto rounded-sm">
-                      <table className="table w-full">
-                        <thead className="group/head text-xs uppercase text-gray-700">
-                          <tr>
-                            <th className="text-start bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap">
-                              Service
-                            </th>
-                            <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-60">
-                              Price / KG
-                            </th>
-                            <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-40">
-                              Quantity
-                            </th>
-                            <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-40">
-                              Total
-                            </th>
-                            <th className="bg-blue-400 px-6 py-4 bg-primary-500 text-white sticky top-0 z-10 text-nowrap w-10">
-                              <div className="sr-only">Actions</div>
-                            </th>
-                          </tr>
-                        </thead>
-                        <tbody className="relative">
-                          {selectedServices?.length ? (
-                            selectedServices?.map((service, index) => (
-                              <tr key={index}>
-                                <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                                  {service?.name}
-                                </td>
-                                <td className="text-center text-nowrap px-6 py-3 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                                  ₱ {service?.price}
-                                </td>
-                                <td className="text-center text-nowrap px-6 py-3 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                                  <Input
-                                    containerClassName="w-20 mx-auto"
-                                    className="text-center"
-                                    value={service?.quantity}
-                                    onChange={(event) => {
-                                      const newValue =
-                                        event?.target?.value?.replace(
-                                          /\D/g,
-                                          ""
-                                        );
 
-                                      const clonedSelectedServices = JSON.parse(
-                                        JSON.stringify(selectedServices)
-                                      );
-
-                                      clonedSelectedServices[index].quantity =
-                                        newValue;
-                                      clonedSelectedServices[index].total =
-                                        service?.price * Number(newValue);
-
-                                      setSelectedServices(
-                                        clonedSelectedServices
-                                      );
-                                    }}
-                                  />
-                                </td>
-                                <td className="text-center text-nowrap px-6 py-3 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                                  <strong>₱ {service?.total || 0}</strong>
-                                </td>
-                                <td className="text-center text-nowrap px-6 py-3 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                                  <XMarkIcon
-                                    className="text-red-500 size-5 cursor-pointer"
-                                    onClick={() => {
-                                      const clonedSelectedServices = JSON.parse(
-                                        JSON.stringify(selectedServices)
-                                      );
-
-                                      setSelectedServices(
-                                        clonedSelectedServices?.filter(
-                                          (_: unknown, i: number) => i !== index
-                                        )
-                                      );
-                                    }}
-                                  />
-                                </td>
-                              </tr>
-                            ))
-                          ) : (
-                            <div className="table-row relative h-22">
-                              <div className="absolute flex flex-col items-center justify-center inset-0">
-                                No Services Added
-                              </div>
-                            </div>
-                          )}
-                        </tbody>
-                      </table>
-                    </div>
-                  </div>
-                  {!!selectedServices?.length && (
-                    <div className="flex items-center justify-between w-full border-t border-gray-100">
-                      <div className="p-4">
-                        <div className="text-sm font-bold text-gray-500">
-                          <div>Gross Total</div>
-                        </div>
-                        <div className="text-lg font-bold text-green-500">
-                          ₱ {grossTotal}
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-x-4 p-4">
-                        <Button
-                          className="bg-red-500 text-white hover:bg-red-600"
-                          onClick={() => setSelectedServices([])}
-                        >
-                          Clear
-                        </Button>
-                        <Button onClick={handleConfirmOrder}>
-                          Confirm Order
-                        </Button>
-                      </div>
+                  {servicesList?.length === 0 && (
+                    <div className="text-center py-12">
+                      <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                      <p className="text-gray-500">No services found</p>
                     </div>
                   )}
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* <div className="fixed border-t border-gray-200 bottom-0 py-10 left-0 right-0 p-4 pl-[320px] bg-blue-400 text-white flex justify-between items-center"></div> */}
-        <PaymentModal
-          show={showModal}
-          grossTotal={grossTotal}
-          onClose={() => setShowModal(false)}
-          onSubmit={() => {
-            setShowModal(false);
-          }}
-        />
+          {/* Order Summary - Right Panel */}
+          <div className="xl:col-span-1 order-1 xl:order-2">
+            <div className="bg-white rounded-xl shadow-sm overflow-hidden sticky top-8">
+              {/* Header with blue background */}
+              <div className="bg-blue-500 px-6 py-4">
+                <div className="flex items-center space-x-3">
+                  <ShoppingCart className="w-5 h-5 text-white" />
+                  <h2 className="text-lg font-semibold text-white">
+                    ORDER SUMMARY
+                  </h2>
+                </div>
+              </div>
+
+              {/* Customer Selection */}
+              <div className="p-6 bg-gray-50">
+                <div className="flex items-center space-x-3 mb-3">
+                  <User className="w-4 h-4 text-gray-600" />
+                  <span className="text-sm font-medium text-gray-700">
+                    CUSTOMER
+                  </span>
+                </div>
+                <Select
+                  placeholder={
+                    loadingCustomers
+                      ? "Loading customers..."
+                      : "Select customer..."
+                  }
+                  options={customerOptions}
+                  value={selectedCustomer}
+                  onChange={handleCustomerChange}
+                  isDisabled={isConfirming || loadingCustomers}
+                  isLoading={loadingCustomers}
+                  containerClassName="w-full"
+                  noOptionsMessage={() => "No customers found"}
+                />
+                {!selectedCustomer && (
+                  <p className="text-xs text-red-500 mt-1">
+                    Please select a customer to continue
+                  </p>
+                )}
+              </div>
+
+              {/* Selected Services */}
+              <div className="p-6 pt-0">
+                {selectedServices.length === 0 ? (
+                  <div className="text-center py-8">
+                    <ShoppingCart className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                    <p className="text-gray-500 text-sm">
+                      No services selected
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3 max-h-80 overflow-y-auto">
+                    {selectedServices.map((service, index) => (
+                      <div
+                        key={index}
+                        className={`bg-gray-50 rounded-lg p-4 ${
+                          isConfirming ? "opacity-50" : ""
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-3">
+                          <div className="flex-1 min-w-0">
+                            <h4 className="font-medium text-gray-900 text-sm truncate">
+                              {service.name}
+                            </h4>
+                            <p className="text-xs text-gray-500">
+                              ₱{service.price}/kg
+                            </p>
+                          </div>
+                          <button
+                            onClick={() =>
+                              !isConfirming && removeService(index)
+                            }
+                            disabled={isConfirming}
+                            className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            <X className="w-4 h-4" />
+                          </button>
+                        </div>
+
+                        {/* Quantity Controls */}
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center space-x-2">
+                            <button
+                              onClick={() =>
+                                !isConfirming &&
+                                updateQuantity(
+                                  index,
+                                  (service.quantity || 1) - 1
+                                )
+                              }
+                              disabled={isConfirming}
+                              className="p-1 hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium">
+                              {service.quantity || 1}
+                            </span>
+                            <button
+                              onClick={() =>
+                                !isConfirming &&
+                                updateQuantity(
+                                  index,
+                                  (service.quantity || 1) + 1
+                                )
+                              }
+                              disabled={isConfirming}
+                              className="p-1 hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="text-sm font-semibold text-gray-900">
+                            ₱{service.total || service.price}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Total and Actions */}
+              {selectedServices.length > 0 && (
+                <div className="p-6 pt-0">
+                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-lg font-semibold text-gray-900">
+                        TOTAL
+                      </span>
+                      <span className="text-xl font-bold text-green-600">
+                        ₱{grossTotal}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    <Button
+                      onClick={() => {
+                        setSelectedServices([]);
+                        setSelectedCustomer("");
+                      }}
+                      disabled={isConfirming}
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white flex items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>Clear All</span>
+                    </Button>
+                    <Button
+                      onClick={handleConfirmOrder}
+                      disabled={
+                        isConfirming ||
+                        !selectedCustomer ||
+                        selectedServices.length === 0
+                      }
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isConfirming ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Confirming...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Check className="w-4 h-4" />
+                          <span>Confirm Order</span>
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
       </div>
+
+      <PaymentModal
+        show={showModal}
+        grossTotal={grossTotal}
+        onClose={() => setShowModal(false)}
+        onSubmit={() => setShowModal(false)}
+      />
     </div>
   );
 };
