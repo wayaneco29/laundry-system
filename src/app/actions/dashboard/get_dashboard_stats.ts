@@ -111,7 +111,7 @@ export async function getRecentOrders(limit: number = 5) {
         *,
         customers!inner(full_name, phone),
         branches!inner(name),
-        sales!inner(total_price, status as payment_status)
+        sales!inner(total_price, payment_status)
       `)
       .order('created_at', { ascending: false })
       .limit(limit);
