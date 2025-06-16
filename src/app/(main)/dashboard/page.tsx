@@ -17,10 +17,10 @@ export default async function Page() {
 
   return (
     <MainDashboardPage
-      monthlyCustomersCount={monthlyResult.count}
-      todayCustomersCount={todayResult.count}
-      monthlySalesData={salesResult.data}
-      chartData={chartResult.data}
+      initialMonthlyCustomersCount={monthlyResult.count}
+      initialTodayCustomersCount={todayResult.count}
+      initialMonthlySalesData={salesResult.data}
+      initialChartData={chartResult.data}
     />
   );
 }

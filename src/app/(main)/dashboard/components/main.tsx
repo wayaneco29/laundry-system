@@ -1,11 +1,21 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { UsersIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
 import { ApexOptions } from "apexcharts";
 
 import { OrdersTable } from "@/app/components";
-import { MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
+import { Select } from "@/app/components/common";
+import { 
+  MonthlySalesData, 
+  MonthlySalesChartData,
+  getMonthlyCustomers,
+  getTodayCustomers,
+  getMonthSales,
+  getMonthlySalesChart
+} from "@/app/actions";
+import { getAllBranches } from "@/app/actions/branch";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -206,17 +216,91 @@ const donutChartOptions = {
   ],
 };
 type MainDashboardPage = {
-  monthlyCustomersCount: number;
-  todayCustomersCount: number;
-  monthlySalesData: MonthlySalesData | null;
-  chartData: MonthlySalesChartData | null;
+  initialMonthlyCustomersCount: number;
+  initialTodayCustomersCount: number;
+  initialMonthlySalesData: MonthlySalesData | null;
+  initialChartData: MonthlySalesChartData | null;
 };
+
 export function MainDashboardPage({
-  monthlyCustomersCount,
-  todayCustomersCount,
-  monthlySalesData,
-  chartData,
+  initialMonthlyCustomersCount,
+  initialTodayCustomersCount,
+  initialMonthlySalesData,
+  initialChartData,
 }: MainDashboardPage) {
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [branches, setBranches] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
+  
+  // Dashboard data state
+  const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(initialMonthlyCustomersCount);
+  const [todayCustomersCount, setTodayCustomersCount] = useState(initialTodayCustomersCount);
+  const [monthlySalesData, setMonthlySalesData] = useState(initialMonthlySalesData);
+  const [chartData, setChartData] = useState(initialChartData);
+
+  // Fetch branches on component mount
+  useEffect(() => {
+    fetchBranches();
+  }, []);
+
+  // Fetch data when branch changes
+  useEffect(() => {
+    if (selectedBranch !== "") {
+      fetchDashboardData();
+    }
+  }, [selectedBranch]);
+
+  const fetchBranches = async () => {
+    try {
+      console.log('Fetching branches...');
+      const result = await getAllBranches();
+      console.log('Branches result:', result);
+      if (result.data) {
+        setBranches(result.data);
+        console.log('Branches set:', result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching branches:', error);
+    }
+  };
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const branchId = selectedBranch === "" ? undefined : selectedBranch;
+      
+      const [monthlyResult, todayResult, salesResult, chartResult] = await Promise.all([
+        getMonthlyCustomers(branchId),
+        getTodayCustomers(branchId),
+        getMonthSales(branchId),
+        getMonthlySalesChart(branchId),
+      ]);
+
+      setMonthlyCustomersCount(monthlyResult.count);
+      setTodayCustomersCount(todayResult.count);
+      setMonthlySalesData(salesResult.data);
+      setChartData(chartResult.data);
+    } catch (error) {
+      console.error('Error fetching dashboard data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleBranchChange = (value: string) => {
+    const branchValue = typeof value === 'object' ? value.value : value;
+    setSelectedBranch(branchValue);
+  };
+
+  const branchOptions = [
+    { label: "All Branches", value: "" },
+    ...branches.map(branch => ({
+      label: branch.name,
+      value: branch.id,
+    })),
+  ];
+  
+  console.log('Branch options:', branchOptions);
   // Dynamic chart options based on data scale
   const dynamicChartOptions: ApexOptions = {
     ...chartOptions,
@@ -238,7 +322,25 @@ export function MainDashboardPage({
 
   return (
     <div className="p-4 lg:p-8">
-      <h1 className="text-gray-700 text-2xl font-medium">Dashboard</h1>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-gray-700 text-2xl font-medium">Dashboard</h1>
+        <div className="w-64">
+          <Select
+            label="Filter by Branch"
+            options={branchOptions}
+            value={selectedBranch}
+            onChange={handleBranchChange}
+            placeholder="Select branch..."
+          />
+        </div>
+      </div>
+      
+      {loading && (
+        <div className="flex items-center justify-center py-8">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Loading dashboard data...</span>
+        </div>
+      )}
       <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
         <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-violet-100 to-white">
           <div className="flex justify-between">

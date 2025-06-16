@@ -96,9 +96,9 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
 
     try {
       const { error } = await addOrder({
-        p_branch_id: "23ad1191-ca30-4138-9887-00566975876c",
+        p_branch_id: "f618210d-01ef-4bd5-8602-d6ff66e12ec7",
         p_customer_id: selectedCustomer, // Use selected customer ID
-        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+        p_staff_id: "acc38e50-d753-4cb5-a09c-7a179a56fc39",
         p_items: selectedServices,
         p_order_date: moment().toISOString(),
         p_order_status: "Pending",

@@ -8,7 +8,7 @@ export type MonthlySalesData = {
   totalSales: number;
 };
 
-export async function getMonthSales(): Promise<{ data: MonthlySalesData | null; error: string | null }> {
+export async function getMonthSales(branchId?: string): Promise<{ data: MonthlySalesData | null; error: string | null }> {
   const supabase = await createClient();
   
   try {
@@ -17,24 +17,28 @@ export async function getMonthSales(): Promise<{ data: MonthlySalesData | null; 
     const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
     const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
     
+    // Build queries with optional branch filter
+    let paidQuery = supabase
+      .from('sales')
+      .select('total_price')
+      .eq('status', 'Paid')
+      .gte('created_at', monthStart.toISOString())
+      .lte('created_at', monthEnd.toISOString());
+    
+    let unpaidQuery = supabase
+      .from('sales')
+      .select('total_price')
+      .eq('status', 'Unpaid')
+      .gte('created_at', monthStart.toISOString())
+      .lte('created_at', monthEnd.toISOString());
+    
+    if (branchId) {
+      paidQuery = paidQuery.eq('branch_id', branchId);
+      unpaidQuery = unpaidQuery.eq('branch_id', branchId);
+    }
+    
     // Fetch paid and unpaid sales for this month in parallel
-    const [paidResult, unpaidResult] = await Promise.all([
-      // Paid sales this month
-      supabase
-        .from('sales')
-        .select('total_price')
-        .eq('status', 'Paid')
-        .gte('created_at', monthStart.toISOString())
-        .lte('created_at', monthEnd.toISOString()),
-      
-      // Unpaid sales this month
-      supabase
-        .from('sales')
-        .select('total_price')
-        .eq('status', 'Unpaid')
-        .gte('created_at', monthStart.toISOString())
-        .lte('created_at', monthEnd.toISOString())
-    ]);
+    const [paidResult, unpaidResult] = await Promise.all([paidQuery, unpaidQuery]);
 
     if (paidResult.error) throw paidResult.error;
     if (unpaidResult.error) throw unpaidResult.error;

@@ -2,7 +2,7 @@
 
 import { createClient } from "@/app/utils/supabase/server";
 
-export async function getMonthlyCustomers() {
+export async function getMonthlyCustomers(branchId?: string) {
   const supabase = await createClient();
 
   try {
@@ -18,12 +18,19 @@ export async function getMonthlyCustomers() {
       59,
       999
     );
-    // Get customers created in current month
-    const { data: monthlyCustomers, error } = await supabase
+    
+    // Build query with optional branch filter
+    let query = supabase
       .from("customers")
       .select("*")
       .gte("created_at", monthStart.toISOString())
-      .lte("created_at", monthEnd.toISOString())
+      .lte("created_at", monthEnd.toISOString());
+    
+    if (branchId) {
+      query = query.eq("branch_id", branchId);
+    }
+    
+    const { data: monthlyCustomers, error } = await query
       .order("created_at", { ascending: false });
 
     if (error) {

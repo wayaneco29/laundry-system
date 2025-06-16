@@ -9,7 +9,7 @@ export type MonthlySalesChartData = {
   useThousands: boolean;
 };
 
-export async function getMonthlySalesChart(): Promise<{
+export async function getMonthlySalesChart(branchId?: string): Promise<{
   data: MonthlySalesChartData | null;
   error: string | null;
 }> {
@@ -18,13 +18,19 @@ export async function getMonthlySalesChart(): Promise<{
   try {
     const currentYear = new Date().getFullYear();
 
-    // Get sales data for the current year
-    const { data: salesData, error } = await supabase
+    // Build query with optional branch filter
+    let query = supabase
       .from("sales")
       .select("total_price, created_at")
       .gte("created_at", `${currentYear}-01-01T00:00:00.000Z`)
       .lt("created_at", `${currentYear + 1}-01-01T00:00:00.000Z`)
       .eq("status", "Paid"); // Only include paid sales for the chart
+    
+    if (branchId) {
+      query = query.eq("branch_id", branchId);
+    }
+    
+    const { data: salesData, error } = await query;
 
     if (error) throw error;
 
