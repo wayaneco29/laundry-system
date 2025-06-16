@@ -4,28 +4,36 @@ import { createClient } from "@/app/utils/supabase/server";
 import { revalidateTag } from "next/cache";
 
 type UpsertBranchStocksType = {
-  p_stock_id: string | null;
-  p_name: string;
-  p_quantity: number;
-  p_branch_id: string;
-  p_created_by: string;
+  branchId: string;
+  stocks: Array<{
+    id: string;
+    name: string;
+    quantity: number;
+  }>;
 };
 
 export const upsertBranchStocks = async (payload: UpsertBranchStocksType) => {
   const supabase = await createClient();
   try {
-    const { data, error } = await supabase.rpc("upsert_branch_stocks", payload);
+    // Update the branch_stocks JSONB field
+    const { data, error } = await supabase
+      .from("branches")
+      .update({ branch_stocks: JSON.stringify(payload.stocks) })
+      .eq("id", payload.branchId)
+      .select();
 
     if (error) throw error;
 
     revalidateTag("getAllBranches");
     revalidateTag("getBranch");
 
-    return { data, error: null };
-  } catch (_error) {
+    return { success: true, data, message: "Inventory updated successfully" };
+  } catch (error: any) {
+    console.error("Error updating branch stocks:", error);
     return {
+      success: false,
       data: null,
-      error: _error,
+      message: error.message || "Failed to update inventory",
     };
   }
 };
