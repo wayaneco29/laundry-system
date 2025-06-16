@@ -99,7 +99,8 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
                 <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
                   <button
                     onClick={() => onEdit(item)}
-                    className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                    className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
+                    title={`Edit ${item.name || 'item'}`}
                   >
                     <Edit2 className="h-4 w-4" />
                     Edit

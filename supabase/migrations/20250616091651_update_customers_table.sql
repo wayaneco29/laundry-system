@@ -1,0 +1,1 @@
+ALTER TABLE public.customers RENAME COLUMN customer_id TO id;

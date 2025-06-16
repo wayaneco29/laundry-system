@@ -44,7 +44,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(
               className={twMerge(
                 "flex-1 py-3 pr-3 bg-transparent text-sm text-gray-900 placeholder-gray-500 h-full",
                 "focus:outline-none disabled:opacity-50 disabled:cursor-not-allowed",
-                icon ? "pl-[35px]" : "pl-0",
+                icon ? "pl-[35px]" : "pl-3",
                 className
               )}
               {...props}

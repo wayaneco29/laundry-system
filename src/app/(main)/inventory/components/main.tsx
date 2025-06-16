@@ -13,6 +13,7 @@ type MainInventoryPageProps = {
 export function MainInventoryPage({ branches }: MainInventoryPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedBranch, setSelectedBranch] = useState<string>("");
+  const [isEditing, setIsEditing] = useState<boolean>(false);
   const [initialValue, setInitialValue] = useState<{
     id: string | null;
     isUpdate: boolean;
@@ -67,8 +68,11 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
         </div>
         <button
           type="button"
-          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-          onClick={() => setShowModal(true)}
+          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 hover:bg-blue-200 disabled:opacity-50 disabled:pointer-events-none transition-colors duration-200"
+          onClick={() => {
+            setIsEditing(false);
+            setShowModal(true);
+          }}
         >
           <Plus className="size-4" /> Add Item
         </button>
@@ -133,6 +137,7 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
             data={inventoryItems}
             selectedBranch={selectedBranch}
             onEdit={(item) => {
+              setIsEditing(true);
               setInitialValue({
                 isUpdate: true,
                 id: item?.id,
@@ -151,6 +156,7 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
         showModal={showModal}
         branches={branches}
         onClose={() => {
+          setIsEditing(false);
           setInitialValue({
             id: null,
             isUpdate: false,

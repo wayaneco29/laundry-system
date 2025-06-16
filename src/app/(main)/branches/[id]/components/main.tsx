@@ -303,15 +303,16 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
               }
               onClick={stockMethods?.handleSubmit(async (newData) => {
                 try {
-                  const { error } = await upsertBranchStocks({
-                    p_branch_id: branch_info?.id,
-                    p_stock_id: newData?.id || null,
-                    p_name: newData?.name,
-                    p_quantity: Number(newData?.quantity),
-                    p_created_by: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  const result = await upsertBranchStocks({
+                    branchId: branch_info?.id,
+                    stocks: [{
+                      id: newData?.id || crypto.randomUUID(),
+                      name: newData?.name,
+                      quantity: Number(newData?.quantity),
+                    }]
                   });
 
-                  if (error) throw error;
+                  if (!result.success) throw new Error(result.message);
 
                   handleModalClose();
                 } catch (_error) {

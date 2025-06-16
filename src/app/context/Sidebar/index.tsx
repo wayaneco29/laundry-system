@@ -20,6 +20,7 @@ import {
   Package,
   Archive,
   FileBarChart,
+  Receipt,
   LogOut,
   Menu,
   X,
@@ -60,14 +61,19 @@ const ROUTES = [
     icon: Building2,
   },
   {
-    path: "/promos",
-    label: "Promos",
-    icon: Tag,
-  },
-  {
     path: "/services",
     label: "Services",
     icon: Package,
+  },
+  {
+    path: "/expenses",
+    label: "Expenses",
+    icon: Receipt,
+  },
+  {
+    path: "/promos",
+    label: "Promos",
+    icon: Tag,
   },
   {
     path: "/inventory",
