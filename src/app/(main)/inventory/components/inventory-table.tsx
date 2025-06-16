@@ -66,7 +66,7 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="sticky right-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -96,7 +96,7 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
                     {getStockStatus(item.quantity || 0)}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
                   <button
                     onClick={() => onEdit(item)}
                     className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"

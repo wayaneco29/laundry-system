@@ -235,235 +235,114 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
     );
   };
 
-  // Mobile Card Component
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const MobileOrderCard = ({ order, index }: { order: any; index: number }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-3 space-y-3">
-      {/* Header with customer name and order number */}
-      <div className="flex items-start justify-between">
-        <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 mb-1">
-            <div className="w-6 h-6 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-xs flex-shrink-0">
-              {index + 1}
-            </div>
-            <User className="w-3 h-3 text-slate-500 flex-shrink-0" />
-            <span className="font-semibold text-slate-800 text-sm truncate">
-              {order?.customer_name}
-            </span>
-          </div>
-          <div className="flex items-center gap-1 text-xs text-slate-500 font-mono pl-8">
-            <Hash className="w-3 h-3" />
-            <span className="truncate">{order?.order_id}</span>
-          </div>
-        </div>
-        <button
-          className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex-shrink-0"
-          onClick={() => router.push(`/orders/${order?.order_id}`)}
-        >
-          <Eye className="w-4 h-4" />
-        </button>
-      </div>
-
-      {/* Date and Branch */}
-      <div className="flex items-center justify-between text-xs text-slate-600">
-        <div className="flex items-center gap-1">
-          <Calendar className="w-3 h-3 text-slate-400" />
-          <span>{moment(order?.order_date).format("MMM DD, YYYY")}</span>
-        </div>
-        <div className="flex items-center gap-1 px-2 py-1 bg-slate-100 rounded-md">
-          <MapPin className="w-3 h-3 text-slate-500" />
-          <span className="font-medium text-slate-700">
-            {order?.branch_name}
-          </span>
+  if (data.length === 0) {
+    return (
+      <div className="bg-white shadow rounded-lg">
+        <div className="px-6 py-12 text-center">
+          <User className="mx-auto h-12 w-12 text-gray-400" />
+          <h3 className="mt-2 text-sm font-medium text-gray-900">No orders</h3>
+          <p className="mt-1 text-sm text-gray-500">
+            Orders will appear here when they are created.
+          </p>
         </div>
       </div>
-
-      {/* Status badges */}
-      <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-600">
-            Order Status:
-          </span>
-          <StatusBadge
-            status={order?.order_status}
-            type="order"
-            orderId={order?.order_id}
-            onClick={() => handleOrderStatusClick(order?.order_id)}
-            isLoading={loadingOrders.has(order?.order_id)}
-          />
-        </div>
-        <div className="flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-600">Payment:</span>
-          <StatusBadge
-            status={order?.payment_status}
-            type="payment"
-            orderId={order?.order_id}
-            onClick={() =>
-              handlePaymentStatusClick(order?.order_id, order?.payment_status)
-            }
-            isLoading={loadingOrders.has(order?.order_id)}
-          />
-        </div>
-      </div>
-
-      {/* Amount */}
-      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-        <span className="text-xs font-medium text-slate-600">
-          Total Amount:
-        </span>
-        <div className="text-slate-800 font-bold text-lg">
-          ₱ {order?.total_price}
-        </div>
-      </div>
-    </div>
-  );
+    );
+  }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-3 sm:p-6">
-      <div className="mx-auto">
-        {/* Mobile View */}
-        <div className="block lg:hidden">
-          <div className="space-y-3">
-            {!!data?.length ? (
-              data?.map((order, index) => (
-                <MobileOrderCard
-                  key={order.order_id}
-                  order={order}
-                  index={index}
-                />
-              ))
-            ) : (
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 text-center text-slate-500">
-                <div className="text-base font-medium mb-2">
-                  No orders found
-                </div>
-                <p className="text-sm">
-                  Orders will appear here when available.
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Desktop View */}
-        <div className="hidden lg:block bg-white rounded-md shadow-xl overflow-hidden border border-slate-200">
-          <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-            <div className="grid grid-cols-12 gap-4 text-white font-semibold text-sm">
-              <div className="col-span-1 text-center">#</div>
-              <div className="col-span-3">ORDER DETAILS</div>
-              <div className="col-span-2 text-center">BRANCH</div>
-              <div className="col-span-2 text-center">ORDER STATUS</div>
-              <div className="col-span-2 text-center">PAYMENT STATUS</div>
-              <div className="col-span-1 text-center">AMOUNT</div>
-              <div className="col-span-1 text-center">ACTION</div>
-            </div>
-          </div>
-
-          <div className="divide-y divide-slate-100">
-            {!!data?.length ? (
-              data?.map((order, index) => (
-                <div
-                  key={order.order_id}
-                  className="grid grid-cols-12 gap-4 px-6 py-5 hover:bg-slate-50 transition-colors duration-150"
-                >
-                  <div className="col-span-1 flex items-center justify-center">
-                    <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-semibold text-sm">
-                      {index + 1}
+    <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Customer & Order ID
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date & Branch
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Order Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Payment Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount
+              </th>
+              <th className="sticky right-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
+            </tr>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {data.map((order, index) => (
+              <tr key={order.order_id || index} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <User className="h-5 w-5 text-gray-400 mr-3" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {order.customer_name}
+                      </div>
+                      <div className="text-sm text-gray-500 font-mono">
+                        {order.order_id}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="col-span-3 space-y-1">
-                    <div className="flex items-center gap-2 text-slate-800 font-semibold">
-                      <User className="w-4 h-4 text-slate-500" />
-                      <span>{order?.customer_name}</span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-600 text-sm">
-                      <Calendar className="w-4 h-4 text-slate-400" />
-                      <span>
-                        {moment(order?.order_date).format("MMMM DD, YYYY")}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 text-slate-500 text-sm font-mono">
-                      <Hash className="w-4 h-4 text-slate-400" />
-                      <span>{order?.order_id}</span>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="flex items-center">
+                    <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                    <div>
+                      <div className="text-sm text-gray-900">
+                        {moment(order.order_date).format("MMM DD, YYYY")}
+                      </div>
+                      <div className="text-sm text-gray-500 flex items-center">
+                        <MapPin className="h-3 w-3 mr-1" />
+                        {order.branch_name}
+                      </div>
                     </div>
                   </div>
-
-                  <div className="col-span-2 flex items-center justify-center">
-                    <div className="flex items-center gap-2 px-3 py-2 bg-slate-100 rounded-lg text-slate-700 font-medium text-sm">
-                      <MapPin className="w-4 h-4 text-slate-500" />
-                      <span>{order?.branch_name}</span>
-                    </div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <StatusBadge
+                    status={order.order_status}
+                    type="order"
+                    orderId={order.order_id}
+                    onClick={() => handleOrderStatusClick(order.order_id)}
+                    isLoading={loadingOrders.has(order.order_id)}
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <StatusBadge
+                    status={order.payment_status}
+                    type="payment"
+                    orderId={order.order_id}
+                    onClick={() =>
+                      handlePaymentStatusClick(order.order_id, order.payment_status)
+                    }
+                    isLoading={loadingOrders.has(order.order_id)}
+                  />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm font-medium text-gray-900">
+                    ₱{order.total_price}
                   </div>
-
-                  <div className="col-span-2 flex items-center justify-center">
-                    <StatusBadge
-                      status={order?.order_status}
-                      type="order"
-                      orderId={order?.order_id}
-                      onClick={() => handleOrderStatusClick(order?.order_id)}
-                      isLoading={loadingOrders.has(order?.order_id)}
-                    />
-                  </div>
-
-                  <div className="col-span-2 flex items-center justify-center">
-                    <StatusBadge
-                      status={order?.payment_status}
-                      type="payment"
-                      orderId={order?.order_id}
-                      onClick={() =>
-                        handlePaymentStatusClick(
-                          order?.order_id,
-                          order?.payment_status
-                        )
-                      }
-                      isLoading={loadingOrders.has(order?.order_id)}
-                    />
-                  </div>
-
-                  <div className="col-span-1 flex items-center justify-center">
-                    <div className="text-slate-800 font-bold text-lg">
-                      ₱ {order?.total_price}
-                    </div>
-                  </div>
-
-                  <div className="col-span-1 flex items-center justify-center">
-                    <button
-                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors duration-150 hover:scale-110 transform"
-                      onClick={() => router.push(`/orders/${order?.order_id}`)}
-                    >
-                      <Eye className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="p-8 text-center text-slate-500">
-                <div className="text-lg font-medium mb-2">No orders found</div>
-                <p>Orders will appear here when available.</p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Footer */}
-        {/* <div className="mt-4 sm:mt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between text-xs sm:text-sm text-slate-600 gap-3 sm:gap-0">
-          <div>Showing {data?.length || 0} orders</div>
-          <div className="flex items-center gap-3 sm:gap-4">
-            <div className="flex items-center gap-1 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-green-200 rounded-full"></div>
-              <span>Paid</span>
-            </div>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-red-200 rounded-full"></div>
-              <span>Unpaid</span>
-            </div>
-            <div className="flex items-center gap-1 sm:gap-2">
-              <div className="w-2 h-2 sm:w-3 sm:h-3 bg-blue-200 rounded-full"></div>
-              <span>Pending</span>
-            </div>
-          </div>
-        </div> */}
+                </td>
+                <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                  <button
+                    onClick={() => router.push(`/orders/${order.order_id}`)}
+                    className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                  >
+                    <Eye className="h-4 w-4" />
+                    View
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

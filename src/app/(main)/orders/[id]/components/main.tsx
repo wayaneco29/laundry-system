@@ -267,7 +267,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
         </div>
       )}
 
-      <div className="max-w-6xl mx-auto p-4 lg:p-8">
+      <div className="mx-auto p-4 lg:p-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
           <div className="flex w-full items-center justify-between gap-4">
