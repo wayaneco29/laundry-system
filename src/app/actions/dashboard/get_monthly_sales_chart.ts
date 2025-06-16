@@ -25,7 +25,7 @@ export async function getMonthlySalesChart(): Promise<{
       .gte("created_at", `${currentYear}-01-01T00:00:00.000Z`)
       .lt("created_at", `${currentYear + 1}-01-01T00:00:00.000Z`)
       .eq("status", "Paid"); // Only include paid sales for the chart
-    console.log(salesData, error);
+
     if (error) throw error;
 
     // Initialize monthly data array (12 months)
@@ -59,7 +59,7 @@ export async function getMonthlySalesChart(): Promise<{
 
     // Use actual values if total is less than 10k, otherwise convert to thousands
     const shouldUseThousands = totalYearSales >= 10000;
-    const displayData = shouldUseThousands 
+    const displayData = shouldUseThousands
       ? monthlyData.map((amount) => Math.round(amount / 1000))
       : monthlyData;
 

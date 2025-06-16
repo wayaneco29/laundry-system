@@ -24,9 +24,10 @@ import {
   Menu,
   X,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
+import { LogoutButton } from "@/app/components/auth/logout-button";
 
 type SidebarContextType = Record<string, never>;
 
@@ -77,11 +78,6 @@ const ROUTES = [
     path: "/reports",
     label: "Reports",
     icon: FileBarChart,
-  },
-  {
-    path: "/logout",
-    label: "Logout",
-    icon: LogOut,
   },
 ];
 
@@ -141,11 +137,11 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                     href={path}
                     className={twMerge(
                       "group relative flex items-center rounded-xl font-medium transition-all duration-200 hover:bg-slate-700/50",
-                      isActiveRoute 
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20" 
+                      isActiveRoute
+                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
                         : "text-slate-300 hover:text-white",
-                      minimize 
-                        ? "lg:justify-center lg:px-3 lg:py-3" 
+                      minimize
+                        ? "lg:justify-center lg:px-3 lg:py-3"
                         : "gap-3 px-3 py-3"
                     )}
                   >
@@ -158,7 +154,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                     >
                       {label}
                     </span>
-                    
+
                     {/* Tooltip for minimized state */}
                     {minimize && (
                       <div className="hidden lg:block absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
@@ -169,6 +165,34 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                   </Link>
                 );
               })}
+
+              {/* Logout Button */}
+              <LogoutButton
+                className={twMerge(
+                  "group relative flex items-center rounded-xl font-medium transition-all duration-200 hover:bg-slate-700/50 text-slate-300 hover:text-white",
+                  minimize
+                    ? "lg:justify-center lg:px-3 lg:py-3"
+                    : "gap-3 px-3 py-3"
+                )}
+              >
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                <span
+                  className={twMerge(
+                    "transition-all duration-200 whitespace-nowrap",
+                    minimize ? "lg:hidden" : "opacity-100"
+                  )}
+                >
+                  Logout
+                </span>
+
+                {/* Tooltip for minimized state */}
+                {minimize && (
+                  <div className="hidden lg:block absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
+                    Logout
+                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-900 rotate-45 border-l border-b border-slate-700"></div>
+                  </div>
+                )}
+              </LogoutButton>
             </div>
           </div>
 
@@ -207,9 +231,13 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                 className="lg:hidden p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors duration-200"
                 onClick={() => setOpen(!open)}
               >
-                {open ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+                {open ? (
+                  <X className="w-6 h-6" />
+                ) : (
+                  <Menu className="w-6 h-6" />
+                )}
               </button>
-              
+
               <button
                 type="button"
                 className="hidden lg:flex p-2 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors duration-200"
@@ -222,7 +250,9 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
             {/* User Profile */}
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
-                <div className="text-sm font-semibold text-slate-900">Admin User</div>
+                <div className="text-sm font-semibold text-slate-900">
+                  Admin User
+                </div>
                 <div className="text-xs text-slate-500">Administrator</div>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">

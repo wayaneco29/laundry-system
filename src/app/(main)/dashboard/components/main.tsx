@@ -344,7 +344,7 @@ export function MainDashboardPage({
             options={dynamicChartOptions}
             series={[
               {
-                name: "This year",
+                name: "",
                 data: chartData?.monthlyData || [
                   0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                 ],
