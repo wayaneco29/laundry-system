@@ -116,23 +116,55 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
     setLoading(true);
     
     try {
-      const result = await upsertExpense({
-        p_expense_id: expense?.id || null,
-        p_title: formData.title,
-        p_description: formData.description || undefined,
-        p_amount: Number(formData.amount),
-        p_category: formData.category as any,
-        p_expense_date: formData.expense_date,
-        p_branch_id: formData.branch_id || undefined,
-        p_created_by: userId
-      });
-
-      if (result.error) {
-        console.error('Error saving expense:', result.error);
-        onShowToast?.('Error saving expense. Please try again.', 'error');
-      } else {
-        onShowToast?.(`Expense ${mode === 'create' ? 'created' : 'updated'} successfully`, 'success');
+      // Check if "All Branches" is selected (empty string or no branch_id)
+      const isAllBranches = !formData.branch_id || formData.branch_id === '';
+      
+      if (isAllBranches && mode === 'create') {
+        // Create expense for each branch
+        const promises = branches.map(branch => 
+          upsertExpense({
+            p_expense_id: null,
+            p_title: formData.title,
+            p_description: formData.description || undefined,
+            p_amount: Number(formData.amount),
+            p_category: formData.category as any,
+            p_expense_date: formData.expense_date,
+            p_branch_id: branch.id,
+            p_created_by: userId
+          })
+        );
+        
+        const results = await Promise.all(promises);
+        
+        // Check if any failed
+        const failed = results.filter(result => result.error);
+        if (failed.length > 0) {
+          console.error('Error saving some expenses:', failed);
+          onShowToast?.(`Created ${results.length - failed.length} expenses, ${failed.length} failed`, 'warning');
+        } else {
+          onShowToast?.(`Created expense for all ${branches.length} branches successfully`, 'success');
+        }
         onClose();
+      } else {
+        // Single expense (either edit mode or specific branch selected)
+        const result = await upsertExpense({
+          p_expense_id: expense?.id || null,
+          p_title: formData.title,
+          p_description: formData.description || undefined,
+          p_amount: Number(formData.amount),
+          p_category: formData.category as any,
+          p_expense_date: formData.expense_date,
+          p_branch_id: formData.branch_id || undefined,
+          p_created_by: userId
+        });
+
+        if (result.error) {
+          console.error('Error saving expense:', result.error);
+          onShowToast?.('Error saving expense. Please try again.', 'error');
+        } else {
+          onShowToast?.(`Expense ${mode === 'create' ? 'created' : 'updated'} successfully`, 'success');
+          onClose();
+        }
       }
     } catch (error) {
       console.error('Error saving expense:', error);

@@ -7,3 +7,5 @@ export * from "./mark_expense_paid";
 export * from "./get_expense_stats";
 export * from "./get_expenses_by_category";
 export * from "./get_recurring_expenses_due";
+export * from "./get_monthly_expense";
+export * from "./get_yearly_expense";

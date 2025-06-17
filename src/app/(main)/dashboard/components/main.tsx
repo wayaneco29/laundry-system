@@ -15,6 +15,7 @@ import {
   getMonthSales,
   getMonthlySalesChart
 } from "@/app/actions";
+import { getMonthlyExpense, getYearlyExpense } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -237,11 +238,27 @@ export function MainDashboardPage({
   const [todayCustomersCount, setTodayCustomersCount] = useState(initialTodayCustomersCount);
   const [monthlySalesData, setMonthlySalesData] = useState(initialMonthlySalesData);
   const [chartData, setChartData] = useState(initialChartData);
+  const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
+  const [yearlyExpense, setYearlyExpense] = useState<number>(0);
 
-  // Fetch branches on component mount
+  // Fetch branches and initial expense data on component mount
   useEffect(() => {
     fetchBranches();
+    fetchInitialExpenseData();
   }, []);
+
+  const fetchInitialExpenseData = async () => {
+    try {
+      const [monthlyExpenseResult, yearlyExpenseResult] = await Promise.all([
+        getMonthlyExpense(),
+        getYearlyExpense(),
+      ]);
+      setMonthlyExpense(monthlyExpenseResult.data || 0);
+      setYearlyExpense(yearlyExpenseResult.data || 0);
+    } catch (error) {
+      console.error('Error fetching initial expense data:', error);
+    }
+  };
 
   // Fetch data when branch changes
   useEffect(() => {
@@ -269,17 +286,21 @@ export function MainDashboardPage({
     try {
       const branchId = selectedBranch === "" ? undefined : selectedBranch;
       
-      const [monthlyResult, todayResult, salesResult, chartResult] = await Promise.all([
+      const [monthlyResult, todayResult, salesResult, chartResult, monthlyExpenseResult, yearlyExpenseResult] = await Promise.all([
         getMonthlyCustomers(branchId),
         getTodayCustomers(branchId),
         getMonthSales(branchId),
         getMonthlySalesChart(branchId),
+        getMonthlyExpense(branchId),
+        getYearlyExpense(branchId),
       ]);
 
       setMonthlyCustomersCount(monthlyResult.count);
       setTodayCustomersCount(todayResult.count);
       setMonthlySalesData(salesResult.data);
       setChartData(chartResult.data);
+      setMonthlyExpense(monthlyExpenseResult.data || 0);
+      setYearlyExpense(yearlyExpenseResult.data || 0);
     } catch (error) {
       console.error('Error fetching dashboard data:', error);
     } finally {
@@ -421,10 +442,10 @@ export function MainDashboardPage({
           <div className="flex justify-between">
             <div>
               <div className="text-gray-700 text-sm font-medium">
-                Total Expenses
+                This Month Expenses
               </div>
               <div className="text-gray-700 text-xl font-bold mt-2">
-                ₱14,580
+                ₱{monthlyExpense?.toLocaleString() || "0"}
               </div>
             </div>
             <div className="p-3 rounded-full bg-red-500 h-fit">
@@ -459,9 +480,9 @@ export function MainDashboardPage({
         <div className="bg-white rounded-md p-4 shadow-md">
           <div className="flex justify-between">
             <div className="text-gray-700 font-medium">Expenses Overview</div>
-            <div className="text-gray-700">This Month</div>
+            <div className="text-gray-700">Yearly</div>
           </div>
-          <div className="text-gray-700 font-bold text-lg">₱8,050.50</div>
+          <div className="text-gray-700 font-bold text-lg">₱{yearlyExpense?.toLocaleString() || "0"}</div>
           <ReactApexChart
             options={donutChartOptions}
             series={donutChartSeries}

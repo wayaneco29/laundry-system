@@ -9,6 +9,8 @@ import {
   getExpenseStats,
   getExpensesByCategory,
   getRecurringExpensesDue,
+  getMonthlyExpense,
+  getYearlyExpense,
 } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useToast } from "@/app/hooks/use-toast";
@@ -21,6 +23,8 @@ export function ExpensesMain() {
   const [stats, setStats] = useState<any>(null);
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
   const [recurringDue, setRecurringDue] = useState<any[]>([]);
+  const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
+  const [yearlyExpense, setYearlyExpense] = useState<number>(0);
   const [loading, setLoading] = useState(true);
 
   // Toast notifications
@@ -48,6 +52,14 @@ export function ExpensesMain() {
     applyFilters();
   }, [expenses, filters]);
 
+  // Refetch expense data when branch filter changes
+  useEffect(() => {
+    if (branches.length > 0) {
+      fetchMonthlyExpense();
+      fetchYearlyExpense();
+    }
+  }, [filters.branch_id]);
+
   const fetchAllData = async () => {
     setLoading(true);
     try {
@@ -57,6 +69,8 @@ export function ExpensesMain() {
         fetchStats(),
         fetchCategoryStats(),
         fetchRecurringDue(),
+        fetchMonthlyExpense(),
+        fetchYearlyExpense(),
       ]);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -97,6 +111,22 @@ export function ExpensesMain() {
     const result = await getRecurringExpensesDue(30); // Next 30 days
     if (result.data) {
       setRecurringDue(result.data);
+    }
+  };
+
+  const fetchMonthlyExpense = async () => {
+    const branchId = filters.branch_id || undefined;
+    const result = await getMonthlyExpense(branchId);
+    if (result.data !== undefined) {
+      setMonthlyExpense(result.data);
+    }
+  };
+
+  const fetchYearlyExpense = async () => {
+    const branchId = filters.branch_id || undefined;
+    const result = await getYearlyExpense(branchId);
+    if (result.data !== undefined) {
+      setYearlyExpense(result.data);
     }
   };
 
@@ -203,156 +233,65 @@ export function ExpensesMain() {
         </Button>
       </div>
 
-      {/* Stats Cards */}
-      {stats && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-blue-100">
-                <svg
-                  className="w-6 h-6 text-blue-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Total Expenses
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.total_expenses}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-green-100">
-                <svg
-                  className="w-6 h-6 text-green-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                  />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">
-                  Total Amount
-                </p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(Number(stats.total_amount))}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-yellow-100">
-                <svg
-                  className="w-6 h-6 text-yellow-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {stats.pending_expenses}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white p-6 rounded-lg shadow">
-            <div className="flex items-center">
-              <div className="p-3 rounded-full bg-purple-100">
-                <svg
-                  className="w-6 h-6 text-purple-600"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                  />
-                </svg>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Avg Amount</p>
-                <p className="text-2xl font-bold text-gray-900">
-                  {formatCurrency(Number(stats.avg_expense_amount))}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Recurring Expenses Due Alert */}
-      {recurringDue.length > 0 && (
-        <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+      {/* Expense Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow">
           <div className="flex items-center">
-            <svg
-              className="w-5 h-5 text-orange-400 mr-2"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
-              />
-            </svg>
-            <h3 className="text-sm font-medium text-orange-800">
-              {recurringDue.length} recurring expense
-              {recurringDue.length > 1 ? "s" : ""} due soon
-            </h3>
-          </div>
-          <div className="mt-2 text-sm text-orange-700">
-            {recurringDue.slice(0, 3).map((expense, index) => (
-              <div key={expense.expense_id}>
-                • {expense.title} - {formatCurrency(Number(expense.amount))}{" "}
-                (Due: {new Date(expense.next_due_date).toLocaleDateString()})
-              </div>
-            ))}
-            {recurringDue.length > 3 && (
-              <div className="text-orange-600 font-medium">
-                ... and {recurringDue.length - 3} more
-              </div>
-            )}
+            <div className="p-3 rounded-full bg-blue-100">
+              <svg
+                className="w-6 h-6 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">
+                This Month Expenses
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {formatCurrency(monthlyExpense)}
+              </p>
+            </div>
           </div>
         </div>
-      )}
+
+        <div className="bg-white p-6 rounded-lg shadow">
+          <div className="flex items-center">
+            <div className="p-3 rounded-full bg-green-100">
+              <svg
+                className="w-6 h-6 text-green-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"
+                />
+              </svg>
+            </div>
+            <div className="ml-4">
+              <p className="text-sm font-medium text-gray-600">
+                Yearly Expenses
+              </p>
+              <p className="text-2xl font-bold text-gray-900">
+                {formatCurrency(yearlyExpense)}
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
 
       {/* Filters */}
       <div className="flex justify-between items-center mb-6">
