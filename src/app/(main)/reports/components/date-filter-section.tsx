@@ -10,54 +10,59 @@ type DateFilterSectionProps = {
   onDateRangeChange: (dateRange: { startDate: Date; endDate: Date }) => void;
 };
 
-export function DateFilterSection({ dateRange, onDateRangeChange }: DateFilterSectionProps) {
+export function DateFilterSection({
+  dateRange,
+  onDateRangeChange,
+}: DateFilterSectionProps) {
   const presetRanges = [
     {
       label: "Today",
       getValue: () => ({
         startDate: new Date(),
-        endDate: new Date()
-      })
+        endDate: new Date(),
+      }),
     },
     {
       label: "This Week",
       getValue: () => {
         const today = new Date();
-        const startOfWeek = new Date(today.setDate(today.getDate() - today.getDay()));
+        const startOfWeek = new Date(
+          today.setDate(today.getDate() - today.getDay())
+        );
         return {
           startDate: startOfWeek,
-          endDate: new Date()
+          endDate: new Date(),
         };
-      }
+      },
     },
     {
       label: "This Month",
       getValue: () => ({
         startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-        endDate: new Date()
-      })
+        endDate: new Date(),
+      }),
     },
     {
       label: "Last 30 Days",
       getValue: () => ({
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
-        endDate: new Date()
-      })
+        endDate: new Date(),
+      }),
     },
     {
       label: "This Year",
       getValue: () => ({
         startDate: new Date(new Date().getFullYear(), 0, 1),
-        endDate: new Date()
-      })
-    }
+        endDate: new Date(),
+      }),
+    },
   ];
 
   const formatDate = (date: Date) => {
-    return date.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
     });
   };
 
@@ -68,7 +73,7 @@ export function DateFilterSection({ dateRange, onDateRangeChange }: DateFilterSe
           <CalendarIcon className="h-5 w-5 text-gray-500" />
           <span className="text-sm font-medium text-gray-700">Date Range:</span>
         </div>
-        
+
         {/* Preset Buttons */}
         <div className="flex flex-wrap gap-2">
           {presetRanges.map((preset) => (
@@ -86,29 +91,34 @@ export function DateFilterSection({ dateRange, onDateRangeChange }: DateFilterSe
         <div className="flex items-center gap-2 ml-auto">
           <input
             type="date"
-            value={dateRange.startDate.toISOString().split('T')[0]}
-            onChange={(e) => onDateRangeChange({
-              ...dateRange,
-              startDate: new Date(e.target.value)
-            })}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={dateRange.startDate.toISOString().split("T")[0]}
+            onChange={(e) =>
+              onDateRangeChange({
+                ...dateRange,
+                startDate: new Date(e.target.value),
+              })
+            }
+            className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <span className="text-gray-500">to</span>
           <input
             type="date"
-            value={dateRange.endDate.toISOString().split('T')[0]}
-            onChange={(e) => onDateRangeChange({
-              ...dateRange,
-              endDate: new Date(e.target.value)
-            })}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={dateRange.endDate.toISOString().split("T")[0]}
+            onChange={(e) =>
+              onDateRangeChange({
+                ...dateRange,
+                endDate: new Date(e.target.value),
+              })
+            }
+            className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
       </div>
-      
+
       <div className="mt-4 text-sm text-gray-600">
-        Showing data from <span className="font-medium">{formatDate(dateRange.startDate)}</span> to{' '}
-        <span className="font-medium">{formatDate(dateRange.endDate)}</span>
+        Showing data from{" "}
+        <span className="font-medium">{formatDate(dateRange.startDate)}</span>{" "}
+        to <span className="font-medium">{formatDate(dateRange.endDate)}</span>
       </div>
     </div>
   );

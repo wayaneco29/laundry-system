@@ -1,10 +1,17 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UsersIcon, UserPlusIcon, ClockIcon, ArrowTrendingUpIcon, CurrencyDollarIcon, StarIcon } from "@heroicons/react/24/outline";
+import {
+  UsersIcon,
+  UserPlusIcon,
+  ClockIcon,
+  ArrowTrendingUpIcon,
+  CurrencyDollarIcon,
+  StarIcon,
+} from "@heroicons/react/24/outline";
 import { ApexChart } from "@/app/components/charts/apex-chart";
-import { 
-  getDailyCustomerTraffic, 
+import {
+  getDailyCustomerTraffic,
   getCustomerRetentionMetrics,
   getCustomerLifetimeValue,
   getCustomerDemographics,
@@ -15,7 +22,7 @@ import {
   CustomerLifetimeValue,
   CustomerDemographics,
   CustomerBehavior,
-  TopCustomer
+  TopCustomer,
 } from "@/app/actions/customer";
 
 type CustomerReportSectionProps = {
@@ -27,15 +34,19 @@ type CustomerReportSectionProps = {
   };
 };
 
-export function CustomerReportSection({ 
-  monthlyCustomersCount, 
+export function CustomerReportSection({
+  monthlyCustomersCount,
   todayCustomersCount,
-  dateRange 
+  dateRange,
 }: CustomerReportSectionProps) {
   const [dailyTraffic, setDailyTraffic] = useState<DailyCustomerTraffic[]>([]);
-  const [retentionMetrics, setRetentionMetrics] = useState<CustomerRetentionMetrics | null>(null);
-  const [lifetimeValue, setLifetimeValue] = useState<CustomerLifetimeValue | null>(null);
-  const [demographics, setDemographics] = useState<CustomerDemographics | null>(null);
+  const [retentionMetrics, setRetentionMetrics] =
+    useState<CustomerRetentionMetrics | null>(null);
+  const [lifetimeValue, setLifetimeValue] =
+    useState<CustomerLifetimeValue | null>(null);
+  const [demographics, setDemographics] = useState<CustomerDemographics | null>(
+    null
+  );
   const [behavior, setBehavior] = useState<CustomerBehavior | null>(null);
   const [topCustomers, setTopCustomers] = useState<TopCustomer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -53,14 +64,14 @@ export function CustomerReportSection({
         ltvResult,
         demographicsResult,
         behaviorResult,
-        topCustomersResult
+        topCustomersResult,
       ] = await Promise.all([
         getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate),
         getCustomerRetentionMetrics(dateRange.startDate, dateRange.endDate),
         getCustomerLifetimeValue(),
         getCustomerDemographics(),
         getCustomerBehavior(dateRange.startDate, dateRange.endDate),
-        getTopCustomers(10)
+        getTopCustomers(10),
       ]);
 
       if (trafficResult.data) setDailyTraffic(trafficResult.data);
@@ -70,7 +81,7 @@ export function CustomerReportSection({
       if (behaviorResult.data) setBehavior(behaviorResult.data);
       if (topCustomersResult.data) setTopCustomers(topCustomersResult.data);
     } catch (error) {
-      console.error('Error fetching customer analytics:', error);
+      console.error("Error fetching customer analytics:", error);
     } finally {
       setLoading(false);
     }
@@ -78,7 +89,9 @@ export function CustomerReportSection({
   const customerMetrics = [
     {
       title: "Total Customers",
-      value: retentionMetrics?.total_customers?.toString() || monthlyCustomersCount.toString(),
+      value:
+        retentionMetrics?.total_customers?.toString() ||
+        monthlyCustomersCount.toString(),
       icon: UsersIcon,
       color: "from-blue-100 to-blue-50",
       iconColor: "bg-blue-500",
@@ -92,30 +105,37 @@ export function CustomerReportSection({
     },
     {
       title: "Retention Rate",
-      value: retentionMetrics?.retention_rate ? `${retentionMetrics.retention_rate}%` : "0%",
+      value: retentionMetrics?.retention_rate
+        ? `${retentionMetrics.retention_rate}%`
+        : "0%",
       icon: ArrowTrendingUpIcon,
       color: "from-purple-100 to-purple-50",
       iconColor: "bg-purple-500",
     },
     {
       title: "Avg Lifetime Value",
-      value: lifetimeValue?.average_ltv ? `₱${lifetimeValue.average_ltv.toLocaleString()}` : "₱0",
+      value: lifetimeValue?.average_ltv
+        ? `₱${lifetimeValue.average_ltv.toLocaleString()}`
+        : "₱0",
       icon: CurrencyDollarIcon,
       color: "from-orange-100 to-orange-50",
       iconColor: "bg-orange-500",
-    }
+    },
   ];
 
   // Get peak day info
-  const peakDay = dailyTraffic.length > 0 
-    ? dailyTraffic.reduce((max, day) => day.customer_count > max.customer_count ? day : max, dailyTraffic[0])
-    : null;
+  const peakDay =
+    dailyTraffic.length > 0
+      ? dailyTraffic.reduce(
+          (max, day) => (day.customer_count > max.customer_count ? day : max),
+          dailyTraffic[0]
+        )
+      : null;
 
   // Customer type data for donut chart
-  const customerTypeData = retentionMetrics ? [
-    retentionMetrics.returning_customers,
-    retentionMetrics.new_customers
-  ] : [0, 0];
+  const customerTypeData = retentionMetrics
+    ? [retentionMetrics.returning_customers, retentionMetrics.new_customers]
+    : [0, 0];
 
   return (
     <div className="space-y-6">
@@ -123,7 +143,10 @@ export function CustomerReportSection({
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-gray-100 rounded-lg p-6 shadow-sm animate-pulse">
+            <div
+              key={i}
+              className="bg-gray-100 rounded-lg p-6 shadow-sm animate-pulse"
+            >
               <div className="h-20"></div>
             </div>
           ))}
@@ -133,11 +156,18 @@ export function CustomerReportSection({
           {customerMetrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <div key={index} className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}>
+              <div
+                key={index}
+                className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      {metric.title}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">
+                      {metric.value}
+                    </p>
                   </div>
                   <div className={`${metric.iconColor} p-3 rounded-full`}>
                     <Icon className="h-6 w-6 text-white" />
@@ -154,9 +184,12 @@ export function CustomerReportSection({
         {/* Daily Customer Trend */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Daily Customer Traffic</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Daily Customer Traffic
+            </h3>
             <span className="text-sm text-gray-500">
-              {dateRange.startDate.toLocaleDateString()} - {dateRange.endDate.toLocaleDateString()}
+              {dateRange.startDate.toLocaleDateString()} -{" "}
+              {dateRange.endDate.toLocaleDateString()}
             </span>
           </div>
           {loading ? (
@@ -171,42 +204,50 @@ export function CustomerReportSection({
                 dataLabels: { enabled: false },
                 grid: { borderColor: "#E5E7EB" },
                 xaxis: {
-                  categories: dailyTraffic.map(day => {
+                  categories: dailyTraffic.map((day) => {
                     const date = new Date(day.date);
                     return `${date.getMonth() + 1}/${date.getDate()}`;
                   }),
-                  labels: { 
+                  labels: {
                     rotate: -45,
-                    style: { fontSize: "10px" }
-                  }
+                    style: { fontSize: "10px" },
+                  },
                 },
                 yaxis: {
                   labels: {
                     formatter: (value) => Math.round(value).toString(),
-                    style: { fontSize: "12px" }
-                  }
+                    style: { fontSize: "12px" },
+                  },
                 },
                 plotOptions: {
                   bar: {
                     borderRadius: 4,
-                    columnWidth: "80%"
-                  }
+                    columnWidth: "80%",
+                  },
                 },
                 tooltip: {
-                  custom: function({ series, seriesIndex, dataPointIndex }) {
+                  custom: function ({ series, seriesIndex, dataPointIndex }) {
                     const day = dailyTraffic[dataPointIndex];
                     return `<div class="px-3 py-2">
-                      <div class="font-semibold">${day.day_name}</div>
-                      <div>${new Date(day.date).toLocaleDateString()}</div>
-                      <div class="text-blue-600 font-bold">${day.customer_count} customers</div>
+                      <div class="font-semibold text-gray-600">${
+                        day.day_name
+                      }</div>
+                      <div class="text-gray-600">${new Date(
+                        day.date
+                      ).toLocaleDateString()}</div>
+                      <div class="text-blue-600 font-bold">${
+                        day.customer_count
+                      } customers</div>
                     </div>`;
-                  }
-                }
+                  },
+                },
               }}
-              series={[{
-                name: "Customers",
-                data: dailyTraffic.map(day => day.customer_count)
-              }]}
+              series={[
+                {
+                  name: "Customers",
+                  data: dailyTraffic.map((day) => day.customer_count),
+                },
+              ]}
               type="bar"
               height={300}
             />
@@ -215,7 +256,9 @@ export function CustomerReportSection({
 
         {/* Customer Type Distribution */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Type Distribution</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Customer Type Distribution
+          </h3>
           {loading ? (
             <div className="flex items-center justify-center h-80">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -228,7 +271,7 @@ export function CustomerReportSection({
                 colors: ["#10B981", "#3B82F6"],
                 dataLabels: {
                   enabled: true,
-                  formatter: (val) => `${Math.round(val as number)}%`
+                  formatter: (val) => `${Math.round(val as number)}%`,
                 },
                 plotOptions: {
                   pie: {
@@ -239,15 +282,17 @@ export function CustomerReportSection({
                         total: {
                           show: true,
                           label: "Total",
-                          formatter: () => retentionMetrics?.total_customers?.toString() || "0"
-                        }
-                      }
-                    }
-                  }
+                          formatter: () =>
+                            retentionMetrics?.total_customers?.toString() ||
+                            "0",
+                        },
+                      },
+                    },
+                  },
                 },
                 legend: {
-                  position: "bottom"
-                }
+                  position: "bottom",
+                },
               }}
               series={customerTypeData}
               type="donut"
@@ -260,13 +305,18 @@ export function CustomerReportSection({
       {/* Customer Insights */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Customer Insights</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Customer Insights
+          </h3>
         </div>
         <div className="p-6">
           {loading ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[1, 2, 3, 4].map((i) => (
-                <div key={i} className="p-4 bg-gray-50 rounded-lg animate-pulse">
+                <div
+                  key={i}
+                  className="p-4 bg-gray-50 rounded-lg animate-pulse"
+                >
                   <div className="h-16"></div>
                 </div>
               ))}
@@ -275,27 +325,41 @@ export function CustomerReportSection({
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">Peak Day</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Peak Day
+                  </span>
                   <span className="text-lg font-bold text-gray-900">
                     {peakDay ? peakDay.day_name : "No data"}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">
-                  {peakDay ? `${peakDay.customer_count} customers on ${new Date(peakDay.date).toLocaleDateString()}` : "Highest customer traffic"}
+                  {peakDay
+                    ? `${peakDay.customer_count} customers on ${new Date(
+                        peakDay.date
+                      ).toLocaleDateString()}`
+                    : "Highest customer traffic"}
                 </p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">Avg. Order Frequency</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Avg. Order Frequency
+                  </span>
                   <span className="text-lg font-bold text-blue-600">
-                    {behavior?.average_order_frequency ? `${behavior.average_order_frequency}x` : "0x"}
+                    {behavior?.average_order_frequency
+                      ? `${behavior.average_order_frequency}x`
+                      : "0x"}
                   </span>
                 </div>
-                <p className="text-xs text-gray-500 mt-1">Orders per customer</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Orders per customer
+                </p>
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">High Value Customers</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    High Value Customers
+                  </span>
                   <span className="text-lg font-bold text-green-600">
                     {lifetimeValue?.high_value_customers || 0}
                   </span>
@@ -304,9 +368,13 @@ export function CustomerReportSection({
               </div>
               <div className="p-4 bg-gray-50 rounded-lg">
                 <div className="flex justify-between items-center">
-                  <span className="text-sm font-medium text-gray-600">Churn Rate</span>
+                  <span className="text-sm font-medium text-gray-600">
+                    Churn Rate
+                  </span>
                   <span className="text-lg font-bold text-red-600">
-                    {retentionMetrics?.churn_rate ? `${retentionMetrics.churn_rate}%` : "0%"}
+                    {retentionMetrics?.churn_rate
+                      ? `${retentionMetrics.churn_rate}%`
+                      : "0%"}
                   </span>
                 </div>
                 <p className="text-xs text-gray-500 mt-1">Customer loss rate</p>
@@ -319,7 +387,9 @@ export function CustomerReportSection({
       {/* Customer Lifetime Value Analysis */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Customer Value Distribution</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Customer Value Distribution
+          </h3>
         </div>
         <div className="p-6">
           {loading ? (
@@ -335,29 +405,31 @@ export function CustomerReportSection({
                 grid: { borderColor: "#E5E7EB" },
                 xaxis: {
                   categories: ["High Value", "Medium Value", "Low Value"],
-                  labels: { style: { fontSize: "12px" } }
+                  labels: { style: { fontSize: "12px" } },
                 },
                 yaxis: {
                   labels: {
                     formatter: (value) => Math.round(value).toString(),
-                    style: { fontSize: "12px" }
-                  }
+                    style: { fontSize: "12px" },
+                  },
                 },
                 plotOptions: {
                   bar: {
                     borderRadius: 4,
-                    horizontal: false
-                  }
-                }
+                    horizontal: false,
+                  },
+                },
               }}
-              series={[{
-                name: "Customers",
-                data: [
-                  lifetimeValue.high_value_customers,
-                  lifetimeValue.medium_value_customers,
-                  lifetimeValue.low_value_customers
-                ]
-              }]}
+              series={[
+                {
+                  name: "Customers",
+                  data: [
+                    lifetimeValue.high_value_customers,
+                    lifetimeValue.medium_value_customers,
+                    lifetimeValue.low_value_customers,
+                  ],
+                },
+              ]}
               type="bar"
               height={300}
             />
@@ -399,11 +471,21 @@ export function CustomerReportSection({
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
                   </tr>
                 ))
               ) : topCustomers.length > 0 ? (
@@ -411,19 +493,35 @@ export function CustomerReportSection({
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
-                        <div className={`flex-shrink-0 h-8 w-8 rounded-full ${index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'} flex items-center justify-center text-xs font-bold`}>
-                          {index < 3 ? <StarIcon className="h-4 w-4" /> : index + 1}
+                        <div
+                          className={`flex-shrink-0 h-8 w-8 rounded-full ${
+                            index < 3
+                              ? "bg-yellow-100 text-yellow-800"
+                              : "bg-gray-100 text-gray-800"
+                          } flex items-center justify-center text-xs font-bold`}
+                        >
+                          {index < 3 ? (
+                            <StarIcon className="h-4 w-4" />
+                          ) : (
+                            index + 1
+                          )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">{customer.customer_name}</div>
+                          <div className="text-sm font-medium text-gray-900">
+                            {customer.customer_name}
+                          </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{customer.total_orders}</div>
+                      <div className="text-sm text-gray-900">
+                        {customer.total_orders}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">₱{customer.total_spent.toLocaleString()}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        ₱{customer.total_spent.toLocaleString()}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {new Date(customer.last_order_date).toLocaleDateString()}
@@ -435,7 +533,10 @@ export function CustomerReportSection({
                 ))
               ) : (
                 <tr>
-                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td
+                    colSpan={5}
+                    className="px-6 py-4 text-center text-sm text-gray-500"
+                  >
                     No customer data available
                   </td>
                 </tr>

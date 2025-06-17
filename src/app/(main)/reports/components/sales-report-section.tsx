@@ -1,6 +1,11 @@
 "use client";
 
-import { CurrencyDollarIcon, ArrowTrendingUpIcon, ArrowTrendingDownIcon, CalendarIcon } from "@heroicons/react/24/outline";
+import {
+  CurrencyDollarIcon,
+  ArrowTrendingUpIcon,
+  ArrowTrendingDownIcon,
+  CalendarIcon,
+} from "@heroicons/react/24/outline";
 import { MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
 import { ApexChart } from "@/app/components/charts/apex-chart";
 
@@ -13,7 +18,11 @@ type SalesReportSectionProps = {
   };
 };
 
-export function SalesReportSection({ monthlySalesData, chartData, dateRange }: SalesReportSectionProps) {
+export function SalesReportSection({
+  monthlySalesData,
+  chartData,
+  dateRange,
+}: SalesReportSectionProps) {
   const salesMetrics = [
     {
       title: "Total Sales",
@@ -38,13 +47,17 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
     },
     {
       title: "Collection Rate",
-      value: `${monthlySalesData?.totalSales 
-        ? Math.round((monthlySalesData.paidSales / monthlySalesData.totalSales) * 100)
-        : 0}%`,
+      value: `${
+        monthlySalesData?.totalSales
+          ? Math.round(
+              (monthlySalesData.paidSales / monthlySalesData.totalSales) * 100
+            )
+          : 0
+      }%`,
       icon: CalendarIcon,
       color: "from-purple-100 to-purple-50",
       iconColor: "bg-purple-500",
-    }
+    },
   ];
 
   return (
@@ -54,11 +67,18 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
         {salesMetrics.map((metric, index) => {
           const Icon = metric.icon;
           return (
-            <div key={index} className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}>
+            <div
+              key={index}
+              className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {metric.title}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {metric.value}
+                  </p>
                 </div>
                 <div className={`${metric.iconColor} p-3 rounded-full`}>
                   <Icon className="h-6 w-6 text-white" />
@@ -74,7 +94,9 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
         {/* Monthly Sales Trend */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Monthly Sales Trend</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Monthly Sales Trend
+            </h3>
             <span className="text-sm text-gray-500">This Year</span>
           </div>
           <div className="text-2xl font-bold text-gray-900 mb-4">
@@ -87,21 +109,37 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
               dataLabels: { enabled: false },
               grid: { borderColor: "#E5E7EB" },
               xaxis: {
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                labels: { style: { fontSize: "12px" } }
+                categories: [
+                  "Jan",
+                  "Feb",
+                  "Mar",
+                  "Apr",
+                  "May",
+                  "Jun",
+                  "Jul",
+                  "Aug",
+                  "Sep",
+                  "Oct",
+                  "Nov",
+                  "Dec",
+                ],
+                labels: { style: { fontSize: "12px" } },
               },
               yaxis: {
                 labels: {
-                  formatter: (value) => `₱${value}${chartData?.useThousands ? 'k' : ''}`,
-                  style: { fontSize: "12px" }
-                }
+                  formatter: (value) =>
+                    `₱${value}${chartData?.useThousands ? "k" : ""}`,
+                  style: { fontSize: "12px" },
+                },
               },
-              markers: { size: 4, colors: ["#3B82F6"] }
+              markers: { size: 4, colors: ["#3B82F6"] },
             }}
-            series={[{
-              name: "Sales",
-              data: chartData?.monthlyData || Array(12).fill(0)
-            }]}
+            series={[
+              {
+                name: "Sales",
+                data: chartData?.monthlyData || Array(12).fill(0),
+              },
+            ]}
             type="line"
             height={300}
           />
@@ -109,7 +147,9 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
 
         {/* Payment Status Breakdown */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Status Breakdown</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Payment Status Breakdown
+          </h3>
           <ApexChart
             options={{
               chart: { type: "donut" },
@@ -117,7 +157,7 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
               colors: ["#10B981", "#EF4444"],
               dataLabels: {
                 enabled: true,
-                formatter: (val) => `${Math.round(val as number)}%`
+                formatter: (val) => `${Math.round(val as number)}%`,
               },
               plotOptions: {
                 pie: {
@@ -128,19 +168,23 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
                       total: {
                         show: true,
                         label: "Total Sales",
-                        formatter: () => `₱${monthlySalesData?.totalSales?.toLocaleString() || "0"}`
-                      }
-                    }
-                  }
-                }
+                        formatter: () =>
+                          `₱${
+                            monthlySalesData?.totalSales?.toLocaleString() ||
+                            "0"
+                          }`,
+                      },
+                    },
+                  },
+                },
               },
               legend: {
-                position: "bottom"
-              }
+                position: "bottom",
+              },
             }}
             series={[
               monthlySalesData?.paidSales || 0,
-              monthlySalesData?.unpaidSales || 0
+              monthlySalesData?.unpaidSales || 0,
             ]}
             type="donut"
             height={300}
@@ -151,33 +195,48 @@ export function SalesReportSection({ monthlySalesData, chartData, dateRange }: S
       {/* Detailed Sales Table */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Sales Performance Summary</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Sales Performance Summary
+          </h3>
         </div>
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Average Order Value</span>
+                <span className="text-sm font-medium text-gray-600">
+                  Average Order Value
+                </span>
                 <span className="text-lg font-bold text-gray-900">
-                  ₱{monthlySalesData?.totalSales && monthlySalesData.totalSales > 0
-                    ? Math.round(monthlySalesData.totalSales / 30).toLocaleString() // Rough monthly average
+                  ₱
+                  {monthlySalesData?.totalSales &&
+                  monthlySalesData.totalSales > 0
+                    ? Math.round(
+                        monthlySalesData.totalSales / 30
+                      ).toLocaleString() // Rough monthly average
                     : "0"}
                 </span>
               </div>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Daily Average</span>
+                <span className="text-sm font-medium text-gray-600">
+                  Daily Average
+                </span>
                 <span className="text-lg font-bold text-gray-900">
-                  ₱{monthlySalesData?.totalSales
-                    ? Math.round(monthlySalesData.totalSales / new Date().getDate()).toLocaleString()
+                  ₱
+                  {monthlySalesData?.totalSales
+                    ? Math.round(
+                        monthlySalesData.totalSales / new Date().getDate()
+                      ).toLocaleString()
                     : "0"}
                 </span>
               </div>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Outstanding Amount</span>
+                <span className="text-sm font-medium text-gray-600">
+                  Outstanding Amount
+                </span>
                 <span className="text-lg font-bold text-red-600">
                   ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
                 </span>

@@ -1,7 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { ClipboardDocumentListIcon, ExclamationTriangleIcon, CheckCircleIcon, XCircleIcon } from "@heroicons/react/24/outline";
+import {
+  ClipboardDocumentListIcon,
+  ExclamationTriangleIcon,
+  CheckCircleIcon,
+  XCircleIcon,
+} from "@heroicons/react/24/outline";
 import { ApexChart } from "@/app/components/charts/apex-chart";
 import {
   getInventoryStockLevels,
@@ -11,7 +16,7 @@ import {
   InventoryStockLevels,
   InventoryByCategory,
   LowStockAlert,
-  InventoryItem
+  InventoryItem,
 } from "@/app/actions/inventory";
 
 type InventoryReportSectionProps = {
@@ -21,8 +26,12 @@ type InventoryReportSectionProps = {
   };
 };
 
-export function InventoryReportSection({ dateRange }: InventoryReportSectionProps) {
-  const [stockLevels, setStockLevels] = useState<InventoryStockLevels | null>(null);
+export function InventoryReportSection({
+  dateRange,
+}: InventoryReportSectionProps) {
+  const [stockLevels, setStockLevels] = useState<InventoryStockLevels | null>(
+    null
+  );
   const [categoryData, setCategoryData] = useState<InventoryByCategory[]>([]);
   const [lowStockAlerts, setLowStockAlerts] = useState<LowStockAlert[]>([]);
   const [inventoryItems, setInventoryItems] = useState<InventoryItem[]>([]);
@@ -35,12 +44,13 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
   const fetchInventoryData = async () => {
     setLoading(true);
     try {
-      const [stockLevelsResult, categoryResult, alertsResult, itemsResult] = await Promise.all([
-        getInventoryStockLevels(),
-        getInventoryByCategory(),
-        getLowStockAlerts(),
-        getInventoryItems(undefined, 20)
-      ]);
+      const [stockLevelsResult, categoryResult, alertsResult, itemsResult] =
+        await Promise.all([
+          getInventoryStockLevels(),
+          getInventoryByCategory(),
+          getLowStockAlerts(),
+          getInventoryItems(undefined, 20),
+        ]);
 
       if (stockLevelsResult.data) {
         setStockLevels(stockLevelsResult.data);
@@ -55,7 +65,7 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
         setInventoryItems(itemsResult.data);
       }
     } catch (error) {
-      console.error('Error fetching inventory data:', error);
+      console.error("Error fetching inventory data:", error);
     } finally {
       setLoading(false);
     }
@@ -72,7 +82,10 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
     },
     {
       title: "Low Stock Items",
-      value: (stockLevels ? stockLevels.low_stock + stockLevels.critical_stock : 0).toString(),
+      value: (stockLevels
+        ? stockLevels.low_stock + stockLevels.critical_stock
+        : 0
+      ).toString(),
       icon: ExclamationTriangleIcon,
       color: "from-yellow-100 to-yellow-50",
       iconColor: "bg-yellow-500",
@@ -90,26 +103,33 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
       icon: XCircleIcon,
       color: "from-red-100 to-red-50",
       iconColor: "bg-red-500",
-    }
+    },
   ];
 
   // Prepare chart data
-  const stockLevelsChartData = stockLevels ? [
-    stockLevels.in_stock,
-    stockLevels.low_stock + stockLevels.critical_stock,
-    stockLevels.out_of_stock
-  ] : [0, 0, 0];
+  const stockLevelsChartData = stockLevels
+    ? [
+        stockLevels.in_stock,
+        stockLevels.low_stock + stockLevels.critical_stock,
+        stockLevels.out_of_stock,
+      ]
+    : [0, 0, 0];
 
-  const categoryChartData = categoryData.map(cat => cat.count);
-  const categoryLabels = categoryData.map(cat => cat.category);
+  const categoryChartData = categoryData.map((cat) => cat.count);
+  const categoryLabels = categoryData.map((cat) => cat.category);
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case "In Stock": return "text-green-600 bg-green-100";
-      case "Low Stock": return "text-yellow-600 bg-yellow-100";
-      case "Critical": return "text-orange-600 bg-orange-100";
-      case "Out of Stock": return "text-red-600 bg-red-100";
-      default: return "text-gray-600 bg-gray-100";
+      case "In Stock":
+        return "text-green-600 bg-green-100";
+      case "Low Stock":
+        return "text-yellow-600 bg-yellow-100";
+      case "Critical":
+        return "text-orange-600 bg-orange-100";
+      case "Out of Stock":
+        return "text-red-600 bg-red-100";
+      default:
+        return "text-gray-600 bg-gray-100";
     }
   };
 
@@ -119,7 +139,10 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="bg-gray-100 rounded-lg p-6 shadow-sm animate-pulse">
+            <div
+              key={i}
+              className="bg-gray-100 rounded-lg p-6 shadow-sm animate-pulse"
+            >
               <div className="h-20"></div>
             </div>
           ))}
@@ -129,11 +152,18 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
           {inventoryMetrics.map((metric, index) => {
             const Icon = metric.icon;
             return (
-              <div key={index} className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}>
+              <div
+                key={index}
+                className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+                    <p className="text-sm font-medium text-gray-600">
+                      {metric.title}
+                    </p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">
+                      {metric.value}
+                    </p>
                   </div>
                   <div className={`${metric.iconColor} p-3 rounded-full`}>
                     <Icon className="h-6 w-6 text-white" />
@@ -149,7 +179,9 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         {/* Stock Status Distribution */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Stock Status Overview</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Stock Status Overview
+          </h3>
           {loading ? (
             <div className="flex items-center justify-center h-80">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -162,7 +194,7 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
                 colors: ["#10B981", "#F59E0B", "#EF4444"],
                 dataLabels: {
                   enabled: true,
-                  formatter: (val) => `${Math.round(val as number)}%`
+                  formatter: (val) => `${Math.round(val as number)}%`,
                 },
                 plotOptions: {
                   pie: {
@@ -173,15 +205,16 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
                         total: {
                           show: true,
                           label: "Total Items",
-                          formatter: () => stockLevels?.total_items?.toString() || "0"
-                        }
-                      }
-                    }
-                  }
+                          formatter: () =>
+                            stockLevels?.total_items?.toString() || "0",
+                        },
+                      },
+                    },
+                  },
                 },
                 legend: {
-                  position: "bottom"
-                }
+                  position: "bottom",
+                },
               }}
               series={stockLevelsChartData}
               type="donut"
@@ -193,7 +226,9 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
         {/* Inventory by Category */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Items by Category</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Items by Category
+            </h3>
           </div>
           {loading ? (
             <div className="flex items-center justify-center h-80">
@@ -208,28 +243,30 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
                 grid: { borderColor: "#E5E7EB" },
                 xaxis: {
                   categories: categoryLabels,
-                  labels: { 
+                  labels: {
                     style: { fontSize: "10px" },
-                    rotate: -45
-                  }
+                    rotate: -45,
+                  },
                 },
                 yaxis: {
                   labels: {
                     formatter: (value) => Math.round(value).toString(),
-                    style: { fontSize: "12px" }
-                  }
+                    style: { fontSize: "12px" },
+                  },
                 },
                 plotOptions: {
                   bar: {
                     borderRadius: 4,
-                    horizontal: false
-                  }
-                }
+                    horizontal: false,
+                  },
+                },
               }}
-              series={[{
-                name: "Items",
-                data: categoryChartData
-              }]}
+              series={[
+                {
+                  name: "Items",
+                  data: categoryChartData,
+                },
+              ]}
               type="bar"
               height={300}
             />
@@ -240,7 +277,9 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
       {/* Inventory Items Table */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Inventory Items Status</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Inventory Items Status
+          </h3>
         </div>
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
@@ -270,31 +309,55 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
-                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="h-4 bg-gray-200 rounded"></div>
+                    </td>
                   </tr>
                 ))
               ) : inventoryItems.length > 0 ? (
                 inventoryItems.map((item, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.name}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.name}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{item.category}</div>
+                      <div className="text-sm text-gray-500">
+                        {item.category}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">{item.branch_name}</div>
+                      <div className="text-sm text-gray-500">
+                        {item.branch_name}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{item.quantity}</div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.quantity}
+                      </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(item.status)}`}>
+                      <span
+                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                          item.status
+                        )}`}
+                      >
                         {item.status}
                       </span>
                     </td>
@@ -305,7 +368,10 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="px-6 py-4 text-center text-sm text-gray-500">
+                  <td
+                    colSpan={6}
+                    className="px-6 py-4 text-center text-sm text-gray-500"
+                  >
                     No inventory items found
                   </td>
                 </tr>
@@ -318,30 +384,39 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
       {/* Inventory Alerts */}
       <div className="bg-white rounded-lg shadow-sm">
         <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">Inventory Alerts</h3>
+          <h3 className="text-lg font-semibold text-gray-900">
+            Inventory Alerts
+          </h3>
         </div>
         <div className="p-6">
           {loading ? (
             <div className="space-y-3">
               {[1, 2, 3].map((i) => (
-                <div key={i} className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                <div
+                  key={i}
+                  className="h-12 bg-gray-200 rounded-lg animate-pulse"
+                ></div>
               ))}
             </div>
           ) : (
             <div className="space-y-3">
-              {stockLevels?.out_of_stock > 0 && (
+              {(stockLevels?.out_of_stock ?? 0) > 0 && (
                 <div className="flex items-center p-3 bg-red-50 border border-red-200 rounded-lg">
                   <XCircleIcon className="h-5 w-5 text-red-500 mr-3" />
                   <span className="text-sm text-red-700">
-                    {stockLevels.out_of_stock} items are out of stock and need immediate restocking
+                    {stockLevels?.out_of_stock ?? 0} items are out of stock and
+                    need immediate restocking
                   </span>
                 </div>
               )}
-              {(stockLevels?.low_stock > 0 || stockLevels?.critical_stock > 0) && (
+              {((stockLevels?.low_stock ?? 0) > 0 ||
+                (stockLevels?.critical_stock ?? 0) > 0) && (
                 <div className="flex items-center p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <ExclamationTriangleIcon className="h-5 w-5 text-yellow-500 mr-3" />
                   <span className="text-sm text-yellow-700">
-                    {(stockLevels?.low_stock || 0) + (stockLevels?.critical_stock || 0)} items have low stock levels and should be restocked soon
+                    {(stockLevels?.low_stock || 0) +
+                      (stockLevels?.critical_stock || 0)}{" "}
+                    items have low stock levels and should be restocked soon
                   </span>
                 </div>
               )}
@@ -349,14 +424,20 @@ export function InventoryReportSection({ dateRange }: InventoryReportSectionProp
                 <div className="flex items-center p-3 bg-blue-50 border border-blue-200 rounded-lg">
                   <ClipboardDocumentListIcon className="h-5 w-5 text-blue-500 mr-3" />
                   <span className="text-sm text-blue-700">
-                    {lowStockAlerts.length} total items need attention. Check the table above for details.
+                    {lowStockAlerts.length} total items need attention. Check
+                    the table above for details.
                   </span>
                 </div>
               )}
-              {(!stockLevels || (stockLevels.out_of_stock === 0 && stockLevels.low_stock === 0 && stockLevels.critical_stock === 0)) && (
+              {(!stockLevels ||
+                (stockLevels.out_of_stock === 0 &&
+                  stockLevels.low_stock === 0 &&
+                  stockLevels.critical_stock === 0)) && (
                 <div className="flex items-center p-3 bg-green-50 border border-green-200 rounded-lg">
                   <CheckCircleIcon className="h-5 w-5 text-green-500 mr-3" />
-                  <span className="text-sm text-green-700">All inventory items are adequately stocked</span>
+                  <span className="text-sm text-green-700">
+                    All inventory items are adequately stocked
+                  </span>
                 </div>
               )}
             </div>
