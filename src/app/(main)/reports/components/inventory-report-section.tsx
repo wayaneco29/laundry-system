@@ -260,6 +260,28 @@ export function InventoryReportSection({
                     horizontal: false,
                   },
                 },
+                tooltip: {
+                  custom: function ({ series, seriesIndex, dataPointIndex }) {
+                    const category = categoryLabels[dataPointIndex];
+                    const itemCount = series[seriesIndex][dataPointIndex];
+                    const categoryItem = categoryData[dataPointIndex];
+                    
+                    return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+                      <div class="font-semibold text-gray-800 text-sm">${category}</div>
+                      <div class="text-gray-600 text-xs mb-2">Inventory Category</div>
+                      <div class="space-y-1">
+                        <div class="flex items-center">
+                          <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                          <span class="text-blue-600 font-bold text-sm">${itemCount} Items</span>
+                        </div>
+                        <div class="flex items-center">
+                          <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                          <span class="text-green-600 text-sm">${categoryItem?.total_quantity || 0} Total Quantity</span>
+                        </div>
+                      </div>
+                    </div>`;
+                  },
+                },
               }}
               series={[
                 {

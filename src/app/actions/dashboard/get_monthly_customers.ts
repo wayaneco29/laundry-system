@@ -2,14 +2,14 @@
 
 import { createClient } from "@/app/utils/supabase/server";
 
-export async function getMonthlyCustomers(branchId?: string) {
+export async function getMonthlyCustomers(branchId?: string, startDate?: Date, endDate?: Date) {
   const supabase = await createClient();
 
   try {
-    // Get current month start and end dates
+    // Use provided date range or default to current month
     const now = new Date();
-    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-    const monthEnd = new Date(
+    const monthStart = startDate || new Date(now.getFullYear(), now.getMonth(), 1);
+    const monthEnd = endDate || new Date(
       now.getFullYear(),
       now.getMonth() + 1,
       0,

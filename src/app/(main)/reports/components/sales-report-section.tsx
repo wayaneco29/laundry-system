@@ -1,12 +1,13 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import {
   CurrencyDollarIcon,
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
-import { MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
+import { MonthlySalesData, MonthlySalesChartData, getMonthSales, getMonthlySalesChart } from "@/app/actions";
 import { ApexChart } from "@/app/components/charts/apex-chart";
 
 type SalesReportSectionProps = {
@@ -19,10 +20,38 @@ type SalesReportSectionProps = {
 };
 
 export function SalesReportSection({
-  monthlySalesData,
-  chartData,
+  monthlySalesData: initialMonthlySalesData,
+  chartData: initialChartData,
   dateRange,
 }: SalesReportSectionProps) {
+  const [monthlySalesData, setMonthlySalesData] = useState<MonthlySalesData | null>(initialMonthlySalesData);
+  const [chartData, setChartData] = useState<MonthlySalesChartData | null>(initialChartData);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    fetchSalesData();
+  }, [dateRange]);
+
+  const fetchSalesData = async () => {
+    setLoading(true);
+    try {
+      const [salesResult, chartResult] = await Promise.all([
+        getMonthSales(undefined, dateRange.startDate, dateRange.endDate),
+        getMonthlySalesChart(undefined, dateRange.startDate, dateRange.endDate),
+      ]);
+
+      if (salesResult.data) {
+        setMonthlySalesData(salesResult.data);
+      }
+      if (chartResult.data) {
+        setChartData(chartResult.data);
+      }
+    } catch (error) {
+      console.error('Error fetching sales data:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const salesMetrics = [
     {
       title: "Total Sales",
@@ -62,6 +91,14 @@ export function SalesReportSection({
 
   return (
     <div className="space-y-6">
+      {/* Loading Indicator */}
+      {loading && (
+        <div className="flex items-center justify-center py-4">
+          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600"></div>
+          <span className="ml-2 text-gray-600">Updating sales data...</span>
+        </div>
+      )}
+      
       {/* Sales Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {salesMetrics.map((metric, index) => {
@@ -69,7 +106,7 @@ export function SalesReportSection({
           return (
             <div
               key={index}
-              className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}
+              className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm ${loading ? 'opacity-50' : ''}`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -133,6 +170,38 @@ export function SalesReportSection({
                 },
               },
               markers: { size: 4, colors: ["#3B82F6"] },
+              tooltip: {
+                custom: function ({ series, seriesIndex, dataPointIndex }) {
+                  const months = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                  ];
+                  const monthName = months[dataPointIndex];
+                  const value = series[seriesIndex][dataPointIndex];
+                  const formattedValue = chartData?.useThousands 
+                    ? `₱${value}k` 
+                    : `₱${value?.toLocaleString() || 0}`;
+                  
+                  // Calculate percentage of yearly total
+                  const yearlyTotal = chartData?.totalYearSales || 0;
+                  const percentage = yearlyTotal > 0 ? Math.round((value / yearlyTotal) * 100) : 0;
+                  
+                  return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+                    <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
+                    <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>
+                    <div class="space-y-1">
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span class="text-blue-600 font-bold text-sm">${formattedValue}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span class="text-green-600 text-sm">${percentage}% of yearly total</span>
+                      </div>
+                    </div>
+                  </div>`;
+                },
+              },
             }}
             series={[
               {

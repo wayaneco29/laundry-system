@@ -24,6 +24,7 @@ import {
   CustomerBehavior,
   TopCustomer,
 } from "@/app/actions/customer";
+import { getMonthlyCustomers } from "@/app/actions";
 
 type CustomerReportSectionProps = {
   monthlyCustomersCount: number;
@@ -35,10 +36,12 @@ type CustomerReportSectionProps = {
 };
 
 export function CustomerReportSection({
-  monthlyCustomersCount,
-  todayCustomersCount,
+  monthlyCustomersCount: initialMonthlyCustomersCount,
+  todayCustomersCount: initialTodayCustomersCount,
   dateRange,
 }: CustomerReportSectionProps) {
+  const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(initialMonthlyCustomersCount);
+  const [todayCustomersCount, setTodayCustomersCount] = useState(initialTodayCustomersCount);
   const [dailyTraffic, setDailyTraffic] = useState<DailyCustomerTraffic[]>([]);
   const [retentionMetrics, setRetentionMetrics] =
     useState<CustomerRetentionMetrics | null>(null);
@@ -65,6 +68,7 @@ export function CustomerReportSection({
         demographicsResult,
         behaviorResult,
         topCustomersResult,
+        monthlyCustomersResult,
       ] = await Promise.all([
         getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate),
         getCustomerRetentionMetrics(dateRange.startDate, dateRange.endDate),
@@ -72,6 +76,7 @@ export function CustomerReportSection({
         getCustomerDemographics(),
         getCustomerBehavior(dateRange.startDate, dateRange.endDate),
         getTopCustomers(10),
+        getMonthlyCustomers(undefined, dateRange.startDate, dateRange.endDate),
       ]);
 
       if (trafficResult.data) setDailyTraffic(trafficResult.data);
@@ -80,6 +85,7 @@ export function CustomerReportSection({
       if (demographicsResult.data) setDemographics(demographicsResult.data);
       if (behaviorResult.data) setBehavior(behaviorResult.data);
       if (topCustomersResult.data) setTopCustomers(topCustomersResult.data);
+      setMonthlyCustomersCount(monthlyCustomersResult.count);
     } catch (error) {
       console.error("Error fetching customer analytics:", error);
     } finally {
@@ -228,16 +234,14 @@ export function CustomerReportSection({
                 tooltip: {
                   custom: function ({ series, seriesIndex, dataPointIndex }) {
                     const day = dailyTraffic[dataPointIndex];
-                    return `<div class="px-3 py-2">
-                      <div class="font-semibold text-gray-600">${
-                        day.day_name
-                      }</div>
-                      <div class="text-gray-600">${new Date(
-                        day.date
-                      ).toLocaleDateString()}</div>
-                      <div class="text-blue-600 font-bold">${
-                        day.customer_count
-                      } customers</div>
+                    if (!day) return '';
+                    return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+                      <div class="font-semibold text-gray-800 text-sm">${day.day_name}</div>
+                      <div class="text-gray-600 text-xs mb-2">${new Date(day.date).toLocaleDateString()}</div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span class="text-blue-600 font-bold text-sm">${day.customer_count} Customers</span>
+                      </div>
                     </div>`;
                   },
                 },
@@ -417,6 +421,29 @@ export function CustomerReportSection({
                   bar: {
                     borderRadius: 4,
                     horizontal: false,
+                  },
+                },
+                tooltip: {
+                  custom: function ({ series, seriesIndex, dataPointIndex }) {
+                    const categories = ["High Value", "Medium Value", "Low Value"];
+                    const colors = ["#10B981", "#3B82F6", "#EF4444"];
+                    const value = series[seriesIndex][dataPointIndex];
+                    const category = categories[dataPointIndex];
+                    const color = colors[dataPointIndex];
+                    
+                    let description = "";
+                    if (dataPointIndex === 0) description = "Above average lifetime value";
+                    else if (dataPointIndex === 1) description = "Average lifetime value";
+                    else description = "Below average lifetime value";
+                    
+                    return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+                      <div class="font-semibold text-gray-800 text-sm">${category} Customers</div>
+                      <div class="text-gray-600 text-xs mb-2">${description}</div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 rounded-full mr-2" style="background-color: ${color}"></div>
+                        <span class="font-bold text-sm" style="color: ${color}">${value} Customers</span>
+                      </div>
+                    </div>`;
                   },
                 },
               }}

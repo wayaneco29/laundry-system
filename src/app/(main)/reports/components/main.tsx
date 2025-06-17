@@ -236,6 +236,38 @@ function OverviewSection({
                   formatter: (value) => `₱${value}${chartData?.useThousands ? 'k' : ''}`,
                   style: { fontSize: "12px" }
                 }
+              },
+              tooltip: {
+                custom: function ({ series, seriesIndex, dataPointIndex }) {
+                  const months = [
+                    "January", "February", "March", "April", "May", "June",
+                    "July", "August", "September", "October", "November", "December"
+                  ];
+                  const monthName = months[dataPointIndex];
+                  const value = series[seriesIndex][dataPointIndex];
+                  const formattedValue = chartData?.useThousands 
+                    ? `₱${value}k` 
+                    : `₱${value?.toLocaleString() || 0}`;
+                  
+                  // Calculate percentage of yearly total
+                  const yearlyTotal = chartData?.totalYearSales || 0;
+                  const percentage = yearlyTotal > 0 ? Math.round((value / yearlyTotal) * 100) : 0;
+                  
+                  return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+                    <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
+                    <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>
+                    <div class="space-y-1">
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                        <span class="text-blue-600 font-bold text-sm">${formattedValue}</span>
+                      </div>
+                      <div class="flex items-center">
+                        <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                        <span class="text-green-600 text-sm">${percentage}% of yearly total</span>
+                      </div>
+                    </div>
+                  </div>`;
+                },
               }
             }}
             series={[{

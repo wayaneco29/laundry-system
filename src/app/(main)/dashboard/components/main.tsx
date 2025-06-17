@@ -68,7 +68,26 @@ const chartOptions: ApexOptions = {
   },
   tooltip: {
     enabled: true,
-
+    custom: function ({ series, seriesIndex, dataPointIndex }) {
+      const months = [
+        "January", "February", "March", "April", "May", "June",
+        "July", "August", "September", "October", "November", "December"
+      ];
+      const monthName = months[dataPointIndex];
+      const value = series[seriesIndex][dataPointIndex];
+      
+      // Get chartData from the component scope if possible, or use default formatting
+      const formattedValue = `₱${value?.toLocaleString() || 0}`;
+      
+      return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+        <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
+        <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>
+        <div class="flex items-center">
+          <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+          <span class="text-blue-600 font-bold text-sm">${formattedValue}</span>
+        </div>
+      </div>`;
+    },
     x: {
       show: true,
     },

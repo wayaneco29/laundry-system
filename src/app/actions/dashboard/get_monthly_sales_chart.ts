@@ -9,21 +9,24 @@ export type MonthlySalesChartData = {
   useThousands: boolean;
 };
 
-export async function getMonthlySalesChart(branchId?: string): Promise<{
+export async function getMonthlySalesChart(branchId?: string, startDate?: Date, endDate?: Date): Promise<{
   data: MonthlySalesChartData | null;
   error: string | null;
 }> {
   const supabase = await createClient();
 
   try {
-    const currentYear = new Date().getFullYear();
+    // Use provided date range or default to current year
+    const today = new Date();
+    const yearStart = startDate || new Date(today.getFullYear(), 0, 1);
+    const yearEnd = endDate || new Date(today.getFullYear(), 11, 31, 23, 59, 59);
 
     // Build query with optional branch filter
     let query = supabase
       .from("sales")
       .select("total_price, created_at")
-      .gte("created_at", `${currentYear}-01-01T00:00:00.000Z`)
-      .lt("created_at", `${currentYear + 1}-01-01T00:00:00.000Z`)
+      .gte("created_at", yearStart.toISOString())
+      .lte("created_at", yearEnd.toISOString())
       .eq("status", "Paid"); // Only include paid sales for the chart
     
     if (branchId) {

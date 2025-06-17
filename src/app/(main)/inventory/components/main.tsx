@@ -33,10 +33,11 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
     const items: any[] = [];
     branches.forEach((branch) => {
       if (branch.branch_stocks) {
-        const stocks = typeof branch.branch_stocks === 'string' 
-          ? JSON.parse(branch.branch_stocks) 
-          : branch.branch_stocks;
-        
+        const stocks =
+          typeof branch.branch_stocks === "string"
+            ? JSON.parse(branch.branch_stocks)
+            : branch.branch_stocks;
+
         if (Array.isArray(stocks)) {
           stocks.forEach((stock) => {
             items.push({
@@ -52,8 +53,8 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
   };
 
   const inventoryItems = getAllInventoryItems();
-  const lowStockItems = inventoryItems.filter(item => item.quantity <= 10);
-  const outOfStockItems = inventoryItems.filter(item => item.quantity === 0);
+  const lowStockItems = inventoryItems.filter((item) => item.quantity <= 10);
+  const outOfStockItems = inventoryItems.filter((item) => item.quantity === 0);
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
@@ -85,27 +86,33 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
             <Package className="h-8 w-8 text-blue-500" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">{inventoryItems.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {inventoryItems.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <AlertTriangle className="h-8 w-8 text-yellow-500" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Low Stock</p>
-              <p className="text-2xl font-bold text-gray-900">{lowStockItems.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {lowStockItems.length}
+              </p>
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <AlertTriangle className="h-8 w-8 text-red-500" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Out of Stock</p>
-              <p className="text-2xl font-bold text-gray-900">{outOfStockItems.length}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {outOfStockItems.length}
+              </p>
             </div>
           </div>
         </div>
@@ -113,14 +120,17 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
 
       {/* Branch Filter */}
       <div className="flex items-center gap-4 mb-4">
-        <label htmlFor="branch-filter" className="text-sm font-medium text-gray-700">
+        <label
+          htmlFor="branch-filter"
+          className="text-sm font-medium text-gray-700"
+        >
           Filter by Branch:
         </label>
         <select
           id="branch-filter"
           value={selectedBranch}
           onChange={(e) => setSelectedBranch(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 border border-gray-300 text-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value="">All Branches</option>
           {branches.map((branch) => (
@@ -150,7 +160,7 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
           />
         </div>
       </div>
-      
+
       <InventoryModal
         initialValue={initialValue}
         showModal={showModal}

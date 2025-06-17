@@ -8,14 +8,14 @@ export type MonthlySalesData = {
   totalSales: number;
 };
 
-export async function getMonthSales(branchId?: string): Promise<{ data: MonthlySalesData | null; error: string | null }> {
+export async function getMonthSales(branchId?: string, startDate?: Date, endDate?: Date): Promise<{ data: MonthlySalesData | null; error: string | null }> {
   const supabase = await createClient();
   
   try {
-    // Get current month date range
+    // Use provided date range or default to current month
     const today = new Date();
-    const monthStart = new Date(today.getFullYear(), today.getMonth(), 1);
-    const monthEnd = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+    const monthStart = startDate || new Date(today.getFullYear(), today.getMonth(), 1);
+    const monthEnd = endDate || new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
     
     // Build queries with optional branch filter
     let paidQuery = supabase
