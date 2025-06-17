@@ -1,9 +1,22 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { UsersIcon, UserPlusIcon, ClockIcon, ArrowTrendingUpIcon } from "@heroicons/react/24/outline";
+import { UsersIcon, UserPlusIcon, ClockIcon, ArrowTrendingUpIcon, CurrencyDollarIcon, StarIcon } from "@heroicons/react/24/outline";
 import { ApexChart } from "@/app/components/charts/apex-chart";
-import { getDailyCustomerTraffic, DailyCustomerTraffic } from "@/app/actions/customer";
+import { 
+  getDailyCustomerTraffic, 
+  getCustomerRetentionMetrics,
+  getCustomerLifetimeValue,
+  getCustomerDemographics,
+  getCustomerBehavior,
+  getTopCustomers,
+  DailyCustomerTraffic,
+  CustomerRetentionMetrics,
+  CustomerLifetimeValue,
+  CustomerDemographics,
+  CustomerBehavior,
+  TopCustomer
+} from "@/app/actions/customer";
 
 type CustomerReportSectionProps = {
   monthlyCustomersCount: number;
@@ -20,53 +33,74 @@ export function CustomerReportSection({
   dateRange 
 }: CustomerReportSectionProps) {
   const [dailyTraffic, setDailyTraffic] = useState<DailyCustomerTraffic[]>([]);
+  const [retentionMetrics, setRetentionMetrics] = useState<CustomerRetentionMetrics | null>(null);
+  const [lifetimeValue, setLifetimeValue] = useState<CustomerLifetimeValue | null>(null);
+  const [demographics, setDemographics] = useState<CustomerDemographics | null>(null);
+  const [behavior, setBehavior] = useState<CustomerBehavior | null>(null);
+  const [topCustomers, setTopCustomers] = useState<TopCustomer[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchDailyTraffic();
+    fetchCustomerAnalytics();
   }, [dateRange]);
 
-  const fetchDailyTraffic = async () => {
+  const fetchCustomerAnalytics = async () => {
     setLoading(true);
     try {
-      const result = await getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate);
-      if (result.data) {
-        setDailyTraffic(result.data);
-      }
+      const [
+        trafficResult,
+        retentionResult,
+        ltvResult,
+        demographicsResult,
+        behaviorResult,
+        topCustomersResult
+      ] = await Promise.all([
+        getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate),
+        getCustomerRetentionMetrics(dateRange.startDate, dateRange.endDate),
+        getCustomerLifetimeValue(),
+        getCustomerDemographics(),
+        getCustomerBehavior(dateRange.startDate, dateRange.endDate),
+        getTopCustomers(10)
+      ]);
+
+      if (trafficResult.data) setDailyTraffic(trafficResult.data);
+      if (retentionResult.data) setRetentionMetrics(retentionResult.data);
+      if (ltvResult.data) setLifetimeValue(ltvResult.data);
+      if (demographicsResult.data) setDemographics(demographicsResult.data);
+      if (behaviorResult.data) setBehavior(behaviorResult.data);
+      if (topCustomersResult.data) setTopCustomers(topCustomersResult.data);
     } catch (error) {
-      console.error('Error fetching daily traffic:', error);
+      console.error('Error fetching customer analytics:', error);
     } finally {
       setLoading(false);
     }
   };
   const customerMetrics = [
     {
-      title: "Total Customers (Month)",
-      value: monthlyCustomersCount.toString(),
+      title: "Total Customers",
+      value: retentionMetrics?.total_customers?.toString() || monthlyCustomersCount.toString(),
       icon: UsersIcon,
       color: "from-blue-100 to-blue-50",
       iconColor: "bg-blue-500",
     },
     {
-      title: "Today's Customers",
-      value: todayCustomersCount.toString(),
+      title: "New Customers",
+      value: retentionMetrics?.new_customers?.toString() || "0",
       icon: UserPlusIcon,
       color: "from-green-100 to-green-50",
       iconColor: "bg-green-500",
     },
     {
-      title: "Daily Average",
-      value: dailyTraffic.length > 0 
-        ? Math.round(dailyTraffic.reduce((sum, day) => sum + day.customer_count, 0) / dailyTraffic.length).toString()
-        : "0",
-      icon: ClockIcon,
+      title: "Retention Rate",
+      value: retentionMetrics?.retention_rate ? `${retentionMetrics.retention_rate}%` : "0%",
+      icon: ArrowTrendingUpIcon,
       color: "from-purple-100 to-purple-50",
       iconColor: "bg-purple-500",
     },
     {
-      title: "Growth Rate",
-      value: "+12%", // Mock data - would need historical comparison
-      icon: ArrowTrendingUpIcon,
+      title: "Avg Lifetime Value",
+      value: lifetimeValue?.average_ltv ? `₱${lifetimeValue.average_ltv.toLocaleString()}` : "₱0",
+      icon: CurrencyDollarIcon,
       color: "from-orange-100 to-orange-50",
       iconColor: "bg-orange-500",
     }
@@ -77,29 +111,43 @@ export function CustomerReportSection({
     ? dailyTraffic.reduce((max, day) => day.customer_count > max.customer_count ? day : max, dailyTraffic[0])
     : null;
 
-  const customerTypeData = [65, 35]; // Returning vs New customers
+  // Customer type data for donut chart
+  const customerTypeData = retentionMetrics ? [
+    retentionMetrics.returning_customers,
+    retentionMetrics.new_customers
+  ] : [0, 0];
 
   return (
     <div className="space-y-6">
       {/* Customer Metrics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {customerMetrics.map((metric, index) => {
-          const Icon = metric.icon;
-          return (
-            <div key={index} className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-sm font-medium text-gray-600">{metric.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
-                </div>
-                <div className={`${metric.iconColor} p-3 rounded-full`}>
-                  <Icon className="h-6 w-6 text-white" />
+      {loading ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {[1, 2, 3, 4].map((i) => (
+            <div key={i} className="bg-gray-100 rounded-lg p-6 shadow-sm animate-pulse">
+              <div className="h-20"></div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          {customerMetrics.map((metric, index) => {
+            const Icon = metric.icon;
+            return (
+              <div key={index} className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-600">{metric.title}</p>
+                    <p className="text-2xl font-bold text-gray-900 mt-1">{metric.value}</p>
+                  </div>
+                  <div className={`${metric.iconColor} p-3 rounded-full`}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
 
       {/* Charts Section */}
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
@@ -168,38 +216,44 @@ export function CustomerReportSection({
         {/* Customer Type Distribution */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <h3 className="text-lg font-semibold text-gray-900 mb-4">Customer Type Distribution</h3>
-          <ApexChart
-            options={{
-              chart: { type: "donut" },
-              labels: ["Returning Customers", "New Customers"],
-              colors: ["#10B981", "#3B82F6"],
-              dataLabels: {
-                enabled: true,
-                formatter: (val) => `${Math.round(val as number)}%`
-              },
-              plotOptions: {
-                pie: {
-                  donut: {
-                    size: "65%",
-                    labels: {
-                      show: true,
-                      total: {
+          {loading ? (
+            <div className="flex items-center justify-center h-80">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <ApexChart
+              options={{
+                chart: { type: "donut" },
+                labels: ["Returning Customers", "New Customers"],
+                colors: ["#10B981", "#3B82F6"],
+                dataLabels: {
+                  enabled: true,
+                  formatter: (val) => `${Math.round(val as number)}%`
+                },
+                plotOptions: {
+                  pie: {
+                    donut: {
+                      size: "65%",
+                      labels: {
                         show: true,
-                        label: "Total",
-                        formatter: () => monthlyCustomersCount.toString()
+                        total: {
+                          show: true,
+                          label: "Total",
+                          formatter: () => retentionMetrics?.total_customers?.toString() || "0"
+                        }
                       }
                     }
                   }
+                },
+                legend: {
+                  position: "bottom"
                 }
-              },
-              legend: {
-                position: "bottom"
-              }
-            }}
-            series={customerTypeData}
-            type="donut"
-            height={300}
-          />
+              }}
+              series={customerTypeData}
+              type="donut"
+              height={300}
+            />
+          )}
         </div>
       </div>
 
@@ -209,33 +263,185 @@ export function CustomerReportSection({
           <h3 className="text-lg font-semibold text-gray-900">Customer Insights</h3>
         </div>
         <div className="p-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Peak Day</span>
-                <span className="text-lg font-bold text-gray-900">
-                  {peakDay ? peakDay.day_name : "No data"}
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 mt-1">
-                {peakDay ? `${peakDay.customer_count} customers on ${new Date(peakDay.date).toLocaleDateString()}` : "Highest customer traffic"}
-              </p>
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="p-4 bg-gray-50 rounded-lg animate-pulse">
+                  <div className="h-16"></div>
+                </div>
+              ))}
             </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Retention Rate</span>
-                <span className="text-lg font-bold text-green-600">65%</span>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Peak Day</span>
+                  <span className="text-lg font-bold text-gray-900">
+                    {peakDay ? peakDay.day_name : "No data"}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">
+                  {peakDay ? `${peakDay.customer_count} customers on ${new Date(peakDay.date).toLocaleDateString()}` : "Highest customer traffic"}
+                </p>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Customers returning monthly</p>
-            </div>
-            <div className="p-4 bg-gray-50 rounded-lg">
-              <div className="flex justify-between items-center">
-                <span className="text-sm font-medium text-gray-600">Avg. Visit Frequency</span>
-                <span className="text-lg font-bold text-blue-600">2.3x</span>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Avg. Order Frequency</span>
+                  <span className="text-lg font-bold text-blue-600">
+                    {behavior?.average_order_frequency ? `${behavior.average_order_frequency}x` : "0x"}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Orders per customer</p>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Times per month</p>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">High Value Customers</span>
+                  <span className="text-lg font-bold text-green-600">
+                    {lifetimeValue?.high_value_customers || 0}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Above average LTV</p>
+              </div>
+              <div className="p-4 bg-gray-50 rounded-lg">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium text-gray-600">Churn Rate</span>
+                  <span className="text-lg font-bold text-red-600">
+                    {retentionMetrics?.churn_rate ? `${retentionMetrics.churn_rate}%` : "0%"}
+                  </span>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Customer loss rate</p>
+              </div>
             </div>
-          </div>
+          )}
+        </div>
+      </div>
+
+      {/* Customer Lifetime Value Analysis */}
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Customer Value Distribution</h3>
+        </div>
+        <div className="p-6">
+          {loading ? (
+            <div className="flex items-center justify-center h-80">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : lifetimeValue ? (
+            <ApexChart
+              options={{
+                chart: { type: "bar", toolbar: { show: false } },
+                colors: ["#10B981", "#3B82F6", "#EF4444"],
+                dataLabels: { enabled: true },
+                grid: { borderColor: "#E5E7EB" },
+                xaxis: {
+                  categories: ["High Value", "Medium Value", "Low Value"],
+                  labels: { style: { fontSize: "12px" } }
+                },
+                yaxis: {
+                  labels: {
+                    formatter: (value) => Math.round(value).toString(),
+                    style: { fontSize: "12px" }
+                  }
+                },
+                plotOptions: {
+                  bar: {
+                    borderRadius: 4,
+                    horizontal: false
+                  }
+                }
+              }}
+              series={[{
+                name: "Customers",
+                data: [
+                  lifetimeValue.high_value_customers,
+                  lifetimeValue.medium_value_customers,
+                  lifetimeValue.low_value_customers
+                ]
+              }]}
+              type="bar"
+              height={300}
+            />
+          ) : (
+            <div className="flex items-center justify-center h-80 text-gray-500">
+              No customer value data available
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Top Customers Table */}
+      <div className="bg-white rounded-lg shadow-sm">
+        <div className="px-6 py-4 border-b border-gray-200">
+          <h3 className="text-lg font-semibold text-gray-900">Top Customers</h3>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="min-w-full divide-y divide-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Customer Name
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total Orders
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Total Spent
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Last Order
+                </th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Customer Since
+                </th>
+              </tr>
+            </thead>
+            <tbody className="bg-white divide-y divide-gray-200">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse">
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                    <td className="px-6 py-4"><div className="h-4 bg-gray-200 rounded"></div></td>
+                  </tr>
+                ))
+              ) : topCustomers.length > 0 ? (
+                topCustomers.map((customer, index) => (
+                  <tr key={index} className="hover:bg-gray-50">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className={`flex-shrink-0 h-8 w-8 rounded-full ${index < 3 ? 'bg-yellow-100 text-yellow-800' : 'bg-gray-100 text-gray-800'} flex items-center justify-center text-xs font-bold`}>
+                          {index < 3 ? <StarIcon className="h-4 w-4" /> : index + 1}
+                        </div>
+                        <div className="ml-4">
+                          <div className="text-sm font-medium text-gray-900">{customer.customer_name}</div>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm text-gray-900">{customer.total_orders}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="text-sm font-medium text-gray-900">₱{customer.total_spent.toLocaleString()}</div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(customer.last_order_date).toLocaleDateString()}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {new Date(customer.customer_since).toLocaleDateString()}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={5} className="px-6 py-4 text-center text-sm text-gray-500">
+                    No customer data available
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
       </div>
     </div>
