@@ -1,7 +1,9 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { UsersIcon, UserPlusIcon, ClockIcon, ArrowTrendingUpIcon } from "@heroicons/react/24/outline";
 import { ApexChart } from "@/app/components/charts/apex-chart";
+import { getDailyCustomerTraffic, DailyCustomerTraffic } from "@/app/actions/customer";
 
 type CustomerReportSectionProps = {
   monthlyCustomersCount: number;
@@ -14,8 +16,29 @@ type CustomerReportSectionProps = {
 
 export function CustomerReportSection({ 
   monthlyCustomersCount, 
-  todayCustomersCount 
+  todayCustomersCount,
+  dateRange 
 }: CustomerReportSectionProps) {
+  const [dailyTraffic, setDailyTraffic] = useState<DailyCustomerTraffic[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchDailyTraffic();
+  }, [dateRange]);
+
+  const fetchDailyTraffic = async () => {
+    setLoading(true);
+    try {
+      const result = await getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate);
+      if (result.data) {
+        setDailyTraffic(result.data);
+      }
+    } catch (error) {
+      console.error('Error fetching daily traffic:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
   const customerMetrics = [
     {
       title: "Total Customers (Month)",
@@ -33,7 +56,9 @@ export function CustomerReportSection({
     },
     {
       title: "Daily Average",
-      value: Math.round(monthlyCustomersCount / new Date().getDate()).toString(),
+      value: dailyTraffic.length > 0 
+        ? Math.round(dailyTraffic.reduce((sum, day) => sum + day.customer_count, 0) / dailyTraffic.length).toString()
+        : "0",
       icon: ClockIcon,
       color: "from-purple-100 to-purple-50",
       iconColor: "bg-purple-500",
@@ -47,10 +72,10 @@ export function CustomerReportSection({
     }
   ];
 
-  // Mock data for customer charts - in real app, would fetch from API
-  const dailyCustomersData = Array.from({ length: 30 }, () => 
-    Math.floor(Math.random() * 10) + 5
-  );
+  // Get peak day info
+  const peakDay = dailyTraffic.length > 0 
+    ? dailyTraffic.reduce((max, day) => day.customer_count > max.customer_count ? day : max, dailyTraffic[0])
+    : null;
 
   const customerTypeData = [65, 35]; // Returning vs New customers
 
@@ -82,40 +107,62 @@ export function CustomerReportSection({
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-lg font-semibold text-gray-900">Daily Customer Traffic</h3>
-            <span className="text-sm text-gray-500">Last 30 Days</span>
+            <span className="text-sm text-gray-500">
+              {dateRange.startDate.toLocaleDateString()} - {dateRange.endDate.toLocaleDateString()}
+            </span>
           </div>
-          <ApexChart
-            options={{
-              chart: { type: "bar", toolbar: { show: false } },
-              colors: ["#3B82F6"],
-              dataLabels: { enabled: false },
-              grid: { borderColor: "#E5E7EB" },
-              xaxis: {
-                categories: Array.from({ length: 30 }, (_, i) => `Day ${i + 1}`),
-                labels: { 
-                  show: false // Hide x-axis labels for cleaner look
+          {loading ? (
+            <div className="flex items-center justify-center h-80">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            </div>
+          ) : (
+            <ApexChart
+              options={{
+                chart: { type: "bar", toolbar: { show: false } },
+                colors: ["#3B82F6"],
+                dataLabels: { enabled: false },
+                grid: { borderColor: "#E5E7EB" },
+                xaxis: {
+                  categories: dailyTraffic.map(day => {
+                    const date = new Date(day.date);
+                    return `${date.getMonth() + 1}/${date.getDate()}`;
+                  }),
+                  labels: { 
+                    rotate: -45,
+                    style: { fontSize: "10px" }
+                  }
+                },
+                yaxis: {
+                  labels: {
+                    formatter: (value) => Math.round(value).toString(),
+                    style: { fontSize: "12px" }
+                  }
+                },
+                plotOptions: {
+                  bar: {
+                    borderRadius: 4,
+                    columnWidth: "80%"
+                  }
+                },
+                tooltip: {
+                  custom: function({ series, seriesIndex, dataPointIndex }) {
+                    const day = dailyTraffic[dataPointIndex];
+                    return `<div class="px-3 py-2">
+                      <div class="font-semibold">${day.day_name}</div>
+                      <div>${new Date(day.date).toLocaleDateString()}</div>
+                      <div class="text-blue-600 font-bold">${day.customer_count} customers</div>
+                    </div>`;
+                  }
                 }
-              },
-              yaxis: {
-                labels: {
-                  formatter: (value) => Math.round(value).toString(),
-                  style: { fontSize: "12px" }
-                }
-              },
-              plotOptions: {
-                bar: {
-                  borderRadius: 4,
-                  columnWidth: "80%"
-                }
-              }
-            }}
-            series={[{
-              name: "Customers",
-              data: dailyCustomersData
-            }]}
-            type="bar"
-            height={300}
-          />
+              }}
+              series={[{
+                name: "Customers",
+                data: dailyTraffic.map(day => day.customer_count)
+              }]}
+              type="bar"
+              height={300}
+            />
+          )}
         </div>
 
         {/* Customer Type Distribution */}
@@ -166,9 +213,13 @@ export function CustomerReportSection({
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center">
                 <span className="text-sm font-medium text-gray-600">Peak Day</span>
-                <span className="text-lg font-bold text-gray-900">Saturday</span>
+                <span className="text-lg font-bold text-gray-900">
+                  {peakDay ? peakDay.day_name : "No data"}
+                </span>
               </div>
-              <p className="text-xs text-gray-500 mt-1">Highest customer traffic</p>
+              <p className="text-xs text-gray-500 mt-1">
+                {peakDay ? `${peakDay.customer_count} customers on ${new Date(peakDay.date).toLocaleDateString()}` : "Highest customer traffic"}
+              </p>
             </div>
             <div className="p-4 bg-gray-50 rounded-lg">
               <div className="flex justify-between items-center">
