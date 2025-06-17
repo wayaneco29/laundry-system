@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { upsertStaff } from "@/app/actions";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input, Datepicker } from "@/app/components/common";
 import { useForm, Controller } from "react-hook-form";
 
@@ -39,6 +40,7 @@ export const UpsertStaffModal = ({
   showModal,
   onClose,
 }: UpsertStaffModalProps) => {
+  const { userId } = useCurrentUser();
   const {
     reset,
     control,
@@ -251,7 +253,7 @@ export const UpsertStaffModal = ({
                   p_email: newData?.email || "",
                   p_address: newData?.address,
                   p_employment_date: newData?.employment_date,
-                  p_created_by: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  p_created_by: userId!, // Use authenticated user ID
                 });
 
                 if (error) throw error;

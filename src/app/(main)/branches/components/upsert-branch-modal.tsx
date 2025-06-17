@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { Building2, MapPin, FileText, Save, X } from "lucide-react";
 
 import { upsertBranch } from "@/app/actions/branch/upsert_branch";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input } from "@/app/components/common";
 
 type UpsertBranchModalProps = {
@@ -17,6 +18,7 @@ export const UpsertBranchModal = ({
   showModal,
   onClose,
 }: UpsertBranchModalProps) => {
+  const { userId } = useCurrentUser();
   const {
     reset,
     control,
@@ -149,7 +151,7 @@ export const UpsertBranchModal = ({
                   p_name: newData?.name,
                   p_description: newData?.description,
                   p_address: newData?.address,
-                  p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  p_staff_id: userId!, // Use authenticated user ID
                 });
 
                 if (error) throw error;

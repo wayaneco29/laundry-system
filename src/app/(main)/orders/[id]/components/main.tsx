@@ -2,6 +2,7 @@
 
 import moment from "moment";
 import { Button } from "@/app/components/common";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useState } from "react";
 import {
   ArrowLeft,
@@ -29,6 +30,7 @@ type MainOrderIdPageProps = {
 
 export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
   const router = useRouter();
+  const { userId } = useCurrentUser();
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
@@ -94,7 +96,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
       const { error } = await updateOrderStatus({
         p_order_id: data?.order_id,
         p_order_status: newStatus,
-        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+        p_staff_id: userId!, // Use authenticated user ID
       });
 
       if (error) throw error;
@@ -120,7 +122,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
       const { error } = await updatePaymentStatus({
         p_order_id: data?.order_id,
         p_payment_status: newStatus,
-        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+        p_staff_id: userId!, // Use authenticated user ID
       });
 
       if (error) throw error;

@@ -25,6 +25,7 @@ import {
 } from "@/app/components/common";
 
 import { customerRevalidateTag, upsertPromo } from "@/app/actions";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { PROMO_STATUS_DROPDOWN } from "@/app/constants";
 import { PromoTable } from "./promo-table";
 
@@ -33,6 +34,7 @@ type MainPromoPageProps = {
 };
 
 export function MainPromoPage({ promo_list }: MainPromoPageProps) {
+  const { userId } = useCurrentUser();
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const {
@@ -109,7 +111,7 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                 isUpdate: true,
                 code: promo?.code,
                 description: promo?.description,
-                id: promo?.id,
+                id: promo?.promo_id,
                 name: promo?.name,
                 status: promo?.status,
                 valid_until: promo?.valid_until,
@@ -287,7 +289,7 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
                     p_description: newData?.description,
                     p_valid_until: newData?.valid_until,
                     p_status: newData?.status,
-                    p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                    p_staff_id: userId!, // Use authenticated user ID
                   });
                   if (error) throw error;
 

@@ -8,6 +8,7 @@ import { Package, DollarSign, CheckCircle, Save, X } from "lucide-react";
 import { Modal, Button, Select, Input } from "@/app/components/common";
 import { SERVICE_STATUS_DROPDOWN } from "@/app/constants";
 import { BranchProvider } from "@/app/providers";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { upsertService } from "@/app/actions";
 
 type ServiceModalProps = {
@@ -28,6 +29,7 @@ export const ServiceModal = ({
   onClose,
   initialValue,
 }: ServiceModalProps) => {
+  const { userId } = useCurrentUser();
   const {
     reset,
     control,
@@ -183,7 +185,7 @@ export const ServiceModal = ({
                   p_name: newData.name,
                   p_price: newData.price,
                   p_status: newData.status,
-                  p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  p_staff_id: userId!, // Use authenticated user ID
                 });
 
                 if (error) throw error;

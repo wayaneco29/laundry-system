@@ -6,6 +6,7 @@ import * as Yup from "yup";
 import { User, Phone, Mail, MapPin, Save, X } from "lucide-react";
 
 import { upsertCustomer } from "@/app/actions";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input } from "@/app/components/common";
 
 type UpsertCustomerModalProps = {
@@ -17,6 +18,7 @@ export const UpsertCustomerModal = ({
   showModal,
   onClose,
 }: UpsertCustomerModalProps) => {
+  const { userId } = useCurrentUser();
   const {
     reset,
     control,
@@ -198,7 +200,7 @@ export const UpsertCustomerModal = ({
                   p_phone: newData?.phone,
                   p_email: newData?.email || "",
                   p_address: newData?.address,
-                  p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                  p_staff_id: userId!, // Use authenticated user ID
                 });
 
                 if (error) throw error;

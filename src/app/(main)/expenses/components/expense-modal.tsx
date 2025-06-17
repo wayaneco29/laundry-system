@@ -27,27 +27,6 @@ const expenseCategories = [
   { label: "Other", value: "Other" },
 ];
 
-const paymentMethods = [
-  { label: "Cash", value: "Cash" },
-  { label: "Bank Transfer", value: "Bank Transfer" },
-  { label: "Credit Card", value: "Credit Card" },
-  { label: "Check", value: "Check" },
-  { label: "Other", value: "Other" },
-];
-
-const recurringFrequencies = [
-  { label: "Weekly", value: "Weekly" },
-  { label: "Monthly", value: "Monthly" },
-  { label: "Quarterly", value: "Quarterly" },
-  { label: "Yearly", value: "Yearly" },
-];
-
-const statusOptions = [
-  { label: "Pending", value: "Pending" },
-  { label: "Approved", value: "Approved" },
-  { label: "Rejected", value: "Rejected" },
-  { label: "Paid", value: "Paid" },
-];
 
 export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: ExpenseModalProps) {
   const [formData, setFormData] = useState({
@@ -57,14 +36,6 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
     category: 'Supplies',
     expense_date: new Date().toISOString().split('T')[0],
     branch_id: '',
-    vendor_name: '',
-    vendor_contact: '',
-    payment_method: 'Cash',
-    is_recurring: false,
-    recurring_frequency: '',
-    next_due_date: '',
-    status: 'Pending',
-    notes: '',
   });
 
   const [branches, setBranches] = useState<any[]>([]);
@@ -85,14 +56,6 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
           category: expense.category || 'Supplies',
           expense_date: expense.expense_date || new Date().toISOString().split('T')[0],
           branch_id: expense.branch_id || '',
-          vendor_name: expense.vendor_name || '',
-          vendor_contact: expense.vendor_contact || '',
-          payment_method: expense.payment_method || 'Cash',
-          is_recurring: expense.is_recurring || false,
-          recurring_frequency: expense.recurring_frequency || '',
-          next_due_date: expense.next_due_date || '',
-          status: expense.status || 'Pending',
-          notes: expense.notes || '',
         });
       } else {
         // Reset form for create mode
@@ -103,14 +66,6 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
           category: 'Supplies',
           expense_date: new Date().toISOString().split('T')[0],
           branch_id: '',
-          vendor_name: '',
-          vendor_contact: '',
-          payment_method: 'Cash',
-          is_recurring: false,
-          recurring_frequency: '',
-          next_due_date: '',
-          status: 'Pending',
-          notes: '',
         });
       }
       setErrors({});
@@ -147,14 +102,6 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
       newErrors.expense_date = 'Expense date is required';
     }
 
-    if (formData.is_recurring && !formData.recurring_frequency) {
-      newErrors.recurring_frequency = 'Recurring frequency is required for recurring expenses';
-    }
-
-    if (formData.is_recurring && !formData.next_due_date) {
-      newErrors.next_due_date = 'Next due date is required for recurring expenses';
-    }
-
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -177,14 +124,6 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
         p_category: formData.category as any,
         p_expense_date: formData.expense_date,
         p_branch_id: formData.branch_id || undefined,
-        p_vendor_name: formData.vendor_name || undefined,
-        p_vendor_contact: formData.vendor_contact || undefined,
-        p_payment_method: formData.payment_method as any,
-        p_is_recurring: formData.is_recurring,
-        p_recurring_frequency: formData.recurring_frequency as any || undefined,
-        p_next_due_date: formData.next_due_date || undefined,
-        p_status: formData.status as any,
-        p_notes: formData.notes || undefined,
         p_created_by: userId
       });
 
@@ -204,7 +143,10 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
   };
 
   const handleInputChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    // Extract value if it's an object from Select component
+    const actualValue = typeof value === 'object' && value?.value !== undefined ? value.value : value;
+    
+    setFormData(prev => ({ ...prev, [field]: actualValue }));
     
     // Clear error when user starts typing
     if (errors[field]) {
@@ -305,109 +247,6 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
             />
           </div>
 
-          {/* Vendor Information */}
-          <div>
-            <Input
-              label="Vendor Name"
-              type="text"
-              value={formData.vendor_name}
-              onChange={(e) => handleInputChange('vendor_name', e.target.value)}
-              disabled={mode === 'view'}
-              placeholder="Enter vendor name"
-            />
-          </div>
-
-          <div>
-            <Input
-              label="Vendor Contact"
-              type="text"
-              value={formData.vendor_contact}
-              onChange={(e) => handleInputChange('vendor_contact', e.target.value)}
-              disabled={mode === 'view'}
-              placeholder="Phone or email"
-            />
-          </div>
-
-          {/* Payment Information */}
-          <div>
-            <Select
-              label="Payment Method"
-              options={paymentMethods}
-              value={formData.payment_method}
-              onChange={(value) => handleInputChange('payment_method', value)}
-              disabled={mode === 'view'}
-            />
-          </div>
-
-
-          {/* Recurring Options */}
-          <div className="md:col-span-2">
-            <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                checked={formData.is_recurring}
-                onChange={(e) => {
-                  console.log('Recurring checkbox changed:', e.target.checked);
-                  handleInputChange('is_recurring', e.target.checked);
-                }}
-                disabled={mode === 'view'}
-                className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-              />
-              <span className="text-sm font-medium text-gray-700">This is a recurring expense</span>
-            </label>
-          </div>
-
-          {formData.is_recurring && (
-            <>
-              <div>
-                <Select
-                  label="Recurring Frequency *"
-                  options={recurringFrequencies}
-                  value={formData.recurring_frequency}
-                  onChange={(value) => handleInputChange('recurring_frequency', value)}
-                  error={errors.recurring_frequency}
-                  disabled={mode === 'view'}
-                />
-              </div>
-
-              <div>
-                <Datepicker
-                  label="Next Due Date *"
-                  value={formData.next_due_date ? new Date(formData.next_due_date) : new Date()}
-                  onChange={(date) => handleInputChange('next_due_date', date)}
-                  error={!!errors.next_due_date}
-                  placeholder="Select next due date"
-                />
-                {errors.next_due_date && (
-                  <p className="mt-1 text-sm text-red-600">{errors.next_due_date}</p>
-                )}
-              </div>
-            </>
-          )}
-
-          {/* Status */}
-          <div>
-            <Select
-              label="Status"
-              options={statusOptions}
-              value={formData.status}
-              onChange={(value) => handleInputChange('status', value)}
-              disabled={mode === 'view'}
-            />
-          </div>
-
-          {/* Notes */}
-          <div className="md:col-span-2">
-            <Input
-              label="Notes"
-              type="textarea"
-              value={formData.notes}
-              onChange={(e) => handleInputChange('notes', e.target.value)}
-              disabled={mode === 'view'}
-              placeholder="Additional notes..."
-              rows={3}
-            />
-          </div>
         </div>
 
         {mode !== 'view' && (

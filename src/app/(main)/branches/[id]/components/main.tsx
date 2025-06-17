@@ -9,6 +9,7 @@ import { upsertBranchStocks } from "@/app/actions";
 import { ArrowLongLeftIcon } from "@heroicons/react/24/solid";
 import { useRouter } from "next/navigation";
 import { upsertBranch } from "@/app/actions/branch/upsert_branch";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useState } from "react";
 
 type StockType = {
@@ -29,6 +30,7 @@ type MainBranchIDPageProps = {
 
 export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
   const router = useRouter();
+  const { userId } = useCurrentUser();
 
   const [showStockModal, setShowStockModal] = useState<boolean>(false);
   const {
@@ -106,7 +108,7 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                         p_name: data?.name,
                         p_description: data?.description,
                         p_address: data?.address,
-                        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+                        p_staff_id: userId!, // Use authenticated user ID
                       });
 
                       if (error) throw error;
@@ -305,11 +307,13 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                 try {
                   const result = await upsertBranchStocks({
                     branchId: branch_info?.id,
-                    stocks: [{
-                      id: newData?.id || crypto.randomUUID(),
-                      name: newData?.name,
-                      quantity: Number(newData?.quantity),
-                    }]
+                    stocks: [
+                      {
+                        id: newData?.id || crypto.randomUUID(),
+                        name: newData?.name,
+                        quantity: Number(newData?.quantity),
+                      },
+                    ],
                   });
 
                   if (!result.success) throw new Error(result.message);

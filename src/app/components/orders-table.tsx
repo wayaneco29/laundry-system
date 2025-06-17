@@ -3,6 +3,7 @@
 import moment from "moment";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import {
   ChevronDown,
   Edit3,
@@ -23,9 +24,10 @@ type OrdersTableProps = {
 
 export const OrdersTable = ({ data }: OrdersTableProps) => {
   const router = useRouter();
+  const { userId } = useCurrentUser();
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [loadingOrders, setLoadingOrders] = useState<Set<string>>(new Set());
-
+  console.log("OrdersTable data:", data);
   const orderStatuses = [
     "Pending",
     "Ongoing",
@@ -75,7 +77,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
       const { error } = await updateOrderStatus({
         p_order_id,
         p_order_status,
-        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+        p_staff_id: userId!, // Use authenticated user ID
       });
 
       if (error) throw error;
@@ -101,7 +103,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
       const { error } = await updatePaymentStatus({
         p_order_id,
         p_payment_status,
-        p_staff_id: "ed541d2d-bc64-4a03-b4b9-e122310c661c",
+        p_staff_id: userId!, // Use authenticated user ID
       });
 
       if (error) throw error;
@@ -320,7 +322,10 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
                     type="payment"
                     orderId={order.order_id}
                     onClick={() =>
-                      handlePaymentStatusClick(order.order_id, order.payment_status)
+                      handlePaymentStatusClick(
+                        order.order_id,
+                        order.payment_status
+                      )
                     }
                     isLoading={loadingOrders.has(order.order_id)}
                   />

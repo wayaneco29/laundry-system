@@ -18,6 +18,7 @@ import {
 import { Button, Input, Select } from "@/app/components/common";
 import { PaymentModal } from "../../components/payment-modal";
 import { addOrder, getAllCustomers } from "@/app/actions";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 import moment from "moment";
 
 type MainAddPageProps = {
@@ -27,6 +28,7 @@ type MainAddPageProps = {
 
 export const MainAddPage = ({ data }: MainAddPageProps) => {
   const router = useRouter();
+  const { userId } = useCurrentUser();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -95,10 +97,11 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
     setIsConfirming(true);
 
     try {
+      // TODO: Replace hardcoded branch_id with proper branch context/selection
       const { error } = await addOrder({
         p_branch_id: "f618210d-01ef-4bd5-8602-d6ff66e12ec7",
         p_customer_id: selectedCustomer, // Use selected customer ID
-        p_staff_id: "acc38e50-d753-4cb5-a09c-7a179a56fc39",
+        p_staff_id: userId!, // Use authenticated user ID
         p_items: selectedServices,
         p_order_date: moment().toISOString(),
         p_order_status: "Pending",

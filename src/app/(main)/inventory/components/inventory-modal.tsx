@@ -44,6 +44,7 @@ export function InventoryModal({
   }, [initialValue, reset]);
 
   const onSubmit = async (data: InventoryFormData) => {
+    console.log("Form data submitted:", data);
     try {
       const quantity = parseInt(data.quantity);
       if (isNaN(quantity) || quantity < 0) {
@@ -52,7 +53,7 @@ export function InventoryModal({
       }
 
       // Find the selected branch
-      const selectedBranch = branches.find(b => b.id === data.branchId);
+      const selectedBranch = branches.find((b) => b.id === data.branchId);
       if (!selectedBranch) {
         alert("Selected branch not found");
         return;
@@ -61,9 +62,10 @@ export function InventoryModal({
       // Get current branch stocks
       let currentStocks = [];
       if (selectedBranch.branch_stocks) {
-        currentStocks = typeof selectedBranch.branch_stocks === 'string' 
-          ? JSON.parse(selectedBranch.branch_stocks) 
-          : selectedBranch.branch_stocks;
+        currentStocks =
+          typeof selectedBranch.branch_stocks === "string"
+            ? JSON.parse(selectedBranch.branch_stocks)
+            : selectedBranch.branch_stocks;
       }
 
       // Ensure currentStocks is an array
@@ -80,7 +82,7 @@ export function InventoryModal({
       let updatedStocks;
       if (data.isUpdate && data.id) {
         // Update existing item
-        updatedStocks = currentStocks.map(stock => 
+        updatedStocks = currentStocks.map((stock) =>
           stock.id === data.id ? newItem : stock
         );
       } else {
@@ -117,7 +119,9 @@ export function InventoryModal({
 
     try {
       // Find the selected branch
-      const selectedBranch = branches.find(b => b.id === initialValue.branchId);
+      const selectedBranch = branches.find(
+        (b) => b.id === initialValue.branchId
+      );
       if (!selectedBranch) {
         alert("Selected branch not found");
         return;
@@ -126,9 +130,10 @@ export function InventoryModal({
       // Get current branch stocks
       let currentStocks = [];
       if (selectedBranch.branch_stocks) {
-        currentStocks = typeof selectedBranch.branch_stocks === 'string' 
-          ? JSON.parse(selectedBranch.branch_stocks) 
-          : selectedBranch.branch_stocks;
+        currentStocks =
+          typeof selectedBranch.branch_stocks === "string"
+            ? JSON.parse(selectedBranch.branch_stocks)
+            : selectedBranch.branch_stocks;
       }
 
       // Ensure currentStocks is an array
@@ -137,7 +142,9 @@ export function InventoryModal({
       }
 
       // Remove the item
-      const updatedStocks = currentStocks.filter(stock => stock.id !== initialValue.id);
+      const updatedStocks = currentStocks.filter(
+        (stock) => stock.id !== initialValue.id
+      );
 
       // Update branch stocks
       const result = await upsertBranchStocks({
@@ -159,7 +166,9 @@ export function InventoryModal({
 
   return (
     <Modal
-      title={initialValue.isUpdate ? "Update Inventory Item" : "Add Inventory Item"}
+      title={
+        initialValue.isUpdate ? "Update Inventory Item" : "Add Inventory Item"
+      }
       show={showModal}
       onClose={onClose}
       isSubmitting={isSubmitting}
@@ -168,9 +177,12 @@ export function InventoryModal({
         <Controller
           name="name"
           control={control}
-          rules={{ 
+          rules={{
             required: "Item name is required",
-            minLength: { value: 2, message: "Item name must be at least 2 characters" }
+            minLength: {
+              value: 2,
+              message: "Item name must be at least 2 characters",
+            },
           }}
           render={({ field }) => (
             <div>
@@ -184,7 +196,9 @@ export function InventoryModal({
                 error={!!errors.name}
               />
               {errors.name && (
-                <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.name.message}
+                </p>
               )}
             </div>
           )}
@@ -205,9 +219,14 @@ export function InventoryModal({
                   value: branch.id,
                   label: branch.name,
                 }))}
+                onChange={(newValue) => {
+                  field.onChange((newValue as { value: string })?.value!);
+                }}
               />
               {errors.branchId && (
-                <p className="mt-1 text-sm text-red-600">{errors.branchId.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.branchId.message}
+                </p>
               )}
             </div>
           )}
@@ -216,10 +235,13 @@ export function InventoryModal({
         <Controller
           name="quantity"
           control={control}
-          rules={{ 
+          rules={{
             required: "Quantity is required",
             min: { value: 0, message: "Quantity must be 0 or greater" },
-            pattern: { value: /^\d+$/, message: "Quantity must be a valid number" }
+            pattern: {
+              value: /^\d+$/,
+              message: "Quantity must be a valid number",
+            },
           }}
           render={({ field }) => (
             <div>
@@ -233,7 +255,9 @@ export function InventoryModal({
                 error={!!errors.quantity}
               />
               {errors.quantity && (
-                <p className="mt-1 text-sm text-red-600">{errors.quantity.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.quantity.message}
+                </p>
               )}
             </div>
           )}
@@ -254,7 +278,7 @@ export function InventoryModal({
               </Button>
             )}
           </div>
-          
+
           {/* Cancel and Save buttons */}
           <div className="flex space-x-3">
             <Button
@@ -271,7 +295,11 @@ export function InventoryModal({
               disabled={isSubmitting}
               leftIcon={<Save className="h-4 w-4" />}
             >
-              {isSubmitting ? "Saving..." : initialValue.isUpdate ? "Update" : "Add"}
+              {isSubmitting
+                ? "Saving..."
+                : initialValue.isUpdate
+                ? "Update"
+                : "Add"}
             </Button>
           </div>
         </div>
