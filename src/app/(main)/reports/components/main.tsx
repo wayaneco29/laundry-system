@@ -23,6 +23,7 @@ import { ExportData } from "@/app/utils/export-utils";
 import { getOrders } from "@/app/actions/order";
 import { getAllCustomers } from "@/app/actions/customer";
 import { getAllExpenses } from "@/app/actions/expense";
+import { SalesSectionSkeleton } from "./skeleton";
 
 type MainReportsPageProps = {
   monthlySalesData: MonthlySalesData | null;
@@ -125,6 +126,9 @@ export function MainReportsPage({
     }
   };
 
+  // Add a loading state for overview
+  const isOverviewLoading = !monthlySalesData || !chartData;
+
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-8">
       {/* Header */}
@@ -138,10 +142,6 @@ export function MainReportsPage({
           </p>
         </div>
         <div className="flex gap-3">
-          <button className="inline-flex items-center gap-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50">
-            <FunnelIcon className="h-4 w-4" />
-            Filters
-          </button>
           <button
             onClick={handleExportReport}
             disabled={isLoadingExport}
@@ -184,14 +184,17 @@ export function MainReportsPage({
 
       {/* Content Sections */}
       <div className="flex-1">
-        {activeTab === "overview" && (
-          <OverviewSection
-            monthlySalesData={monthlySalesData}
-            chartData={chartData}
-            monthlyCustomersCount={monthlyCustomersCount}
-            todayCustomersCount={todayCustomersCount}
-          />
-        )}
+        {activeTab === "overview" &&
+          (isOverviewLoading ? (
+            <SalesSectionSkeleton />
+          ) : (
+            <OverviewSection
+              monthlySalesData={monthlySalesData}
+              chartData={chartData}
+              monthlyCustomersCount={monthlyCustomersCount}
+              todayCustomersCount={todayCustomersCount}
+            />
+          ))}
 
         {activeTab === "sales" && (
           <SalesReportSection

@@ -18,6 +18,7 @@ import {
   LowStockAlert,
   InventoryItem,
 } from "@/app/actions/inventory";
+import { InventorySectionSkeleton } from "./skeleton";
 
 type InventoryReportSectionProps = {
   dateRange: {
@@ -135,293 +136,240 @@ export function InventoryReportSection({
 
   return (
     <div className="space-y-6">
-      {/* Inventory Metrics Cards */}
       {loading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((i) => (
-            <div
-              key={i}
-              className="bg-gray-100 rounded-lg p-6 shadow-sm animate-pulse"
-            >
-              <div className="h-20"></div>
-            </div>
-          ))}
-        </div>
+        <InventorySectionSkeleton />
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {inventoryMetrics.map((metric, index) => {
-            const Icon = metric.icon;
-            return (
-              <div
-                key={index}
-                className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">
-                      {metric.title}
-                    </p>
-                    <p className="text-2xl font-bold text-gray-900 mt-1">
-                      {metric.value}
-                    </p>
-                  </div>
-                  <div className={`${metric.iconColor} p-3 rounded-full`}>
-                    <Icon className="h-6 w-6 text-white" />
+        <>
+          {/* Inventory Metrics Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {inventoryMetrics.map((metric, index) => {
+              const Icon = metric.icon;
+              return (
+                <div
+                  key={index}
+                  className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm font-medium text-gray-600">
+                        {metric.title}
+                      </p>
+                      <p className="text-2xl font-bold text-gray-900 mt-1">
+                        {metric.value}
+                      </p>
+                    </div>
+                    <div className={`${metric.iconColor} p-3 rounded-full`}>
+                      <Icon className="h-6 w-6 text-white" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
 
-      {/* Charts Section */}
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
-        {/* Stock Status Distribution */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">
-            Stock Status Overview
-          </h3>
-          {loading ? (
-            <div className="flex items-center justify-center h-80">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <ApexChart
-              options={{
-                chart: { type: "donut" },
-                labels: ["In Stock", "Low Stock", "Out of Stock"],
-                colors: ["#10B981", "#F59E0B", "#EF4444"],
-                dataLabels: {
-                  enabled: true,
-                  formatter: (val) => `${Math.round(val as number)}%`,
-                },
-                plotOptions: {
-                  pie: {
-                    donut: {
-                      size: "65%",
-                      labels: {
-                        show: true,
-                        total: {
+          {/* Charts Section */}
+          <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            {/* Stock Status Distribution */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                Stock Status Overview
+              </h3>
+              <ApexChart
+                options={{
+                  chart: { type: "donut" },
+                  labels: ["In Stock", "Low Stock", "Out of Stock"],
+                  colors: ["#10B981", "#F59E0B", "#EF4444"],
+                  dataLabels: {
+                    enabled: true,
+                    formatter: (val) => `${Math.round(val as number)}%`,
+                  },
+                  plotOptions: {
+                    pie: {
+                      donut: {
+                        size: "65%",
+                        labels: {
                           show: true,
-                          label: "Total Items",
-                          formatter: () =>
-                            stockLevels?.total_items?.toString() || "0",
+                          total: {
+                            show: true,
+                            label: "Total Items",
+                            formatter: () =>
+                              stockLevels?.total_items?.toString() || "0",
+                          },
                         },
                       },
                     },
                   },
-                },
-                legend: {
-                  position: "bottom",
-                },
-              }}
-              series={stockLevelsChartData}
-              type="donut"
-              height={300}
-            />
-          )}
-        </div>
+                  legend: {
+                    position: "bottom",
+                  },
+                }}
+                series={stockLevelsChartData}
+                type="donut"
+                height={300}
+              />
+            </div>
 
-        {/* Inventory by Category */}
-        <div className="bg-white rounded-lg shadow-sm p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">
-              Items by Category
-            </h3>
+            {/* Inventory by Category */}
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Items by Category
+                </h3>
+              </div>
+              <ApexChart
+                options={{
+                  chart: { type: "bar", toolbar: { show: false } },
+                  colors: ["#3B82F6"],
+                  dataLabels: { enabled: false },
+                  grid: { borderColor: "#E5E7EB" },
+                  xaxis: {
+                    categories: categoryLabels,
+                    labels: {
+                      style: { fontSize: "10px" },
+                      rotate: -45,
+                    },
+                  },
+                  yaxis: {
+                    labels: {
+                      formatter: (value) => Math.round(value).toString(),
+                      style: { fontSize: "12px" },
+                    },
+                  },
+                  plotOptions: {
+                    bar: {
+                      borderRadius: 4,
+                      horizontal: false,
+                    },
+                  },
+                  tooltip: {
+                    custom: function ({ series, seriesIndex, dataPointIndex }) {
+                      const category = categoryLabels[dataPointIndex];
+                      const itemCount = series[seriesIndex][dataPointIndex];
+                      const categoryItem = categoryData[dataPointIndex];
+
+                      return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+                        <div class="font-semibold text-gray-800 text-sm">${category}</div>
+                        <div class="text-gray-600 text-xs mb-2">Inventory Category</div>
+                        <div class="space-y-1">
+                          <div class="flex items-center">
+                            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+                            <span class="text-blue-600 font-bold text-sm">${itemCount} Items</span>
+                          </div>
+                          <div class="flex items-center">
+                            <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
+                            <span class="text-green-600 text-sm">${
+                              categoryItem?.total_quantity || 0
+                            } Total Quantity</span>
+                          </div>
+                        </div>
+                      </div>`;
+                    },
+                  },
+                }}
+                series={[
+                  {
+                    name: "Items",
+                    data: categoryChartData,
+                  },
+                ]}
+                type="bar"
+                height={300}
+              />
+            </div>
           </div>
-          {loading ? (
-            <div className="flex items-center justify-center h-80">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <ApexChart
-              options={{
-                chart: { type: "bar", toolbar: { show: false } },
-                colors: ["#3B82F6"],
-                dataLabels: { enabled: false },
-                grid: { borderColor: "#E5E7EB" },
-                xaxis: {
-                  categories: categoryLabels,
-                  labels: {
-                    style: { fontSize: "10px" },
-                    rotate: -45,
-                  },
-                },
-                yaxis: {
-                  labels: {
-                    formatter: (value) => Math.round(value).toString(),
-                    style: { fontSize: "12px" },
-                  },
-                },
-                plotOptions: {
-                  bar: {
-                    borderRadius: 4,
-                    horizontal: false,
-                  },
-                },
-                tooltip: {
-                  custom: function ({ series, seriesIndex, dataPointIndex }) {
-                    const category = categoryLabels[dataPointIndex];
-                    const itemCount = series[seriesIndex][dataPointIndex];
-                    const categoryItem = categoryData[dataPointIndex];
-                    
-                    return `<div class="bg-white p-3 rounded-lg shadow-lg border">
-                      <div class="font-semibold text-gray-800 text-sm">${category}</div>
-                      <div class="text-gray-600 text-xs mb-2">Inventory Category</div>
-                      <div class="space-y-1">
-                        <div class="flex items-center">
-                          <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
-                          <span class="text-blue-600 font-bold text-sm">${itemCount} Items</span>
-                        </div>
-                        <div class="flex items-center">
-                          <div class="w-3 h-3 bg-green-500 rounded-full mr-2"></div>
-                          <span class="text-green-600 text-sm">${categoryItem?.total_quantity || 0} Total Quantity</span>
-                        </div>
-                      </div>
-                    </div>`;
-                  },
-                },
-              }}
-              series={[
-                {
-                  name: "Items",
-                  data: categoryChartData,
-                },
-              ]}
-              type="bar"
-              height={300}
-            />
-          )}
-        </div>
-      </div>
 
-      {/* Inventory Items Table */}
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Inventory Items Status
-          </h3>
-        </div>
-        <div className="overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Item Name
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Category
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Branch
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Stock Level
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Last Updated
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse">
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </td>
-                    <td className="px-6 py-4">
-                      <div className="h-4 bg-gray-200 rounded"></div>
-                    </td>
+          {/* Inventory Items Table */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Inventory Items Status
+              </h3>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Item Name
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Category
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Branch
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Stock Level
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Last Updated
+                    </th>
                   </tr>
-                ))
-              ) : inventoryItems.length > 0 ? (
-                inventoryItems.map((item, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {item.name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {item.category}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {item.branch_name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">
-                        {item.quantity}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span
-                        className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                          item.status
-                        )}`}
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {inventoryItems.length > 0 ? (
+                    inventoryItems.map((item, index) => (
+                      <tr key={index} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {item.category}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm text-gray-500">
+                            {item.branch_name}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            {item.quantity}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <span
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
+                              item.status
+                            )}`}
+                          >
+                            {item.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(item.last_updated).toLocaleDateString()}
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td
+                        colSpan={6}
+                        className="px-6 py-4 text-center text-sm text-gray-500"
                       >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {new Date(item.last_updated).toLocaleDateString()}
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td
-                    colSpan={6}
-                    className="px-6 py-4 text-center text-sm text-gray-500"
-                  >
-                    No inventory items found
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      {/* Inventory Alerts */}
-      <div className="bg-white rounded-lg shadow-sm">
-        <div className="px-6 py-4 border-b border-gray-200">
-          <h3 className="text-lg font-semibold text-gray-900">
-            Inventory Alerts
-          </h3>
-        </div>
-        <div className="p-6">
-          {loading ? (
-            <div className="space-y-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="h-12 bg-gray-200 rounded-lg animate-pulse"
-                ></div>
-              ))}
+                        No inventory items found
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
             </div>
-          ) : (
-            <div className="space-y-3">
+          </div>
+
+          {/* Inventory Alerts */}
+          <div className="bg-white rounded-lg shadow-sm">
+            <div className="px-6 py-4 border-b border-gray-200">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Inventory Alerts
+              </h3>
+            </div>
+            <div className="p-6">
               {(stockLevels?.out_of_stock ?? 0) > 0 && (
                 <div className="flex items-center p-3 bg-red-50 border border-red-200 rounded-lg">
                   <XCircleIcon className="h-5 w-5 text-red-500 mr-3" />
@@ -463,9 +411,9 @@ export function InventoryReportSection({
                 </div>
               )}
             </div>
-          )}
-        </div>
-      </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

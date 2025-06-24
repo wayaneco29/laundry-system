@@ -25,7 +25,7 @@ export function ExportModal({
   activeTab,
 }: ExportModalProps) {
   const [isExporting, setIsExporting] = useState(false);
-  const [exportType, setExportType] = useState<"excel" | "pdf">("pdf");
+  const [exportType, setExportType] = useState<"excel" | "pdf">("excel");
   const [selectedReports, setSelectedReports] = useState<ReportType[]>([]);
 
   // Initialize selected reports based on available data
@@ -42,7 +42,7 @@ export function ExportModal({
     if (availableReports.length > 0 && selectedReports.length === 0) {
       setSelectedReports(availableReports);
     }
-  }, [availableReports.length, selectedReports.length]);
+  }, [availableReports.length]);
 
   const handleReportToggle = (reportType: ReportType) => {
     setSelectedReports((prev) =>
