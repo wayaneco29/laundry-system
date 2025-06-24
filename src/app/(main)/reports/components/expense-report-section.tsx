@@ -355,9 +355,6 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
                       Amount
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Status
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Branch
                     </th>
                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -406,15 +403,6 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
                           <div className="text-sm font-medium text-gray-900">
                             ₱{Number(expense.amount || 0).toLocaleString()}
                           </div>
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
-                          <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${getStatusColor(
-                              expense.status
-                            )}`}
-                          >
-                            {expense.status || "Unknown"}
-                          </span>
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <div className="text-sm text-gray-500">

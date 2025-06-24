@@ -8,6 +8,7 @@ import {
 import { Modal } from "@/app/components/common/modal";
 import { Button } from "@/app/components/common/button";
 import { exportReport, ExportData } from "@/app/utils/export-utils";
+import { Loader2 } from "@/app/components/common/loader2";
 
 interface ExportModalProps {
   isOpen: boolean;

@@ -15,6 +15,11 @@ import {
 import { getAllBranches } from "@/app/actions/branch";
 import { useToast } from "@/app/hooks/use-toast";
 import { PlusIcon } from "lucide-react";
+import {
+  HeaderWithButtonSkeleton,
+  StatsCardsSkeleton,
+  TableSkeleton,
+} from "../../dashboard/components/skeleton";
 
 export function ExpensesMain() {
   const [expenses, setExpenses] = useState<any[]>([]);
@@ -38,7 +43,7 @@ export function ExpensesMain() {
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
 
   // Filter states
-  const [filters, setFilters] = useState({
+  const [filters, setFilters] = useState<{ branch_id: string }>({
     branch_id: "",
   });
 
@@ -135,13 +140,9 @@ export function ExpensesMain() {
 
     // Branch filter
     if (filters.branch_id) {
-      const branchValue =
-        typeof filters.branch_id === "object"
-          ? filters.branch_id.value
-          : filters.branch_id;
-      if (branchValue && branchValue !== "") {
+      if (filters.branch_id !== "") {
         filtered = filtered.filter(
-          (expense) => expense.branch_id === branchValue
+          (expense) => expense.branch_id === filters.branch_id
         );
       }
     }
@@ -200,7 +201,7 @@ export function ExpensesMain() {
 
   const branchOptions = [
     { label: "All Branches", value: "" },
-    ...branches.map((branch) => ({
+    ...branches.map((branch: any) => ({
       label: branch.name,
       value: branch.id,
     })),
@@ -208,8 +209,14 @@ export function ExpensesMain() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600"></div>
+      <div className="flex flex-col gap-4 p-4 lg:p-8 animate-pulse">
+        <HeaderWithButtonSkeleton />
+        <StatsCardsSkeleton count={2} />
+        <div className="flex gap-4 mb-2">
+          <div className="h-10 w-48 bg-gray-200 rounded"></div>
+          <div className="h-10 w-48 bg-gray-200 rounded"></div>
+        </div>
+        <TableSkeleton />
       </div>
     );
   }
@@ -318,8 +325,8 @@ export function ExpensesMain() {
           data={filteredExpenses}
           onEdit={handleEditExpense}
           onView={handleViewExpense}
-          onShowToast={success}
-          onShowError={error}
+          onShowToast={(msg: string) => success(msg)}
+          onShowError={(msg: string) => error(msg)}
         />
       </div>
 
@@ -329,11 +336,11 @@ export function ExpensesMain() {
         onClose={handleModalClose}
         expense={selectedExpense}
         mode={modalMode}
-        onShowToast={success}
+        onShowToast={(msg: string) => success(msg)}
       />
 
       {/* Toast Container */}
-      <ToastContainer toasts={toasts} onRemoveToast={removeToast} />
+      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }

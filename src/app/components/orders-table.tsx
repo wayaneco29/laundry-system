@@ -26,7 +26,12 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
   const router = useRouter();
   const { userId } = useCurrentUser();
   const [editingCell, setEditingCell] = useState<string | null>(null);
-  const [loadingOrders, setLoadingOrders] = useState<Set<string>>(new Set());
+  const [loadingOrderStatus, setLoadingOrderStatus] = useState<Set<string>>(
+    new Set()
+  );
+  const [loadingPaymentStatus, setLoadingPaymentStatus] = useState<Set<string>>(
+    new Set()
+  );
   console.log("OrdersTable data:", data);
   const orderStatuses = [
     "Pending",
@@ -72,20 +77,18 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
     p_order_status: string
   ) => {
     try {
-      setLoadingOrders((prev) => new Set(prev).add(p_order_id));
-
+      setLoadingOrderStatus((prev) => new Set(prev).add(p_order_id));
       const { error } = await updateOrderStatus({
         p_order_id,
         p_order_status,
-        p_staff_id: userId!, // Use authenticated user ID
+        p_staff_id: userId!,
       });
-
       if (error) throw error;
       setEditingCell(null);
     } catch (error) {
       console.error(error);
     } finally {
-      setLoadingOrders((prev) => {
+      setLoadingOrderStatus((prev) => {
         const newSet = new Set(prev);
         newSet.delete(p_order_id);
         return newSet;
@@ -98,20 +101,18 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
     p_payment_status: string
   ) => {
     try {
-      setLoadingOrders((prev) => new Set(prev).add(p_order_id));
-
+      setLoadingPaymentStatus((prev) => new Set(prev).add(p_order_id));
       const { error } = await updatePaymentStatus({
         p_order_id,
         p_payment_status,
-        p_staff_id: userId!, // Use authenticated user ID
+        p_staff_id: userId!,
       });
-
       if (error) throw error;
       setEditingCell(null);
     } catch (error) {
       console.error(error);
     } finally {
-      setLoadingOrders((prev) => {
+      setLoadingPaymentStatus((prev) => {
         const newSet = new Set(prev);
         newSet.delete(p_order_id);
         return newSet;
@@ -313,7 +314,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
                     type="order"
                     orderId={order.order_id}
                     onClick={() => handleOrderStatusClick(order.order_id)}
-                    isLoading={loadingOrders.has(order.order_id)}
+                    isLoading={loadingOrderStatus.has(order.order_id)}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -327,7 +328,7 @@ export const OrdersTable = ({ data }: OrdersTableProps) => {
                         order.payment_status
                       )
                     }
-                    isLoading={loadingOrders.has(order.order_id)}
+                    isLoading={loadingPaymentStatus.has(order.order_id)}
                   />
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">

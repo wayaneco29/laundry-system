@@ -27,6 +27,20 @@ type OrderReportSectionProps = {
   };
 };
 
+// Helper to check if date range is 'This Year'
+function isFullYearRange(startDate: Date, endDate: Date) {
+  const now = new Date();
+  return (
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === 0 &&
+    startDate.getDate() === 1 &&
+    ((endDate.getMonth() === 11 && endDate.getDate() === 31) ||
+      (endDate.getFullYear() === now.getFullYear() &&
+        endDate.getMonth() === now.getMonth() &&
+        endDate.getDate() === now.getDate()))
+  );
+}
+
 export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
   const [statusBreakdown, setStatusBreakdown] = useState<
     OrderStatusBreakdown[]
@@ -109,10 +123,42 @@ export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
     },
   ];
 
-  // Prepare chart data
-  const orderStatusData = statusBreakdown.map((status) => status.count);
-  const statusLabels = statusBreakdown.map((status) => status.status);
-  const dailyOrdersData = dailyVolume.map((day) => day.order_count);
+  // Prepare x-axis categories for the chart
+  const showMonths = isFullYearRange(dateRange.startDate, dateRange.endDate);
+  let xCategories: string[];
+  if (showMonths) {
+    xCategories = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+  } else {
+    xCategories = dailyVolume.map((day) => {
+      const date = new Date(day.date);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    });
+  }
+  // For showMonths, aggregate dailyVolume by month for the data series
+  let chartData: number[];
+  if (showMonths) {
+    chartData = Array(12).fill(0);
+    dailyVolume.forEach((day) => {
+      const date = new Date(day.date);
+      const month = date.getMonth();
+      chartData[month] += day.order_count;
+    });
+  } else {
+    chartData = dailyVolume.map((day) => day.order_count);
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -172,7 +218,7 @@ export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
               <ApexChart
                 options={{
                   chart: { type: "donut" },
-                  labels: statusLabels,
+                  labels: statusBreakdown.map((status) => status.status),
                   colors: [
                     "#10B981",
                     "#F59E0B",
@@ -203,7 +249,7 @@ export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
                     position: "bottom",
                   },
                 }}
-                series={orderStatusData}
+                series={statusBreakdown.map((status) => status.count)}
                 type="donut"
                 height={300}
               />
@@ -231,10 +277,7 @@ export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
                   dataLabels: { enabled: false },
                   grid: { borderColor: "#E5E7EB" },
                   xaxis: {
-                    categories: dailyVolume.map((day) => {
-                      const date = new Date(day.date);
-                      return `${date.getMonth() + 1}/${date.getDate()}`;
-                    }),
+                    categories: xCategories,
                     labels: {
                       rotate: -45,
                       style: { fontSize: "10px" },
@@ -267,7 +310,7 @@ export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
                 series={[
                   {
                     name: "Orders",
-                    data: dailyOrdersData,
+                    data: chartData,
                   },
                 ]}
                 type="area"

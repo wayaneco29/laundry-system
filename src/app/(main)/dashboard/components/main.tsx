@@ -847,8 +847,8 @@ export function MainDashboardPage({
               <TableSkeleton />
             </div>
           ) : (
-            <div className="bg-white rounded-md shadow-md p-4">
-              <div className="text-gray-700 mb-4 text-lg">
+            <div className="bg-white rounded-md shadow-md p-4 mt-8">
+              <div className="text-gray-700 mb-4 font-medium">
                 Latest Transaction
               </div>
               <div className="flex flex-col">

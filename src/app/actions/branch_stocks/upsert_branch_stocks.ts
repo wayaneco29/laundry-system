@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
+import moment from "moment";
 import { revalidateTag } from "next/cache";
 
 type UpsertBranchStocksType = {
@@ -18,7 +19,10 @@ export const upsertBranchStocks = async (payload: UpsertBranchStocksType) => {
     // Update the branch_stocks JSONB field
     const { data, error } = await supabase
       .from("branches")
-      .update({ branch_stocks: JSON.stringify(payload.stocks) })
+      .update({
+        branch_stocks: JSON.stringify(payload.stocks),
+        updated_at: moment().toISOString(),
+      })
       .eq("id", payload.branchId)
       .select();
 

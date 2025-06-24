@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { LogoutButton } from "@/app/components/auth/logout-button";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 type SidebarContextType = Record<string, never>;
 
@@ -91,6 +92,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
   const [open, setOpen] = useState<boolean>(false);
   const [minimize, setMinimized] = useState<boolean>(false);
   const pathname = usePathname();
+  const { user, loading: userLoading } = useCurrentUser();
 
   const isActive = (path: string) => {
     return pathname?.includes(path);
@@ -257,12 +259,23 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
             <div className="flex items-center gap-3">
               <div className="hidden sm:block text-right">
                 <div className="text-sm font-semibold text-slate-900">
-                  Admin User
+                  {userLoading
+                    ? "Loading..."
+                    : user?.user_metadata?.full_name || user?.email || "User"}
                 </div>
                 <div className="text-xs text-slate-500">Administrator</div>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-semibold text-sm">AU</span>
+                <span className="text-white font-semibold text-sm">
+                  {userLoading
+                    ? "--"
+                    : user?.user_metadata?.full_name
+                    ? user.user_metadata.full_name
+                        .split(" ")
+                        .map((n: string) => n[0])
+                        .join("")
+                    : user?.email?.slice(0, 2)?.toUpperCase() || "U"}
+                </span>
               </div>
             </div>
           </div>

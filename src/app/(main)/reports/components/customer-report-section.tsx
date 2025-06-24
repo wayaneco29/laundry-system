@@ -36,6 +36,20 @@ type CustomerReportSectionProps = {
   };
 };
 
+// Helper to check if date range is 'This Year'
+function isFullYearRange(startDate: Date, endDate: Date) {
+  const now = new Date();
+  return (
+    startDate.getFullYear() === endDate.getFullYear() &&
+    startDate.getMonth() === 0 &&
+    startDate.getDate() === 1 &&
+    ((endDate.getMonth() === 11 && endDate.getDate() === 31) ||
+      (endDate.getFullYear() === now.getFullYear() &&
+        endDate.getMonth() === now.getMonth() &&
+        endDate.getDate() === now.getDate()))
+  );
+}
+
 export function CustomerReportSection({
   monthlyCustomersCount: initialMonthlyCustomersCount,
   todayCustomersCount: initialTodayCustomersCount,
@@ -148,6 +162,44 @@ export function CustomerReportSection({
     ? [retentionMetrics.returning_customers, retentionMetrics.new_customers]
     : [0, 0];
 
+  // Prepare x-axis categories for the chart
+  const showMonths = isFullYearRange(dateRange.startDate, dateRange.endDate);
+  let xCategories: string[];
+  if (showMonths) {
+    xCategories = [
+      "Jan",
+      "Feb",
+      "Mar",
+      "Apr",
+      "May",
+      "Jun",
+      "Jul",
+      "Aug",
+      "Sep",
+      "Oct",
+      "Nov",
+      "Dec",
+    ];
+  } else {
+    xCategories = dailyTraffic.map((day) => {
+      const date = new Date(day.date);
+      return `${date.getMonth() + 1}/${date.getDate()}`;
+    });
+  }
+
+  // For showMonths, aggregate dailyTraffic by month for the data series
+  let chartData: number[];
+  if (showMonths) {
+    chartData = Array(12).fill(0);
+    dailyTraffic.forEach((day) => {
+      const date = new Date(day.date);
+      const month = date.getMonth();
+      chartData[month] += day.customer_count;
+    });
+  } else {
+    chartData = dailyTraffic.map((day) => day.customer_count);
+  }
+
   return (
     <div className="space-y-6">
       {loading ? (
@@ -201,10 +253,7 @@ export function CustomerReportSection({
                   dataLabels: { enabled: false },
                   grid: { borderColor: "#E5E7EB" },
                   xaxis: {
-                    categories: dailyTraffic.map((day) => {
-                      const date = new Date(day.date);
-                      return `${date.getMonth() + 1}/${date.getDate()}`;
-                    }),
+                    categories: xCategories,
                     labels: {
                       rotate: -45,
                       style: { fontSize: "10px" },
@@ -246,7 +295,7 @@ export function CustomerReportSection({
                 series={[
                   {
                     name: "Customers",
-                    data: dailyTraffic.map((day) => day.customer_count),
+                    data: chartData,
                   },
                 ]}
                 type="bar"
