@@ -7,15 +7,20 @@ import { ApexOptions } from "apexcharts";
 
 import { OrdersTable } from "@/app/components";
 import { Select } from "@/app/components/common";
-import { 
-  MonthlySalesData, 
+import {
+  MonthlySalesData,
   MonthlySalesChartData,
   getMonthlyCustomers,
   getTodayCustomers,
   getMonthSales,
-  getMonthlySalesChart
+  getMonthlySalesChart,
 } from "@/app/actions";
-import { getMonthlyExpense, getYearlyExpense } from "@/app/actions/expense";
+import { getRecentOrders, RecentOrder } from "@/app/actions/order";
+import {
+  getMonthlyExpense,
+  getYearlyExpense,
+  getExpensesByCategory,
+} from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
@@ -70,15 +75,25 @@ const chartOptions: ApexOptions = {
     enabled: true,
     custom: function ({ series, seriesIndex, dataPointIndex }) {
       const months = [
-        "January", "February", "March", "April", "May", "June",
-        "July", "August", "September", "October", "November", "December"
+        "January",
+        "February",
+        "March",
+        "April",
+        "May",
+        "June",
+        "July",
+        "August",
+        "September",
+        "October",
+        "November",
+        "December",
       ];
       const monthName = months[dataPointIndex];
       const value = series[seriesIndex][dataPointIndex];
-      
+
       // Get chartData from the component scope if possible, or use default formatting
       const formattedValue = `₱${value?.toLocaleString() || 0}`;
-      
+
       return `<div class="bg-white p-3 rounded-lg shadow-lg border">
         <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
         <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>
@@ -187,11 +202,11 @@ const chartOptions: ApexOptions = {
   // },
 };
 
-const donutChartSeries = [1000, 200, 2500];
+const defaultDonutChartSeries = [1000, 200, 2500];
+const defaultDonutChartLabels = ["Detergent", "Water", "Electricity"];
 
 const donutChartOptions = {
-  colors: ["#FF9F29", "#487FFF", "#45B369"],
-  labels: ["Detergent", "Water", "Electricity"],
+  colors: ["#FF9F29", "#487FFF", "#45B369", "#EF4444", "#8B5CF6", "#10B981"],
   legend: {
     show: false,
   },
@@ -251,31 +266,61 @@ export function MainDashboardPage({
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
-  
+
   // Dashboard data state
-  const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(initialMonthlyCustomersCount);
-  const [todayCustomersCount, setTodayCustomersCount] = useState(initialTodayCustomersCount);
-  const [monthlySalesData, setMonthlySalesData] = useState(initialMonthlySalesData);
+  const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(
+    initialMonthlyCustomersCount
+  );
+  const [todayCustomersCount, setTodayCustomersCount] = useState(
+    initialTodayCustomersCount
+  );
+  const [monthlySalesData, setMonthlySalesData] = useState(
+    initialMonthlySalesData
+  );
   const [chartData, setChartData] = useState(initialChartData);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
   const [yearlyExpense, setYearlyExpense] = useState<number>(0);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
+  const [expensesByCategory, setExpensesByCategory] = useState<any[]>([]);
 
   // Fetch branches and initial expense data on component mount
   useEffect(() => {
     fetchBranches();
     fetchInitialExpenseData();
+    fetchInitialRecentOrders();
   }, []);
+
+  const fetchInitialRecentOrders = async () => {
+    try {
+      const result = await getRecentOrders(10);
+      if (result.data) {
+        setRecentOrders(result.data);
+      }
+    } catch (error) {
+      console.error("Error fetching recent orders:", error);
+    }
+  };
 
   const fetchInitialExpenseData = async () => {
     try {
-      const [monthlyExpenseResult, yearlyExpenseResult] = await Promise.all([
+      const currentYear = new Date().getFullYear();
+      const [
+        monthlyExpenseResult,
+        yearlyExpenseResult,
+        expensesByCategoryResult,
+      ] = await Promise.all([
         getMonthlyExpense(),
         getYearlyExpense(),
+        getExpensesByCategory({
+          startDate: `${currentYear}-01-01`,
+          endDate: `${currentYear}-12-31`,
+        }),
       ]);
       setMonthlyExpense(monthlyExpenseResult.data || 0);
       setYearlyExpense(yearlyExpenseResult.data || 0);
+      setExpensesByCategory(expensesByCategoryResult.data || []);
     } catch (error) {
-      console.error('Error fetching initial expense data:', error);
+      console.error("Error fetching initial expense data:", error);
     }
   };
 
@@ -288,15 +333,15 @@ export function MainDashboardPage({
 
   const fetchBranches = async () => {
     try {
-      console.log('Fetching branches...');
+      console.log("Fetching branches...");
       const result = await getAllBranches();
-      console.log('Branches result:', result);
+      console.log("Branches result:", result);
       if (result.data) {
         setBranches(result.data);
-        console.log('Branches set:', result.data);
+        console.log("Branches set:", result.data);
       }
     } catch (error) {
-      console.error('Error fetching branches:', error);
+      console.error("Error fetching branches:", error);
     }
   };
 
@@ -304,14 +349,30 @@ export function MainDashboardPage({
     setLoading(true);
     try {
       const branchId = selectedBranch === "" ? undefined : selectedBranch;
-      
-      const [monthlyResult, todayResult, salesResult, chartResult, monthlyExpenseResult, yearlyExpenseResult] = await Promise.all([
+
+      const currentYear = new Date().getFullYear();
+      const [
+        monthlyResult,
+        todayResult,
+        salesResult,
+        chartResult,
+        monthlyExpenseResult,
+        yearlyExpenseResult,
+        recentOrdersResult,
+        expensesByCategoryResult,
+      ] = await Promise.all([
         getMonthlyCustomers(branchId),
         getTodayCustomers(branchId),
         getMonthSales(branchId),
         getMonthlySalesChart(branchId),
         getMonthlyExpense(branchId),
         getYearlyExpense(branchId),
+        getRecentOrders(10, branchId),
+        getExpensesByCategory({
+          startDate: `${currentYear}-01-01`,
+          endDate: `${currentYear}-12-31`,
+          branchId: branchId,
+        }),
       ]);
 
       setMonthlyCustomersCount(monthlyResult.count);
@@ -320,27 +381,44 @@ export function MainDashboardPage({
       setChartData(chartResult.data);
       setMonthlyExpense(monthlyExpenseResult.data || 0);
       setYearlyExpense(yearlyExpenseResult.data || 0);
+      setRecentOrders(recentOrdersResult.data || []);
+      setExpensesByCategory(expensesByCategoryResult.data || []);
     } catch (error) {
-      console.error('Error fetching dashboard data:', error);
+      console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const handleBranchChange = (value: string) => {
-    const branchValue = typeof value === 'object' ? value.value : value;
+    const branchValue = typeof value === "object" ? value.value : value;
     setSelectedBranch(branchValue);
   };
 
   const branchOptions = [
     { label: "All Branches", value: "" },
-    ...branches.map(branch => ({
+    ...branches.map((branch) => ({
       label: branch.name,
       value: branch.id,
     })),
   ];
-  
-  console.log('Branch options:', branchOptions);
+
+  console.log("Branch options:", branchOptions);
+
+  // Prepare dynamic donut chart data
+  const hasExpenseData = expensesByCategory.length > 0;
+  const donutChartSeries = hasExpenseData
+    ? expensesByCategory.map((item) => Number(item.total_amount || 0))
+    : defaultDonutChartSeries;
+  const donutChartLabels = hasExpenseData
+    ? expensesByCategory.map((item) => item.category_name || "Unknown")
+    : defaultDonutChartLabels;
+
+  const dynamicDonutChartOptions = {
+    ...donutChartOptions,
+    labels: donutChartLabels,
+  };
+
   // Dynamic chart options based on data scale
   const dynamicChartOptions: ApexOptions = {
     ...chartOptions,
@@ -374,7 +452,7 @@ export function MainDashboardPage({
           />
         </div>
       </div>
-      
+
       {loading && (
         <div className="flex items-center justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
@@ -477,7 +555,6 @@ export function MainDashboardPage({
         <div className="bg-white rounded-md p-4 shadow-md">
           <div className="flex justify-between">
             <div className="text-gray-700 font-medium">Sales Overview</div>
-            <div className="text-gray-700">Yearly</div>
           </div>
           <div className="text-gray-700 font-bold text-lg">
             ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
@@ -499,11 +576,12 @@ export function MainDashboardPage({
         <div className="bg-white rounded-md p-4 shadow-md">
           <div className="flex justify-between">
             <div className="text-gray-700 font-medium">Expenses Overview</div>
-            <div className="text-gray-700">Yearly</div>
           </div>
-          <div className="text-gray-700 font-bold text-lg">₱{yearlyExpense?.toLocaleString() || "0"}</div>
+          <div className="text-gray-700 font-bold text-lg">
+            ₱{yearlyExpense?.toLocaleString() || "0"}
+          </div>
           <ReactApexChart
-            options={donutChartOptions}
+            options={dynamicDonutChartOptions}
             series={donutChartSeries}
             type="donut"
             height={264}
@@ -513,7 +591,17 @@ export function MainDashboardPage({
       <div className="bg-white rounded-md shadow-md p-4">
         <div className="text-gray-700 mb-4 text-lg">Latest Transaction</div>
         <div className="flex flex-col">
-          <OrdersTable data={[]} />
+          <OrdersTable
+            data={recentOrders.map((order) => ({
+              order_id: order.id,
+              customer_name: order.customer_name,
+              order_date: order.created_at,
+              branch_name: order.branch_name,
+              order_status: order.status,
+              payment_status: order.payment_status,
+              total_price: order.total_amount.toLocaleString(),
+            }))}
+          />
         </div>
       </div>
     </div>

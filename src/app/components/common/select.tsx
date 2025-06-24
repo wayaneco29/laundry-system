@@ -5,14 +5,18 @@ import { twMerge } from "tailwind-merge";
 
 type SelectProps = Props & {
   label?: string;
+  disabled?: boolean;
   placeholder?: string;
   value?: Array<string> | string;
   containerClassName?: string;
   icon?: React.ReactNode;
+  error?: boolean;
 };
 
 export const Select = ({
   label,
+  disabled = false,
+  error = false,
   placeholder = "Select option...",
   options,
   value,
@@ -35,7 +39,9 @@ export const Select = ({
   return (
     <div className={twMerge("relative w-full", containerClassName)}>
       {label && (
-        <label className="block text-sm font-medium mb-2">{label}</label>
+        <label className="block text-sm text-gray-600 font-medium mb-2">
+          {label}
+        </label>
       )}
       <div className="flex items-center w-full relative">
         {icon && (
@@ -46,6 +52,7 @@ export const Select = ({
           </div>
         )}
         <ReactSelect
+          isDisabled={disabled}
           menuPortalTarget={document?.body}
           options={options}
           value={composeValues()}
@@ -60,8 +67,10 @@ export const Select = ({
                 minHeight: "48px",
                 borderRadius: "0.5rem",
                 borderColor: "#ebe6e7",
-                "&:hover": { borderColor: "#ebe6e7" },
-                ...(props?.isFocused && { boxShadow: "0 0 0 2px #51A2FF" }),
+                "&:hover": { borderColor: error ? "red" : '"#ebe6e7"' },
+                ...(props?.isFocused && {
+                  boxShadow: error ? "0 0 0 2px red" : "0 0 0 2px #51A2FF",
+                }),
               };
             },
             valueContainer(base) {

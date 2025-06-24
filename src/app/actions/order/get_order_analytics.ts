@@ -30,6 +30,7 @@ export type RecentOrder = {
   branch_name: string;
   total_amount: number;
   status: string;
+  payment_status: string;
   created_at: string;
 };
 
@@ -252,7 +253,7 @@ export const getRecentOrders = async (
   try {
     let query = supabase
       .from("view_orders")
-      .select("order_id, customer_name, branch_name, total_price, order_status, created_at")
+      .select("order_id, customer_name, branch_name, total_price, order_status, payment_status, created_at")
       .order("created_at", { ascending: false })
       .limit(limit);
 
@@ -270,6 +271,7 @@ export const getRecentOrders = async (
       branch_name: order.branch_name || 'N/A',
       total_amount: Number(order.total_price || 0),
       status: order.order_status,
+      payment_status: order.payment_status || 'Unpaid',
       created_at: order.created_at
     })) || [];
 

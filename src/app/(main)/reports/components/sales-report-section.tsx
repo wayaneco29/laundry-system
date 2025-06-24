@@ -7,7 +7,12 @@ import {
   ArrowTrendingDownIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
-import { MonthlySalesData, MonthlySalesChartData, getMonthSales, getMonthlySalesChart } from "@/app/actions";
+import {
+  MonthlySalesData,
+  MonthlySalesChartData,
+  getMonthSales,
+  getMonthlySalesChart,
+} from "@/app/actions";
 import { ApexChart } from "@/app/components/charts/apex-chart";
 
 type SalesReportSectionProps = {
@@ -24,8 +29,11 @@ export function SalesReportSection({
   chartData: initialChartData,
   dateRange,
 }: SalesReportSectionProps) {
-  const [monthlySalesData, setMonthlySalesData] = useState<MonthlySalesData | null>(initialMonthlySalesData);
-  const [chartData, setChartData] = useState<MonthlySalesChartData | null>(initialChartData);
+  const [monthlySalesData, setMonthlySalesData] =
+    useState<MonthlySalesData | null>(initialMonthlySalesData);
+  const [chartData, setChartData] = useState<MonthlySalesChartData | null>(
+    initialChartData
+  );
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -47,11 +55,12 @@ export function SalesReportSection({
         setChartData(chartResult.data);
       }
     } catch (error) {
-      console.error('Error fetching sales data:', error);
+      console.error("Error fetching sales data:", error);
     } finally {
       setLoading(false);
     }
   };
+
   const salesMetrics = [
     {
       title: "Total Sales",
@@ -98,7 +107,7 @@ export function SalesReportSection({
           <span className="ml-2 text-gray-600">Updating sales data...</span>
         </div>
       )}
-      
+
       {/* Sales Metrics Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {salesMetrics.map((metric, index) => {
@@ -106,7 +115,9 @@ export function SalesReportSection({
           return (
             <div
               key={index}
-              className={`bg-gradient-to-r ${metric.color} rounded-lg p-6 shadow-sm ${loading ? 'opacity-50' : ''}`}
+              className={`bg-gradient-to-r ${
+                metric.color
+              } rounded-lg p-6 shadow-sm ${loading ? "opacity-50" : ""}`}
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -173,19 +184,32 @@ export function SalesReportSection({
               tooltip: {
                 custom: function ({ series, seriesIndex, dataPointIndex }) {
                   const months = [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
                   ];
                   const monthName = months[dataPointIndex];
                   const value = series[seriesIndex][dataPointIndex];
-                  const formattedValue = chartData?.useThousands 
-                    ? `₱${value}k` 
+                  const formattedValue = chartData?.useThousands
+                    ? `₱${value}k`
                     : `₱${value?.toLocaleString() || 0}`;
-                  
+
                   // Calculate percentage of yearly total
                   const yearlyTotal = chartData?.totalYearSales || 0;
-                  const percentage = yearlyTotal > 0 ? Math.round((value / yearlyTotal) * 100) : 0;
-                  
+                  const percentage =
+                    yearlyTotal > 0
+                      ? Math.round((value / yearlyTotal) * 100)
+                      : 0;
+
                   return `<div class="bg-white p-3 rounded-lg shadow-lg border">
                     <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
                     <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>

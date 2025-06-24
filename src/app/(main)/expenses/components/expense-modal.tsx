@@ -1,7 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Modal, Button, Input, Select, Datepicker } from "@/app/components/common";
+import {
+  Modal,
+  Button,
+  Input,
+  Select,
+  Datepicker,
+} from "@/app/components/common";
 import { upsertExpense } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
@@ -10,8 +16,11 @@ type ExpenseModalProps = {
   isOpen: boolean;
   onClose: () => void;
   expense?: any;
-  mode: 'create' | 'edit' | 'view';
-  onShowToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  mode: "create" | "edit" | "view";
+  onShowToast?: (
+    message: string,
+    type: "success" | "error" | "warning" | "info"
+  ) => void;
 };
 
 const expenseCategories = [
@@ -27,45 +36,51 @@ const expenseCategories = [
   { label: "Other", value: "Other" },
 ];
 
-
-export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: ExpenseModalProps) {
+export function ExpenseModal({
+  isOpen,
+  onClose,
+  expense,
+  mode,
+  onShowToast,
+}: ExpenseModalProps) {
   const [formData, setFormData] = useState({
-    title: '',
-    description: '',
-    amount: '',
-    category: 'Supplies',
-    expense_date: new Date().toISOString().split('T')[0],
-    branch_id: '',
+    title: "",
+    description: "",
+    amount: "",
+    category: "Supplies",
+    expense_date: new Date().toISOString().split("T")[0],
+    branch_id: "",
   });
 
   const [branches, setBranches] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
-  
+
   const { userId } = useCurrentUser();
 
   useEffect(() => {
     if (isOpen) {
       fetchBranches();
-      
-      if (expense && (mode === 'edit' || mode === 'view')) {
+
+      if (expense && (mode === "edit" || mode === "view")) {
         setFormData({
-          title: expense.title || '',
-          description: expense.description || '',
-          amount: expense.amount?.toString() || '',
-          category: expense.category || 'Supplies',
-          expense_date: expense.expense_date || new Date().toISOString().split('T')[0],
-          branch_id: expense.branch_id || '',
+          title: expense.title || "",
+          description: expense.description || "",
+          amount: expense.amount?.toString() || "",
+          category: expense.category || "Supplies",
+          expense_date:
+            expense.expense_date || new Date().toISOString().split("T")[0],
+          branch_id: expense.branch_id || "",
         });
       } else {
         // Reset form for create mode
         setFormData({
-          title: '',
-          description: '',
-          amount: '',
-          category: 'Supplies',
-          expense_date: new Date().toISOString().split('T')[0],
-          branch_id: '',
+          title: "",
+          description: "",
+          amount: "",
+          category: "Supplies",
+          expense_date: new Date().toISOString().split("T")[0],
+          branch_id: "",
         });
       }
       setErrors({});
@@ -79,7 +94,7 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
         setBranches(result.data);
       }
     } catch (error) {
-      console.error('Error fetching branches:', error);
+      console.error("Error fetching branches:", error);
     }
   };
 
@@ -87,19 +102,23 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
     const newErrors: Record<string, string> = {};
 
     if (!formData.title.trim()) {
-      newErrors.title = 'Title is required';
+      newErrors.title = "Title is required";
     }
 
-    if (!formData.amount || isNaN(Number(formData.amount)) || Number(formData.amount) <= 0) {
-      newErrors.amount = 'Please enter a valid amount greater than 0';
+    if (
+      !formData.amount ||
+      isNaN(Number(formData.amount)) ||
+      Number(formData.amount) <= 0
+    ) {
+      newErrors.amount = "Please enter a valid amount greater than 0";
     }
 
     if (!formData.category) {
-      newErrors.category = 'Category is required';
+      newErrors.category = "Category is required";
     }
 
     if (!formData.expense_date) {
-      newErrors.expense_date = 'Expense date is required';
+      newErrors.expense_date = "Expense date is required";
     }
 
     setErrors(newErrors);
@@ -108,20 +127,20 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (mode === 'view') return;
-    
+
+    if (mode === "view") return;
+
     if (!validateForm()) return;
 
     setLoading(true);
-    
+
     try {
       // Check if "All Branches" is selected (empty string or no branch_id)
-      const isAllBranches = !formData.branch_id || formData.branch_id === '';
-      
-      if (isAllBranches && mode === 'create') {
+      const isAllBranches = !formData.branch_id || formData.branch_id === "";
+
+      if (isAllBranches && mode === "create") {
         // Create expense for each branch
-        const promises = branches.map(branch => 
+        const promises = branches.map((branch) =>
           upsertExpense({
             p_expense_id: null,
             p_title: formData.title,
@@ -130,19 +149,27 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
             p_category: formData.category as any,
             p_expense_date: formData.expense_date,
             p_branch_id: branch.id,
-            p_created_by: userId
+            p_created_by: userId!,
           })
         );
-        
+
         const results = await Promise.all(promises);
-        
+
         // Check if any failed
-        const failed = results.filter(result => result.error);
+        const failed = results.filter((result) => result.error);
         if (failed.length > 0) {
-          console.error('Error saving some expenses:', failed);
-          onShowToast?.(`Created ${results.length - failed.length} expenses, ${failed.length} failed`, 'warning');
+          console.error("Error saving some expenses:", failed);
+          onShowToast?.(
+            `Created ${results.length - failed.length} expenses, ${
+              failed.length
+            } failed`,
+            "warning"
+          );
         } else {
-          onShowToast?.(`Created expense for all ${branches.length} branches successfully`, 'success');
+          onShowToast?.(
+            `Created expense for all ${branches.length} branches successfully`,
+            "success"
+          );
         }
         onClose();
       } else {
@@ -155,20 +182,23 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
           p_category: formData.category as any,
           p_expense_date: formData.expense_date,
           p_branch_id: formData.branch_id || undefined,
-          p_created_by: userId
+          p_created_by: userId!,
         });
 
         if (result.error) {
-          console.error('Error saving expense:', result.error);
-          onShowToast?.('Error saving expense. Please try again.', 'error');
+          console.error("Error saving expense:", result.error);
+          onShowToast?.("Error saving expense. Please try again.", "error");
         } else {
-          onShowToast?.(`Expense ${mode === 'create' ? 'created' : 'updated'} successfully`, 'success');
+          onShowToast?.(
+            `Expense ${mode === "create" ? "created" : "updated"} successfully`,
+            "success"
+          );
           onClose();
         }
       }
     } catch (error) {
-      console.error('Error saving expense:', error);
-      onShowToast?.('Error saving expense. Please try again.', 'error');
+      console.error("Error saving expense:", error);
+      onShowToast?.("Error saving expense. Please try again.", "error");
     } finally {
       setLoading(false);
     }
@@ -176,19 +206,22 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
 
   const handleInputChange = (field: string, value: any) => {
     // Extract value if it's an object from Select component
-    const actualValue = typeof value === 'object' && value?.value !== undefined ? value.value : value;
-    
-    setFormData(prev => ({ ...prev, [field]: actualValue }));
-    
+    const actualValue =
+      typeof value === "object" && value?.value !== undefined
+        ? value.value
+        : value;
+
+    setFormData((prev) => ({ ...prev, [field]: actualValue }));
+
     // Clear error when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const branchOptions = [
     { label: "All Branches", value: "" },
-    ...branches.map(branch => ({
+    ...branches.map((branch) => ({
       label: branch.name,
       value: branch.id,
     })),
@@ -196,10 +229,14 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
 
   const getModalTitle = () => {
     switch (mode) {
-      case 'create': return 'Add New Expense';
-      case 'edit': return 'Edit Expense';
-      case 'view': return 'View Expense';
-      default: return 'Expense';
+      case "create":
+        return "Add New Expense";
+      case "edit":
+        return "Edit Expense";
+      case "view":
+        return "View Expense";
+      default:
+        return "Expense";
     }
   };
 
@@ -213,9 +250,9 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
               label="Title *"
               type="text"
               value={formData.title}
-              onChange={(e) => handleInputChange('title', e.target.value)}
-              error={errors.title}
-              disabled={mode === 'view'}
+              onChange={(e) => handleInputChange("title", e.target.value)}
+              error={!!errors.title}
+              disabled={mode === "view"}
               placeholder="Enter expense title"
             />
           </div>
@@ -225,22 +262,20 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
               label="Description"
               type="textarea"
               value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              disabled={mode === 'view'}
+              onChange={(e) => handleInputChange("description", e.target.value)}
+              disabled={mode === "view"}
               placeholder="Enter expense description"
-              rows={3}
             />
           </div>
 
           <div>
             <Input
               label="Amount *"
-              type="number"
-              step="0.01"
+              inputMode="numeric"
               value={formData.amount}
-              onChange={(e) => handleInputChange('amount', e.target.value)}
-              error={errors.amount}
-              disabled={mode === 'view'}
+              onChange={(e) => handleInputChange("amount", e.target.value)}
+              error={!!errors.amount}
+              disabled={mode === "view"}
               placeholder="0.00"
             />
           </div>
@@ -250,17 +285,21 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
               label="Category *"
               options={expenseCategories}
               value={formData.category}
-              onChange={(value) => handleInputChange('category', value)}
-              error={errors.category}
-              disabled={mode === 'view'}
+              onChange={(value) => handleInputChange("category", value)}
+              error={!!errors.category}
+              disabled={mode === "view"}
             />
           </div>
 
           <div>
             <Datepicker
               label="Expense Date *"
-              value={formData.expense_date ? new Date(formData.expense_date) : new Date()}
-              onChange={(date) => handleInputChange('expense_date', date)}
+              value={
+                formData.expense_date
+                  ? new Date(formData.expense_date)
+                  : new Date()
+              }
+              onChange={(date) => handleInputChange("expense_date", date)}
               error={!!errors.expense_date}
               placeholder="Select expense date"
             />
@@ -274,15 +313,14 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
               label="Branch"
               options={branchOptions}
               value={formData.branch_id}
-              onChange={(value) => handleInputChange('branch_id', value)}
-              disabled={mode === 'view'}
+              onChange={(value) => handleInputChange("branch_id", value)}
+              disabled={mode === "view"}
             />
           </div>
-
         </div>
 
-        {mode !== 'view' && (
-          <div className="flex justify-end space-x-3 pt-6 border-t">
+        {mode !== "view" && (
+          <div className="flex justify-end space-x-3 pt-6">
             <Button
               type="button"
               variant="outline"
@@ -291,23 +329,19 @@ export function ExpenseModal({ isOpen, onClose, expense, mode, onShowToast }: Ex
             >
               Cancel
             </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={loading}
-            >
-              {loading ? 'Saving...' : mode === 'create' ? 'Create Expense' : 'Update Expense'}
+            <Button type="submit" variant="primary" disabled={loading}>
+              {loading
+                ? "Saving..."
+                : mode === "create"
+                ? "Create Expense"
+                : "Update Expense"}
             </Button>
           </div>
         )}
 
-        {mode === 'view' && (
+        {mode === "view" && (
           <div className="flex justify-end pt-6 border-t">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-            >
+            <Button type="button" variant="outline" onClick={onClose}>
               Close
             </Button>
           </div>

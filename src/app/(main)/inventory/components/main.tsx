@@ -5,6 +5,7 @@ import { Plus, Package, AlertTriangle } from "lucide-react";
 
 import { InventoryTable } from "./inventory-table";
 import { InventoryModal } from "./inventory-modal";
+import { Select } from "@/app/components/common";
 
 type MainInventoryPageProps = {
   branches: Array<Record<string, any>>;
@@ -120,25 +121,19 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
 
       {/* Branch Filter */}
       <div className="flex items-center gap-4 mb-4">
-        <label
-          htmlFor="branch-filter"
-          className="text-sm font-medium text-gray-700"
-        >
-          Filter by Branch:
-        </label>
-        <select
-          id="branch-filter"
+        <Select
+          containerClassName="max-w-sm"
+          label="Filter by Branch:"
           value={selectedBranch}
-          onChange={(e) => setSelectedBranch(e.target.value)}
-          className="px-3 py-2 border border-gray-300 text-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">All Branches</option>
-          {branches.map((branch) => (
-            <option key={branch.id} value={branch.id}>
-              {branch.name}
-            </option>
-          ))}
-        </select>
+          onChange={(newValue) =>
+            setSelectedBranch((newValue as { value: string })?.value)
+          }
+          options={[
+            { label: "All Branch", value: "" },
+            ...(branches?.map(({ id, name }) => ({ label: name, value: id })) ||
+              []),
+          ]}
+        />
       </div>
 
       <div className="mt-4">

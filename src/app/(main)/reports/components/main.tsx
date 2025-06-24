@@ -1,13 +1,14 @@
 "use client";
 
-import { useState } from "react";
-import { 
+import { useState, useEffect } from "react";
+import {
   ChartBarIcon,
   UsersIcon,
   CurrencyDollarIcon,
   ClipboardDocumentListIcon,
   DocumentArrowDownIcon,
-  FunnelIcon
+  FunnelIcon,
+  BanknotesIcon,
 } from "@heroicons/react/24/outline";
 import { MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
 import { ApexChart } from "@/app/components/charts/apex-chart";
@@ -15,7 +16,13 @@ import { SalesReportSection } from "./sales-report-section";
 import { CustomerReportSection } from "./customer-report-section";
 import { InventoryReportSection } from "./inventory-report-section";
 import { OrderReportSection } from "./order-report-section";
+import { ExpenseReportSection } from "./expense-report-section";
 import { DateFilterSection } from "./date-filter-section";
+import { ExportModal } from "./export-modal";
+import { ExportData } from "@/app/utils/export-utils";
+import { getOrders } from "@/app/actions/order";
+import { getAllCustomers } from "@/app/actions/customer";
+import { getAllExpenses } from "@/app/actions/expense";
 
 type MainReportsPageProps = {
   monthlySalesData: MonthlySalesData | null;
@@ -30,23 +37,92 @@ export function MainReportsPage({
   monthlyCustomersCount,
   todayCustomersCount,
 }: MainReportsPageProps) {
-  const [activeTab, setActiveTab] = useState<'overview' | 'sales' | 'customers' | 'inventory' | 'orders'>('overview');
+  const [activeTab, setActiveTab] = useState<
+    "overview" | "sales" | "customers" | "inventory" | "orders" | "expenses"
+  >("overview");
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
-    endDate: new Date()
+    endDate: new Date(),
   });
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportData, setExportData] = useState<ExportData>({});
+  const [isLoadingExport, setIsLoadingExport] = useState(false);
 
   const tabs = [
-    { id: 'overview', name: 'Overview', icon: ChartBarIcon },
-    { id: 'sales', name: 'Sales Analytics', icon: CurrencyDollarIcon },
-    { id: 'customers', name: 'Customer Analytics', icon: UsersIcon },
-    { id: 'inventory', name: 'Inventory Reports', icon: ClipboardDocumentListIcon },
-    { id: 'orders', name: 'Order Reports', icon: DocumentArrowDownIcon },
+    { id: "overview", name: "Overview", icon: ChartBarIcon },
+    { id: "sales", name: "Sales Analytics", icon: CurrencyDollarIcon },
+    { id: "customers", name: "Customer Analytics", icon: UsersIcon },
+    {
+      id: "inventory",
+      name: "Inventory Reports",
+      icon: ClipboardDocumentListIcon,
+    },
+    { id: "orders", name: "Order Reports", icon: DocumentArrowDownIcon },
+    { id: "expenses", name: "Expense Reports", icon: BanknotesIcon },
   ];
 
-  const handleExportReport = () => {
-    // Export functionality - could generate PDF, CSV, etc.
-    alert('Export functionality would be implemented here');
+  const handleExportReport = async () => {
+    setIsLoadingExport(true);
+    try {
+      // Fetch data based on active tab and date range
+      const data: ExportData = {
+        dateRange: dateRange,
+        sales: monthlySalesData,
+      };
+
+      // Fetch orders data
+      const ordersResponse = await getOrders();
+      if (ordersResponse.data) {
+        // Filter orders by date range
+        const filteredOrders = ordersResponse.data.filter((order: any) => {
+          const orderDate = new Date(order.order_date);
+          return (
+            orderDate >= dateRange.startDate && orderDate <= dateRange.endDate
+          );
+        });
+        data.orders = filteredOrders;
+      }
+
+      // Fetch customers data
+      const customersResponse = await getAllCustomers();
+      if (customersResponse.data) {
+        // Filter customers by date range
+        const filteredCustomers = customersResponse.data.filter(
+          (customer: any) => {
+            const customerDate = new Date(customer.created_at);
+            return (
+              customerDate >= dateRange.startDate &&
+              customerDate <= dateRange.endDate
+            );
+          }
+        );
+        data.customers = filteredCustomers;
+      }
+
+      // Fetch expenses data
+      const expensesResponse = await getAllExpenses();
+      if (expensesResponse.data) {
+        // Filter expenses by date range
+        const filteredExpenses = expensesResponse.data.filter(
+          (expense: any) => {
+            const expenseDate = new Date(expense.expense_date);
+            return (
+              expenseDate >= dateRange.startDate &&
+              expenseDate <= dateRange.endDate
+            );
+          }
+        );
+        data.expenses = filteredExpenses;
+      }
+
+      setExportData(data);
+      setExportModalOpen(true);
+    } catch (error) {
+      console.error("Failed to prepare export data:", error);
+      alert("Failed to prepare export data. Please try again.");
+    } finally {
+      setIsLoadingExport(false);
+    }
   };
 
   return (
@@ -66,18 +142,19 @@ export function MainReportsPage({
             <FunnelIcon className="h-4 w-4" />
             Filters
           </button>
-          <button 
+          <button
             onClick={handleExportReport}
-            className="inline-flex items-center gap-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            disabled={isLoadingExport}
+            className="inline-flex items-center gap-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <DocumentArrowDownIcon className="h-4 w-4" />
-            Export Report
+            {isLoadingExport ? "Preparing..." : "Export Report"}
           </button>
         </div>
       </div>
 
       {/* Date Filter */}
-      <DateFilterSection 
+      <DateFilterSection
         dateRange={dateRange}
         onDateRangeChange={setDateRange}
       />
@@ -93,8 +170,8 @@ export function MainReportsPage({
                 onClick={() => setActiveTab(tab.id as typeof activeTab)}
                 className={`flex items-center gap-2 py-2 px-1 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
-                    ? 'border-blue-500 text-blue-600'
-                    : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                    ? "border-blue-500 text-blue-600"
+                    : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                 }`}
               >
                 <Icon className="h-5 w-5" />
@@ -107,7 +184,7 @@ export function MainReportsPage({
 
       {/* Content Sections */}
       <div className="flex-1">
-        {activeTab === 'overview' && (
+        {activeTab === "overview" && (
           <OverviewSection
             monthlySalesData={monthlySalesData}
             chartData={chartData}
@@ -115,31 +192,41 @@ export function MainReportsPage({
             todayCustomersCount={todayCustomersCount}
           />
         )}
-        
-        {activeTab === 'sales' && (
-          <SalesReportSection 
+
+        {activeTab === "sales" && (
+          <SalesReportSection
             monthlySalesData={monthlySalesData}
             chartData={chartData}
             dateRange={dateRange}
           />
         )}
-        
-        {activeTab === 'customers' && (
-          <CustomerReportSection 
+
+        {activeTab === "customers" && (
+          <CustomerReportSection
             monthlyCustomersCount={monthlyCustomersCount}
             todayCustomersCount={todayCustomersCount}
             dateRange={dateRange}
           />
         )}
-        
-        {activeTab === 'inventory' && (
+
+        {activeTab === "inventory" && (
           <InventoryReportSection dateRange={dateRange} />
         )}
-        
-        {activeTab === 'orders' && (
-          <OrderReportSection dateRange={dateRange} />
+
+        {activeTab === "orders" && <OrderReportSection dateRange={dateRange} />}
+
+        {activeTab === "expenses" && (
+          <ExpenseReportSection dateRange={dateRange} />
         )}
       </div>
+
+      {/* Export Modal */}
+      <ExportModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        data={exportData}
+        activeTab={activeTab}
+      />
     </div>
   );
 }
@@ -194,11 +281,18 @@ function OverviewSection({
         {summaryCards.map((card, index) => {
           const Icon = card.icon;
           return (
-            <div key={index} className={`bg-gradient-to-r ${card.color} rounded-lg p-6 shadow-sm`}>
+            <div
+              key={index}
+              className={`bg-gradient-to-r ${card.color} rounded-lg p-6 shadow-sm`}
+            >
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-medium text-gray-600">{card.title}</p>
-                  <p className="text-2xl font-bold text-gray-900 mt-1">{card.value}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    {card.title}
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900 mt-1">
+                    {card.value}
+                  </p>
                 </div>
                 <div className={`${card.iconColor} p-3 rounded-full`}>
                   <Icon className="h-6 w-6 text-white" />
@@ -214,7 +308,9 @@ function OverviewSection({
         {/* Sales Chart */}
         <div className="bg-white rounded-lg shadow-sm p-6">
           <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-900">Sales Overview</h3>
+            <h3 className="text-lg font-semibold text-gray-900">
+              Sales Overview
+            </h3>
             <span className="text-sm text-gray-500">This Year</span>
           </div>
           <div className="text-2xl font-bold text-gray-900 mb-4">
@@ -224,35 +320,65 @@ function OverviewSection({
             options={{
               chart: { type: "area", toolbar: { show: false } },
               stroke: { curve: "smooth", colors: ["#3B82F6"], width: 2 },
-              fill: { type: "gradient", gradient: { opacityFrom: 0.3, opacityTo: 0 } },
+              fill: {
+                type: "gradient",
+                gradient: { opacityFrom: 0.3, opacityTo: 0 },
+              },
               dataLabels: { enabled: false },
               grid: { borderColor: "#E5E7EB" },
               xaxis: {
-                categories: ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"],
-                labels: { style: { fontSize: "12px" } }
+                categories: [
+                  "Jan",
+                  "Feb",
+                  "Mar",
+                  "Apr",
+                  "May",
+                  "Jun",
+                  "Jul",
+                  "Aug",
+                  "Sep",
+                  "Oct",
+                  "Nov",
+                  "Dec",
+                ],
+                labels: { style: { fontSize: "12px" } },
               },
               yaxis: {
                 labels: {
-                  formatter: (value) => `₱${value}${chartData?.useThousands ? 'k' : ''}`,
-                  style: { fontSize: "12px" }
-                }
+                  formatter: (value) =>
+                    `₱${value}${chartData?.useThousands ? "k" : ""}`,
+                  style: { fontSize: "12px" },
+                },
               },
               tooltip: {
                 custom: function ({ series, seriesIndex, dataPointIndex }) {
                   const months = [
-                    "January", "February", "March", "April", "May", "June",
-                    "July", "August", "September", "October", "November", "December"
+                    "January",
+                    "February",
+                    "March",
+                    "April",
+                    "May",
+                    "June",
+                    "July",
+                    "August",
+                    "September",
+                    "October",
+                    "November",
+                    "December",
                   ];
                   const monthName = months[dataPointIndex];
                   const value = series[seriesIndex][dataPointIndex];
-                  const formattedValue = chartData?.useThousands 
-                    ? `₱${value}k` 
+                  const formattedValue = chartData?.useThousands
+                    ? `₱${value}k`
                     : `₱${value?.toLocaleString() || 0}`;
-                  
+
                   // Calculate percentage of yearly total
                   const yearlyTotal = chartData?.totalYearSales || 0;
-                  const percentage = yearlyTotal > 0 ? Math.round((value / yearlyTotal) * 100) : 0;
-                  
+                  const percentage =
+                    yearlyTotal > 0
+                      ? Math.round((value / yearlyTotal) * 100)
+                      : 0;
+
                   return `<div class="bg-white p-3 rounded-lg shadow-lg border">
                     <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
                     <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>
@@ -268,12 +394,14 @@ function OverviewSection({
                     </div>
                   </div>`;
                 },
-              }
+              },
             }}
-            series={[{
-              name: "Sales",
-              data: chartData?.monthlyData || Array(12).fill(0)
-            }]}
+            series={[
+              {
+                name: "Sales",
+                data: chartData?.monthlyData || Array(12).fill(0),
+              },
+            ]}
             type="area"
             height={300}
           />
@@ -281,27 +409,44 @@ function OverviewSection({
 
         {/* Quick Stats */}
         <div className="bg-white rounded-lg shadow-sm p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Quick Statistics</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">
+            Quick Statistics
+          </h3>
           <div className="space-y-4">
             <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">Unpaid Sales</span>
+              <span className="text-sm font-medium text-gray-600">
+                Unpaid Sales
+              </span>
               <span className="text-lg font-bold text-red-600">
                 ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">Collection Rate</span>
+              <span className="text-sm font-medium text-gray-600">
+                Collection Rate
+              </span>
               <span className="text-lg font-bold text-green-600">
-                {monthlySalesData?.totalSales 
-                  ? Math.round((monthlySalesData.paidSales / monthlySalesData.totalSales) * 100)
-                  : 0}%
+                {monthlySalesData?.totalSales
+                  ? Math.round(
+                      (monthlySalesData.paidSales /
+                        monthlySalesData.totalSales) *
+                        100
+                    )
+                  : 0}
+                %
               </span>
             </div>
             <div className="flex justify-between items-center p-4 bg-gray-50 rounded-lg">
-              <span className="text-sm font-medium text-gray-600">Avg. Customer Value</span>
+              <span className="text-sm font-medium text-gray-600">
+                Avg. Customer Value
+              </span>
               <span className="text-lg font-bold text-blue-600">
-                ₱{monthlyCustomersCount > 0 
-                  ? Math.round((monthlySalesData?.totalSales || 0) / monthlyCustomersCount).toLocaleString()
+                ₱
+                {monthlyCustomersCount > 0
+                  ? Math.round(
+                      (monthlySalesData?.totalSales || 0) /
+                        monthlyCustomersCount
+                    ).toLocaleString()
                   : "0"}
               </span>
             </div>

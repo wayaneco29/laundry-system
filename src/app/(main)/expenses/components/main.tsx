@@ -292,7 +292,6 @@ export function ExpensesMain() {
         </div>
       </div>
 
-
       {/* Filters */}
       <div className="flex justify-between items-center mb-6">
         <div className="w-64">
