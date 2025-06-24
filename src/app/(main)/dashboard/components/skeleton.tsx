@@ -85,3 +85,31 @@ export function DashboardSkeleton() {
     </div>
   );
 }
+
+// Header skeleton with title, subtitle, and button
+export function HeaderWithButtonSkeleton({
+  titleWidth = "w-64",
+  subtitleWidth = "w-80",
+  buttonWidth = "w-32",
+}) {
+  return (
+    <div className="flex justify-between items-center mb-4">
+      <div>
+        <div className={`h-8 bg-gray-300 rounded ${titleWidth} mb-2`}></div>
+        <div className={`h-5 bg-gray-200 rounded ${subtitleWidth}`}></div>
+      </div>
+      <div className={`h-10 bg-gray-300 rounded ${buttonWidth}`}></div>
+    </div>
+  );
+}
+
+// Stats cards skeleton (row of 2-4 cards)
+export function StatsCardsSkeleton({ count = 2 }) {
+  return (
+    <div className={`grid grid-cols-1 md:grid-cols-${count} gap-4 mb-6`}>
+      {Array.from({ length: count }).map((_, i) => (
+        <StatCardSkeleton key={i} />
+      ))}
+    </div>
+  );
+}
