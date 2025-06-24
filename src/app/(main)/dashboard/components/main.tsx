@@ -274,6 +274,7 @@ export function MainDashboardPage({
   const [statsLoading, setStatsLoading] = useState(false);
   const [chartsLoading, setChartsLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
+  const [chartKey, setChartKey] = useState(0); // Force chart re-render
   const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(
     initialMonthlyCustomersCount
   );
@@ -380,6 +381,23 @@ export function MainDashboardPage({
     console.log("selectedBranch state changed to:", selectedBranch);
   }, [selectedBranch]);
 
+  // Force chart re-render when chart data changes
+  useEffect(() => {
+    console.log("Chart data changed, forcing re-render");
+    // Force a small delay to ensure DOM is ready
+    const timer = setTimeout(() => {
+      const chartElement = document.querySelector(
+        '[data-apexcharts="sales-chart"]'
+      );
+      if (chartElement) {
+        console.log("Chart element found, triggering resize");
+        window.dispatchEvent(new Event("resize"));
+      }
+    }, 100);
+
+    return () => clearTimeout(timer);
+  }, [chartData]);
+
   const fetchBranches = async () => {
     try {
       console.log("Fetching branches...");
@@ -433,6 +451,7 @@ export function MainDashboardPage({
       setTodayCustomersCount(todayResult.count);
       setMonthlySalesData(salesResult.data);
       setChartData(chartResult.data);
+      setChartKey((prev) => prev + 1); // Force chart re-render
       setMonthlyExpense(monthlyExpenseResult.data || 0);
       setYearlyExpense(yearlyExpenseResult.data || 0);
       setRecentOrders(recentOrdersResult.data || []);
@@ -492,9 +511,96 @@ export function MainDashboardPage({
 
   // Dynamic chart options based on data scale
   const dynamicChartOptions: ApexOptions = {
-    ...chartOptions,
+    chart: {
+      id: "sales-chart",
+      height: 264,
+      type: "area",
+      toolbar: {
+        show: false,
+      },
+      zoom: {
+        enabled: false,
+      },
+      dropShadow: {
+        enabled: false,
+        top: 6,
+        left: 0,
+        blur: 4,
+        color: "#000",
+        opacity: 0.1,
+      },
+      redrawOnWindowResize: true,
+      redrawOnParentResize: true,
+    },
+    fill: {
+      type: "gradient",
+      gradient: {
+        shadeIntensity: 1,
+        inverseColors: false,
+        opacityFrom: 0,
+        opacityTo: 0,
+        stops: [0, 90, 100],
+      },
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    stroke: {
+      curve: "smooth",
+      colors: ["#487FFF"],
+      width: 3,
+    },
+    markers: {
+      size: 0,
+      strokeWidth: 3,
+      hover: {
+        size: 8,
+      },
+    },
+    tooltip: {
+      enabled: true,
+      custom: function ({ series, seriesIndex, dataPointIndex }) {
+        const months = [
+          "January",
+          "February",
+          "March",
+          "April",
+          "May",
+          "June",
+          "July",
+          "August",
+          "September",
+          "October",
+          "November",
+          "December",
+        ];
+        const monthName = months[dataPointIndex];
+        const value = series[seriesIndex][dataPointIndex];
+        const formattedValue = `₱${value?.toLocaleString() || 0}`;
+
+        return `<div class="bg-white p-3 rounded-lg shadow-lg border">
+          <div class="font-semibold text-gray-800 text-sm">${monthName} ${new Date().getFullYear()}</div>
+          <div class="text-gray-600 text-xs mb-2">Monthly Sales</div>
+          <div class="flex items-center">
+            <div class="w-3 h-3 bg-blue-500 rounded-full mr-2"></div>
+            <span class="text-blue-600 font-bold text-sm">${formattedValue}</span>
+          </div>
+        </div>`;
+      },
+      x: {
+        show: true,
+      },
+      cssClass: "text-gray-700",
+    },
+    grid: {
+      row: {
+        colors: ["transparent", "transparent"],
+        opacity: 0.5,
+      },
+      borderColor: "#D1D5DB",
+      strokeDashArray: 3,
+    },
     yaxis: {
-      ...chartOptions.yaxis,
       labels: {
         formatter: function (value) {
           if (chartData?.useThousands) {
@@ -507,7 +613,59 @@ export function MainDashboardPage({
         },
       },
     },
+    xaxis: {
+      categories: [
+        "Jan",
+        "Feb",
+        "Mar",
+        "Apr",
+        "May",
+        "Jun",
+        "Jul",
+        "Aug",
+        "Sep",
+        "Oct",
+        "Nov",
+        "Dec",
+      ],
+      tooltip: {
+        enabled: false,
+      },
+      labels: {
+        formatter: function (value: string) {
+          return value;
+        },
+        style: {
+          fontSize: "14px",
+        },
+      },
+      axisBorder: {
+        show: false,
+      },
+      crosshairs: {
+        show: true,
+        width: 20,
+        stroke: {
+          width: 0,
+        },
+        fill: {
+          type: "solid",
+          color: "#487FFF40",
+        },
+      },
+    },
   };
+
+  // Debug chart data
+  console.log("Chart data:", chartData);
+  console.log(
+    "Chart options categories:",
+    dynamicChartOptions.xaxis?.categories
+  );
+  console.log(
+    "Chart series data:",
+    chartData?.monthlyData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+  );
 
   return (
     <div className="p-4 lg:p-8">
@@ -647,19 +805,22 @@ export function MainDashboardPage({
                 <div className="text-gray-700 font-bold text-lg">
                   ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
                 </div>
-                <ReactApexChart
-                  options={dynamicChartOptions}
-                  series={[
-                    {
-                      name: "",
-                      data: chartData?.monthlyData || [
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      ],
-                    },
-                  ]}
-                  type="area"
-                  height={264}
-                />
+                <div data-apexcharts="sales-chart">
+                  <ReactApexChart
+                    key={`sales-chart-${chartKey}-${selectedBranch}`}
+                    options={dynamicChartOptions}
+                    series={[
+                      {
+                        name: "",
+                        data: chartData?.monthlyData || [
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        ],
+                      },
+                    ]}
+                    type="area"
+                    height={264}
+                  />
+                </div>
               </div>
               <div className="bg-white rounded-md p-4 shadow-md">
                 <div className="flex justify-between">
