@@ -55,7 +55,6 @@ export const OrdersTable = ({
   const [loadingPaymentStatus, setLoadingPaymentStatus] = useState<Set<string>>(
     new Set()
   );
-  console.log("===================", data);
 
   const orderStatuses = [
     "Pending",
@@ -347,13 +346,48 @@ export const OrdersTable = ({
 
   if (!data || data.length === 0) {
     return (
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-12 text-center">
-          <Hash className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No orders</h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Get started by creating your first order.
-          </p>
+      <div>
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search orders by customer name or order ID..."
+              value={search}
+              onChange={(e) => handleSearchChange(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+              disabled={loading}
+            />
+            {loading && (
+              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
+              </div>
+            )}
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+            disabled={loading}
+          >
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Ongoing">Ongoing</option>
+            <option value="Ready for Pickup">Ready for Pickup</option>
+            <option value="Picked up">Picked up</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        <div className="bg-white shadow rounded-lg">
+          <div className="px-6 py-12 text-center">
+            <Hash className="mx-auto h-12 w-12 text-gray-400" />
+            <h3 className="mt-2 text-sm font-medium text-gray-900">
+              No orders
+            </h3>
+            <p className="mt-1 text-sm text-gray-500">
+              Get started by creating your first order.
+            </p>
+          </div>
         </div>
       </div>
     );
@@ -362,7 +396,7 @@ export const OrdersTable = ({
   return (
     <div className="space-y-4">
       {/* Search and filters */}
-      <div className="flex flex-col sm:flex-row gap-4">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
           <input
@@ -370,7 +404,7 @@ export const OrdersTable = ({
             placeholder="Search orders by customer name or order ID..."
             value={search}
             onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
             disabled={loading}
           />
           {loading && (
@@ -382,7 +416,7 @@ export const OrdersTable = ({
         <select
           value={statusFilter}
           onChange={(e) => handleStatusFilterChange(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
           disabled={loading}
         >
           <option value="">All Status</option>

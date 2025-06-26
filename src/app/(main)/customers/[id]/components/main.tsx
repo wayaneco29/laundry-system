@@ -19,6 +19,8 @@ import {
 import { Button, Input } from "@/app/components/common";
 import { upsertCustomer } from "@/app/actions";
 import { useRouter } from "next/navigation";
+import { getRecentOrdersByCustomer } from "@/app/actions/order/get_order_analytics";
+import { useEffect, useState } from "react";
 
 type MainCustomerIdPageProps = {
   customer_info: {
@@ -57,6 +59,28 @@ export const MainCustomerIdPage = ({
     ),
   });
 
+  // Add state for recent transactions
+  const [recentOrders, setRecentOrders] = useState<any[]>([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
+
+  useEffect(() => {
+    const fetchRecentOrders = async () => {
+      setLoadingOrders(true);
+      try {
+        const { data } = await getRecentOrdersByCustomer(
+          customer_info.customer_id,
+          10
+        );
+        setRecentOrders(data || []);
+      } catch (error) {
+        setRecentOrders([]);
+      } finally {
+        setLoadingOrders(false);
+      }
+    };
+    fetchRecentOrders();
+  }, [customer_info.customer_id]);
+
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
       <div className="flex justify-between items-center">
@@ -82,8 +106,8 @@ export const MainCustomerIdPage = ({
         </Button>
       </div>
       <div className="mt-4 text-gray-700">
-        <div className="grid grid-cols-1 2xl:grid-cols-2 gap-y-4 md:gap-y-8 2xl:gap-x-8">
-          <div className="col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-y-4 md:gap-y-8 2xl:gap-x-8">
+          <div className="col-span-1 lg:col-span-1">
             <div className="bg-white rounded-md shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 text-blue-600 font-medium">
@@ -241,7 +265,7 @@ export const MainCustomerIdPage = ({
               </div>
             </div>
           </div>
-          <div className="col-span-1">
+          <div className="col-span-1 lg:col-span-3">
             <div className="bg-white rounded-md shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 text-blue-600 font-medium">
@@ -260,134 +284,84 @@ export const MainCustomerIdPage = ({
                       <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                         Branch / Service
                       </th>
+                      <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                        Services
+                      </th>
                       <th className="w-28 text-center bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                         Status
                       </th>
                     </tr>
                   </thead>
                   <tbody className="group/body divide-y divide-gray-100">
-                    <tr className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200">
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        October 17, 2025
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-blue-500" />
-                          <div>
-                            <div className="font-bold">Manduae City, Cebu</div>
-                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
-                              <Package className="w-3 h-3" />
-                              Wash, Dry and Fold
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-nowrap text-center px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <span
-                          className={twMerge(
-                            "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium  text-white bg-yellow-500"
-                            // order?.status === "Picked Up" && "",
-                            // order?.status === "Pending" && "bg-blue-400",
-                            // order?.status === "Ready for Pickup" && "bg-yellow-500"
-                          )}
+                    {loadingOrders ? (
+                      <tr>
+                        <td colSpan={3} className="text-center py-4">
+                          Loading...
+                        </td>
+                      </tr>
+                    ) : recentOrders.length === 0 ? (
+                      <tr>
+                        <td colSpan={3} className="text-center py-4">
+                          No transactions found.
+                        </td>
+                      </tr>
+                    ) : (
+                      recentOrders.map((order) => (
+                        <tr
+                          key={order.id}
+                          className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200"
                         >
-                          Ongoing
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200">
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        January 17, 2024
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-blue-500" />
-                          <div>
-                            <div className="font-bold">
-                              Brgy. Sambag 2, Colon, Cebu
+                          <td className="text-nowrap px-6 py-4">
+                            {order.created_at
+                              ? new Date(order.created_at).toLocaleDateString()
+                              : "-"}
+                          </td>
+                          <td className="text-nowrap px-6 py-4">
+                            <div className="flex items-center gap-2">
+                              <Building2 className="w-4 h-4 text-blue-500" />
+                              <div>
+                                <div className="font-bold">
+                                  {order.branch_name}
+                                </div>
+                                {/* You can add service info here if available */}
+                              </div>
                             </div>
-                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
-                              <Package className="w-3 h-3" />
-                              Wash, Dry and Fold
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <span
-                          className={twMerge(
-                            "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium  text-white bg-green-500"
-                            // order?.status === "Picked Up" && "",
-                            // order?.status === "Pending" && "bg-blue-400",
-                            // order?.status === "Ready for Pickup" && "bg-yellow-500"
-                          )}
-                        >
-                          Picked up
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200">
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        January 17, 2024
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-blue-500" />
-                          <div>
-                            <div className="font-bold">
-                              Brgy. Sambag 2, Colon, Cebu
-                            </div>
-                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
-                              <Package className="w-3 h-3" />
-                              Wash, Dry and Fold
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <span
-                          className={twMerge(
-                            "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium  text-white bg-green-500"
-                            // order?.status === "Picked Up" && "",
-                            // order?.status === "Pending" && "bg-blue-400",
-                            // order?.status === "Ready for Pickup" && "bg-yellow-500"
-                          )}
-                        >
-                          Picked up
-                        </span>
-                      </td>
-                    </tr>
-                    <tr className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200">
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        January 17, 2024
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <div className="flex items-center gap-2">
-                          <Building2 className="w-4 h-4 text-blue-500" />
-                          <div>
-                            <div className="font-bold">
-                              Brgy. Sambag 2, Colon, Cebu
-                            </div>
-                            <div className="flex items-center gap-1 mt-1 text-sm text-gray-600">
-                              <Package className="w-3 h-3" />
-                              Wash, Dry and Fold
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                        <span
-                          className={twMerge(
-                            "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium  text-white bg-green-500"
-                            // order?.status === "Picked Up" && "",
-                            // order?.status === "Pending" && "bg-blue-400",
-                            // order?.status === "Ready for Pickup" && "bg-yellow-500"
-                          )}
-                        >
-                          Picked up
-                        </span>
-                      </td>
-                    </tr>
+                          </td>
+                          <td className="px-6 py-4">
+                            {order.items && order.items.length > 0 ? (
+                              <ul className="list-disc pl-4">
+                                {order.items.map((item: any, idx: number) => (
+                                  <li
+                                    key={idx}
+                                    className="text-xs text-gray-700"
+                                  >
+                                    {item.name} x{item.quantity}
+                                  </li>
+                                ))}
+                              </ul>
+                            ) : (
+                              <span className="text-xs text-gray-400">
+                                No services
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-nowrap text-center px-6 py-4">
+                            <span
+                              className={twMerge(
+                                "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium text-white",
+                                order.status === "Picked up"
+                                  ? "bg-green-500"
+                                  : order.status === "Pending"
+                                  ? "bg-blue-400"
+                                  : "bg-yellow-500"
+                              )}
+                            >
+                              {order.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
