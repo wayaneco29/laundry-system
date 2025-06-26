@@ -33,6 +33,7 @@ export function Pagination({
   const endItem = Math.min(currentPage * itemsPerPage, totalItems);
 
   const getVisiblePages = () => {
+    if (totalPages === 1) return [1];
     const delta = 2;
     const range = [];
     const rangeWithDots = [];
@@ -61,8 +62,6 @@ export function Pagination({
 
     return rangeWithDots;
   };
-
-  if (totalPages <= 1) return null;
 
   return (
     <div

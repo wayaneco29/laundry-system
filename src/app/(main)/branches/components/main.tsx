@@ -11,9 +11,19 @@ import { Button } from "@/app/components/common";
 
 type BranchesPageProps = {
   branch_list: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
 };
 
-export function MainBranchesPage({ branch_list }: BranchesPageProps) {
+export function MainBranchesPage({
+  branch_list,
+  totalCount,
+  searchParams,
+}: BranchesPageProps) {
   const router = useRouter();
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -41,6 +51,8 @@ export function MainBranchesPage({ branch_list }: BranchesPageProps) {
         <div className="flex flex-col">
           <BranchTable
             data={branch_list}
+            totalCount={totalCount}
+            searchParams={searchParams}
             onView={(branch) => {
               customerRevalidateTag("getBranch");
               router?.push(`/branches/${branch?.id}`);

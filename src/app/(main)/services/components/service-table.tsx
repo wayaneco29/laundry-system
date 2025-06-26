@@ -1,19 +1,50 @@
 "use client";
 
-import {
-  Package,
-  DollarSign,
-  Edit2,
-  CheckCircle,
-  XCircle,
-} from "lucide-react";
+import { Package, DollarSign, Edit2, CheckCircle, XCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/app/components/common/pagination";
 
 type ServiceTableProps = {
   data: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
   onEdit: (service: Record<string, string>) => void;
 };
 
-export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
+export const ServiceTable = ({
+  data,
+  totalCount,
+  searchParams,
+  onEdit,
+}: ServiceTableProps) => {
+  const router = useRouter();
+
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = Number(searchParams.limit) || 15;
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: String(page),
+      limit: String(itemsPerPage),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: "1",
+      limit: String(limit),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
@@ -30,7 +61,9 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-12 text-center">
           <Package className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No services</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No services
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
             Get started by adding your first service.
           </p>
@@ -79,7 +112,11 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(service.status)}`}>
+                  <span
+                    className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      service.status
+                    )}`}
+                  >
                     {service.status === "Active" ? (
                       <CheckCircle className="h-4 w-4" />
                     ) : (
@@ -101,6 +138,16 @@ export const ServiceTable = ({ data, onEdit }: ServiceTableProps) => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
     </div>
   );

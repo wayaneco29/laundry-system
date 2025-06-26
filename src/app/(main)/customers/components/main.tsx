@@ -10,9 +10,19 @@ import { CustomersTable } from "./customers-table";
 
 type MainCustomerPageProps = {
   customer_list: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
 };
 
-export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
+export function MainCustomerPage({
+  customer_list,
+  totalCount,
+  searchParams,
+}: MainCustomerPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
 
   const router = useRouter();
@@ -38,8 +48,10 @@ export function MainCustomerPage({ customer_list }: MainCustomerPageProps) {
       </div>
       <div className="mt-4">
         <div className="flex flex-col">
-          <CustomersTable 
-            data={customer_list} 
+          <CustomersTable
+            data={customer_list}
+            totalCount={totalCount}
+            searchParams={searchParams}
             onView={(customer) => {
               customerRevalidateTag("getCustomer");
               router.push(`/customers/${customer?.customer_id}`);

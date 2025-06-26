@@ -1,14 +1,29 @@
 "use client";
 
 import { Edit2, Package, AlertTriangle } from "lucide-react";
+import { Pagination } from "@/app/components/common/pagination";
 
 type InventoryTableProps = {
   data: Array<Record<string, any>>;
   selectedBranch: string;
+  totalCount: number;
+  page: number;
+  limit: number;
+  onPageChange: (page: number) => void;
+  onLimitChange: (limit: number) => void;
   onEdit: (item: Record<string, any>) => void;
 };
 
-export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableProps) {
+export function InventoryTable({
+  data,
+  selectedBranch,
+  totalCount,
+  page,
+  limit,
+  onPageChange,
+  onLimitChange,
+  onEdit,
+}: InventoryTableProps) {
   const filteredData = selectedBranch
     ? data.filter((item) => item.branch_id === selectedBranch)
     : data;
@@ -37,10 +52,12 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-12 text-center">
           <Package className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No inventory items</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No inventory items
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
-            {selectedBranch 
-              ? "No items found for the selected branch." 
+            {selectedBranch
+              ? "No items found for the selected branch."
               : "Get started by adding your first inventory item."}
           </p>
         </div>
@@ -73,17 +90,22 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {filteredData.map((item, index) => (
-              <tr key={`${item.branch_id}-${item.id || index}`} className="hover:bg-gray-50">
+              <tr
+                key={`${item.branch_id}-${item.id || index}`}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <Package className="h-5 w-5 text-gray-400 mr-3" />
                     <div className="text-sm font-medium text-gray-900">
-                      {item.name || 'Unnamed Item'}
+                      {item.name || "Unnamed Item"}
                     </div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">{item.branch_name}</div>
+                  <div className="text-sm text-gray-900">
+                    {item.branch_name}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm font-medium text-gray-900">
@@ -91,7 +113,11 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStockStatusColor(item.quantity || 0)}`}>
+                  <span
+                    className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStockStatusColor(
+                      item.quantity || 0
+                    )}`}
+                  >
                     {getStockIcon(item.quantity || 0)}
                     {getStockStatus(item.quantity || 0)}
                   </span>
@@ -100,7 +126,7 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
                   <button
                     onClick={() => onEdit(item)}
                     className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
-                    title={`Edit ${item.name || 'item'}`}
+                    title={`Edit ${item.name || "item"}`}
                   >
                     <Edit2 className="h-4 w-4" />
                     Edit
@@ -110,6 +136,16 @@ export function InventoryTable({ data, selectedBranch, onEdit }: InventoryTableP
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="p-4">
+        <Pagination
+          currentPage={page}
+          totalPages={Math.ceil(totalCount / limit) || 1}
+          totalItems={totalCount}
+          itemsPerPage={limit}
+          onPageChange={onPageChange}
+          onItemsPerPageChange={onLimitChange}
+        />
       </div>
     </div>
   );

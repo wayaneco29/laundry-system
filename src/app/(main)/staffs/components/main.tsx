@@ -8,9 +8,19 @@ import { StaffTable } from "./staff-table";
 
 type MainStaffPageProps = {
   staff_list: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
 };
 
-export function MainStaffPage({ staff_list }: MainStaffPageProps) {
+export function MainStaffPage({
+  staff_list,
+  totalCount,
+  searchParams,
+}: MainStaffPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [initialValues, setInitialValues] = useState({
     isUpdate: false,
@@ -48,6 +58,8 @@ export function MainStaffPage({ staff_list }: MainStaffPageProps) {
         <div className="flex flex-col">
           <StaffTable
             data={staff_list}
+            totalCount={totalCount}
+            searchParams={searchParams}
             onEdit={(staff) => {
               setInitialValues({
                 isUpdate: true,

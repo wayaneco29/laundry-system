@@ -1,19 +1,58 @@
 "use client";
 
 import { User, Phone, Mail, MapPin, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/app/components/common/pagination";
 
 type CustomersTableProps = {
   data: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
   onView: (customer: Record<string, string>) => void;
 };
 
-export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
+export const CustomersTable = ({
+  data,
+  totalCount,
+  searchParams,
+  onView,
+}: CustomersTableProps) => {
+  const router = useRouter();
+
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = Number(searchParams.limit) || 20;
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: String(page),
+      limit: String(itemsPerPage),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: "1",
+      limit: String(limit),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
   if (data.length === 0) {
     return (
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-12 text-center">
           <User className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No customers</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No customers
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
             Get started by adding your first customer.
           </p>
@@ -47,7 +86,10 @@ export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {data.map((customer, index) => (
-              <tr key={customer.customer_id || index} className="hover:bg-gray-50">
+              <tr
+                key={customer.customer_id || index}
+                className="hover:bg-gray-50"
+              >
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <User className="h-5 w-5 text-gray-400 mr-3" />
@@ -68,7 +110,7 @@ export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {customer.email || 'No email'}
+                      {customer.email || "No email"}
                     </div>
                   </div>
                 </td>
@@ -76,7 +118,7 @@ export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {customer.address || 'No address'}
+                      {customer.address || "No address"}
                     </div>
                   </div>
                 </td>
@@ -93,6 +135,16 @@ export const CustomersTable = ({ data, onView }: CustomersTableProps) => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
     </div>
   );

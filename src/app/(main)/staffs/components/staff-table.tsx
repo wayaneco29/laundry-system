@@ -2,19 +2,58 @@
 
 import moment from "moment";
 import { Users, Phone, Mail, MapPin, Calendar, Edit2 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/app/components/common/pagination";
 
 type StaffTableProps = {
   data: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
   onEdit: (staff: Record<string, string>) => void;
 };
 
-export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
+export const StaffTable = ({
+  data,
+  totalCount,
+  searchParams,
+  onEdit,
+}: StaffTableProps) => {
+  const router = useRouter();
+
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = Number(searchParams.limit) || 15;
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: String(page),
+      limit: String(itemsPerPage),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: "1",
+      limit: String(limit),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
   if (data.length === 0) {
     return (
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-12 text-center">
           <Users className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No staff members</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No staff members
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
             Get started by adding your first staff member.
           </p>
@@ -63,16 +102,14 @@ export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                    <div className="text-sm text-gray-900">
-                      {staff.phone}
-                    </div>
+                    <div className="text-sm text-gray-900">{staff.phone}</div>
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="flex items-center">
                     <Mail className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {staff.email || 'No email'}
+                      {staff.email || "No email"}
                     </div>
                   </div>
                 </td>
@@ -88,7 +125,7 @@ export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {staff.address || 'No address'}
+                      {staff.address || "No address"}
                     </div>
                   </div>
                 </td>
@@ -105,6 +142,16 @@ export const StaffTable = ({ data, onEdit }: StaffTableProps) => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
     </div>
   );

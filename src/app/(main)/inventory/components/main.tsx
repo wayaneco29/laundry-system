@@ -6,6 +6,7 @@ import { Plus, Package, AlertTriangle } from "lucide-react";
 import { InventoryTable } from "./inventory-table";
 import { InventoryModal } from "./inventory-modal";
 import { Select } from "@/app/components/common";
+import { Pagination } from "@/app/components/common/pagination";
 
 type MainInventoryPageProps = {
   branches: Array<Record<string, any>>;
@@ -28,6 +29,8 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
     quantity: "",
     branchId: "",
   });
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(20);
 
   // Get all inventory items from all branches
   const getAllInventoryItems = () => {
@@ -54,6 +57,19 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
   };
 
   const inventoryItems = getAllInventoryItems();
+  const filteredItems = selectedBranch
+    ? inventoryItems.filter((item) => item.branch_id === selectedBranch)
+    : inventoryItems;
+  const totalCount = filteredItems.length;
+  const totalPages = Math.ceil(totalCount / limit) || 1;
+  const paginatedItems = filteredItems.slice((page - 1) * limit, page * limit);
+
+  const handlePageChange = (newPage: number) => setPage(newPage);
+  const handleLimitChange = (newLimit: number) => {
+    setLimit(newLimit);
+    setPage(1);
+  };
+
   const lowStockItems = inventoryItems.filter((item) => item.quantity <= 10);
   const outOfStockItems = inventoryItems.filter((item) => item.quantity === 0);
 
@@ -139,8 +155,13 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
       <div className="mt-4">
         <div className="flex flex-col">
           <InventoryTable
-            data={inventoryItems}
+            data={paginatedItems}
             selectedBranch={selectedBranch}
+            totalCount={totalCount}
+            page={page}
+            limit={limit}
+            onPageChange={handlePageChange}
+            onLimitChange={handleLimitChange}
             onEdit={(item) => {
               setIsEditing(true);
               setInitialValue({

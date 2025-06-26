@@ -8,9 +8,21 @@ import {
   deleteExpense,
 } from "@/app/actions/expense";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/app/components/common/pagination";
 
 type ExpenseTableProps = {
   data: Array<Record<string, any>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+    branchId?: string;
+    status?: string;
+  };
   onEdit: (expense: any) => void;
   onView: (expense: any) => void;
   onShowToast?: (
@@ -22,6 +34,8 @@ type ExpenseTableProps = {
 
 export function ExpenseTable({
   data,
+  totalCount,
+  searchParams,
   onEdit,
   onView,
   onShowToast,
@@ -45,6 +59,29 @@ export function ExpenseTable({
   });
 
   const { userId } = useCurrentUser();
+  const router = useRouter();
+
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = Number(searchParams.limit) || 20;
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: String(page),
+      limit: String(itemsPerPage),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: "1",
+      limit: String(limit),
+    });
+    router.push(`?${params.toString()}`);
+  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -462,6 +499,17 @@ export function ExpenseTable({
           ))}
         </tbody>
       </table>
+
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
+      </div>
 
       {/* Confirmation Dialog */}
       <ConfirmationDialog

@@ -21,9 +21,25 @@ import {
   TableSkeleton,
 } from "../../dashboard/components/skeleton";
 
-export function ExpensesMain() {
-  const [expenses, setExpenses] = useState<any[]>([]);
-  const [filteredExpenses, setFilteredExpenses] = useState<any[]>([]);
+interface ExpensesMainProps {
+  expenses: Array<Record<string, any>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+    startDate?: string;
+    endDate?: string;
+    branchId?: string;
+    status?: string;
+  };
+}
+
+export function ExpensesMain({
+  expenses,
+  totalCount,
+  searchParams,
+}: ExpensesMainProps) {
   const [branches, setBranches] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
@@ -51,11 +67,6 @@ export function ExpensesMain() {
   useEffect(() => {
     fetchAllData();
   }, []);
-
-  // Apply filters when expenses or filters change
-  useEffect(() => {
-    applyFilters();
-  }, [expenses, filters]);
 
   // Refetch expense data when branch filter changes
   useEffect(() => {
@@ -87,7 +98,7 @@ export function ExpensesMain() {
   const fetchExpenses = async () => {
     const result = await getAllExpenses();
     if (result.data) {
-      setExpenses(result.data);
+      // setExpenses(result.data);
     }
   };
 
@@ -315,18 +326,20 @@ export function ExpensesMain() {
       {/* Results Summary */}
       <div className="flex justify-between items-center">
         <p className="text-sm text-gray-600">
-          Showing {filteredExpenses.length} of {expenses.length} expenses
+          Showing {expenses.length} of {expenses.length} expenses
         </p>
       </div>
 
       {/* Expenses Table */}
       <div className="bg-white rounded-lg shadow">
         <ExpenseTable
-          data={filteredExpenses}
+          data={expenses}
+          totalCount={totalCount}
+          searchParams={searchParams}
           onEdit={handleEditExpense}
           onView={handleViewExpense}
-          onShowToast={(msg: string) => success(msg)}
-          onShowError={(msg: string) => error(msg)}
+          onShowToast={(msg, type) => success(msg)}
+          onShowError={(msg) => error(msg)}
         />
       </div>
 

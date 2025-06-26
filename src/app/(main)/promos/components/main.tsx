@@ -31,9 +31,20 @@ import { PromoTable } from "./promo-table";
 
 type MainPromoPageProps = {
   promo_list: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+    status?: string;
+  };
 };
 
-export function MainPromoPage({ promo_list }: MainPromoPageProps) {
+export function MainPromoPage({
+  promo_list,
+  totalCount,
+  searchParams,
+}: MainPromoPageProps) {
   const { userId } = useCurrentUser();
   const [showModal, setShowModal] = useState<boolean>(false);
 
@@ -105,6 +116,8 @@ export function MainPromoPage({ promo_list }: MainPromoPageProps) {
         <div className="flex flex-col">
           <PromoTable
             data={promo_list}
+            totalCount={totalCount}
+            searchParams={searchParams}
             onEdit={(promo) => {
               customerRevalidateTag("getPromos");
               reset({

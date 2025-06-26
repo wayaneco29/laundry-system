@@ -1,19 +1,58 @@
 "use client";
 
 import { Building2, MapPin, FileText, Eye } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/app/components/common/pagination";
 
 type BranchTableProps = {
   data: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
   onView: (branch: Record<string, string>) => void;
 };
 
-export const BranchTable = ({ data, onView }: BranchTableProps) => {
+export const BranchTable = ({
+  data,
+  totalCount,
+  searchParams,
+  onView,
+}: BranchTableProps) => {
+  const router = useRouter();
+
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = Number(searchParams.limit) || 10;
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: String(page),
+      limit: String(itemsPerPage),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: "1",
+      limit: String(limit),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
   if (data.length === 0) {
     return (
       <div className="bg-white shadow rounded-lg">
         <div className="px-6 py-12 text-center">
           <Building2 className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">No branches</h3>
+          <h3 className="mt-2 text-sm font-medium text-gray-900">
+            No branches
+          </h3>
           <p className="mt-1 text-sm text-gray-500">
             Get started by adding your first branch.
           </p>
@@ -57,7 +96,7 @@ export const BranchTable = ({ data, onView }: BranchTableProps) => {
                   <div className="flex items-center">
                     <FileText className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {branch.description || 'No description'}
+                      {branch.description || "No description"}
                     </div>
                   </div>
                 </td>
@@ -65,7 +104,7 @@ export const BranchTable = ({ data, onView }: BranchTableProps) => {
                   <div className="flex items-center">
                     <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {branch.address || 'No address'}
+                      {branch.address || "No address"}
                     </div>
                   </div>
                 </td>
@@ -82,6 +121,16 @@ export const BranchTable = ({ data, onView }: BranchTableProps) => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
     </div>
   );

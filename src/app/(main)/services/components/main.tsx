@@ -8,9 +8,19 @@ import { ServiceTable } from "./service-table";
 
 type MainServicePageProps = {
   services_list: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+  };
 };
 
-export function MainServicePage({ services_list }: MainServicePageProps) {
+export function MainServicePage({
+  services_list,
+  totalCount,
+  searchParams,
+}: MainServicePageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [initialValue, setInitialValue] = useState<{
     id: string | null;
@@ -51,6 +61,8 @@ export function MainServicePage({ services_list }: MainServicePageProps) {
         <div className="flex flex-col">
           <ServiceTable
             data={services_list}
+            totalCount={totalCount}
+            searchParams={searchParams}
             onEdit={(service) => {
               setInitialValue({
                 isUpdate: true,

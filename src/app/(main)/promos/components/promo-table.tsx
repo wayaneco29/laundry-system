@@ -10,13 +10,51 @@ import {
   Clock,
   Edit2,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Pagination } from "@/app/components/common/pagination";
 
 type PromoTableProps = {
   data: Array<Record<string, string>>;
+  totalCount: number;
+  searchParams: {
+    page?: string;
+    limit?: string;
+    search?: string;
+    status?: string;
+  };
   onEdit: (promo: Record<string, string>) => void;
 };
 
-export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
+export const PromoTable = ({
+  data,
+  totalCount,
+  searchParams,
+  onEdit,
+}: PromoTableProps) => {
+  const router = useRouter();
+
+  const currentPage = Number(searchParams.page) || 1;
+  const itemsPerPage = Number(searchParams.limit) || 15;
+  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+
+  const handlePageChange = (page: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: String(page),
+      limit: String(itemsPerPage),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
+  const handleItemsPerPageChange = (limit: number) => {
+    const params = new URLSearchParams({
+      ...searchParams,
+      page: "1",
+      limit: String(limit),
+    });
+    router.push(`?${params.toString()}`);
+  };
+
   const getStatusColor = (status: string) => {
     switch (status) {
       case "Active":
@@ -103,7 +141,7 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
                   <div className="flex items-center">
                     <FileText className="h-4 w-4 text-gray-400 mr-2" />
                     <div className="text-sm text-gray-900">
-                      {promo.description || 'No description'}
+                      {promo.description || "No description"}
                     </div>
                   </div>
                 </td>
@@ -116,7 +154,11 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <span className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(promo.status)}`}>
+                  <span
+                    className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                      promo.status
+                    )}`}
+                  >
                     {getStatusIcon(promo.status)}
                     {promo.status}
                   </span>
@@ -134,6 +176,16 @@ export const PromoTable = ({ data, onEdit }: PromoTableProps) => {
             ))}
           </tbody>
         </table>
+      </div>
+      <div className="p-4">
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          itemsPerPage={itemsPerPage}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
+        />
       </div>
     </div>
   );
