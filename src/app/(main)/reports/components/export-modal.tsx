@@ -5,10 +5,10 @@ import {
   DocumentArrowDownIcon,
   DocumentTextIcon,
 } from "@heroicons/react/24/outline";
+import { Loader2 } from "lucide-react";
 import { Modal } from "@/app/components/common/modal";
 import { Button } from "@/app/components/common/button";
 import { exportReport, ExportData } from "@/app/utils/export-utils";
-import { Loader2 } from "@/app/components/common/loader2";
 
 interface ExportModalProps {
   isOpen: boolean;

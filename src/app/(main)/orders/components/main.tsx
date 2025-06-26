@@ -8,11 +8,22 @@ import { useRouter } from "next/navigation";
 import { PlusIcon } from "lucide-react";
 
 type OrdersPageProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
+  totalCount: number;
+  searchParams?: {
+    page?: string;
+    limit?: string;
+    search?: string;
+    status?: string;
+    branchId?: string;
+  };
 };
 
-export function OrdersPage({ data }: OrdersPageProps) {
+export function OrdersPage({
+  data,
+  totalCount,
+  searchParams,
+}: OrdersPageProps) {
   const router = useRouter();
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -38,7 +49,11 @@ export function OrdersPage({ data }: OrdersPageProps) {
       </div>
       <div className="mt-4">
         <div className="flex flex-col">
-          <OrdersTable data={data} />
+          <OrdersTable
+            initialData={data}
+            totalCount={totalCount}
+            searchParams={searchParams}
+          />
         </div>
       </div>
       <OrderModal showModal={showModal} onClose={() => setShowModal(false)} />

@@ -4,38 +4,59 @@ import { unstable_cache } from "next/cache";
 
 import { createClient } from "@/app/utils/supabase/server";
 
-export const getAllServices = async () => {
+export const getAllServices = async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+}) => {
   const supabase = await createClient();
+  const page = options?.page || 1;
+  const limit = options?.limit || 15;
+  const offset = (page - 1) * limit;
 
   const fetchServices = unstable_cache(
     async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("view_services")
-        .select("*")
+        .select("*", { count: "exact" });
+
+      // Apply search filter
+      if (options?.search) {
+        query = query.or(
+          `name.ilike.%${options.search}%,description.ilike.%${options.search}%`
+        );
+      }
+
+      query = query
         .order("created_at", {
           ascending: false,
-        });
+        })
+        .range(offset, offset + limit - 1);
+
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
-      return data;
+      return { data, error: null, count };
     },
-    ["getAllServices"],
+    ["getAllServices", JSON.stringify(options)],
     { revalidate: 60, tags: ["getAllServices"] }
   );
 
   try {
-    const data = await fetchServices();
+    const result = await fetchServices();
 
     return {
-      data,
-      error: null,
+      data: result.data,
+      error: result.error,
+      count: result.count || 0,
     };
   } catch (error) {
     console.error("getAllServices", error);
     return {
       data: [],
       error,
+      count: 0,
     };
   }
 };

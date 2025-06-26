@@ -4,24 +4,35 @@ import { unstable_cache } from "next/cache";
 import { createClient } from "@/app/utils/supabase/server";
 
 export const getAllExpenses = async (options?: {
+  page?: number;
+  limit?: number;
+  search?: string;
   startDate?: string;
   endDate?: string;
   branchId?: string;
+  status?: string;
 }) => {
   const supabase = await createClient();
+  const page = options?.page || 1;
+  const limit = options?.limit || 20;
+  const offset = (page - 1) * limit;
 
   const fetchExpenses = unstable_cache(
     async () => {
       let query = supabase
         .from("view_expenses")
-        .select("*");
+        .select("*", { count: "exact" });
 
-      // Apply date filters if provided - try different possible date column names
+      // Apply filters
+      if (options?.search) {
+        query = query.or(
+          `description.ilike.%${options.search}%,vendor.ilike.%${options.search}%`
+        );
+      }
       if (options?.startDate) {
         try {
           query = query.gte("expense_date", options.startDate);
         } catch (error) {
-          // Try alternative date column names
           try {
             query = query.gte("created_at", options.startDate);
           } catch (fallbackError) {
@@ -33,7 +44,6 @@ export const getAllExpenses = async (options?: {
         try {
           query = query.lte("expense_date", options.endDate);
         } catch (error) {
-          // Try alternative date column names
           try {
             query = query.lte("created_at", options.endDate);
           } catch (fallbackError) {
@@ -44,31 +54,38 @@ export const getAllExpenses = async (options?: {
       if (options?.branchId) {
         query = query.eq("branch_id", options.branchId);
       }
+      if (options?.status) {
+        query = query.eq("status", options.status);
+      }
 
-      query = query.order("created_at", { ascending: false });
+      query = query
+        .order("created_at", { ascending: false })
+        .range(offset, offset + limit - 1);
 
-      const { data, error } = await query;
+      const { data, error, count } = await query;
 
       if (error) throw error;
 
-      return data;
+      return { data, error: null, count };
     },
-    ["getAllExpenses", options?.startDate || "", options?.endDate || "", options?.branchId || ""],
+    ["getAllExpenses", JSON.stringify(options)],
     { revalidate: 60, tags: ["getAllExpenses"] }
   );
 
   try {
-    const data = await fetchExpenses();
+    const result = await fetchExpenses();
 
     return {
-      data,
-      error: null,
+      data: result.data,
+      error: result.error,
+      count: result.count || 0,
     };
   } catch (error) {
     console.error("getAllExpenses", error);
     return {
       data: [],
       error,
+      count: 0,
     };
   }
 };

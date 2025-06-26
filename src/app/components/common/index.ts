@@ -7,3 +7,4 @@ export * from "./dropdown";
 export * from "./use-modal";
 export * from "./toast";
 export * from "./confirmation-dialog";
+export * from "./pagination";

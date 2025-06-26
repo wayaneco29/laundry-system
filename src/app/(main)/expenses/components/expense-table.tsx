@@ -2,61 +2,77 @@
 
 import { useState } from "react";
 import { Button, ConfirmationDialog } from "@/app/components/common";
-import { approveExpense, markExpensePaid, deleteExpense } from "@/app/actions/expense";
+import {
+  approveExpense,
+  markExpensePaid,
+  deleteExpense,
+} from "@/app/actions/expense";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 
 type ExpenseTableProps = {
   data: Array<Record<string, any>>;
   onEdit: (expense: any) => void;
   onView: (expense: any) => void;
-  onShowToast?: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void;
+  onShowToast?: (
+    message: string,
+    type: "success" | "error" | "warning" | "info"
+  ) => void;
   onShowError?: (message: string) => void;
 };
 
-export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }: ExpenseTableProps) {
-  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>({});
+export function ExpenseTable({
+  data,
+  onEdit,
+  onView,
+  onShowToast,
+  onShowError,
+}: ExpenseTableProps) {
+  const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
+    {}
+  );
   const [confirmDialog, setConfirmDialog] = useState<{
     isOpen: boolean;
     title: string;
     message: string;
     onConfirm: () => void;
-    type: 'danger' | 'warning' | 'info';
+    type: "danger" | "warning" | "info";
   }>({
     isOpen: false,
-    title: '',
-    message: '',
+    title: "",
+    message: "",
     onConfirm: () => {},
-    type: 'danger',
+    type: "danger",
   });
-  
+
   const { userId } = useCurrentUser();
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
     }).format(amount);
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'short',
-      day: 'numeric',
+    return new Date(dateString).toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "short",
+      day: "numeric",
     });
   };
 
   const getStatusBadgeClass = (status: string) => {
-    const baseClasses = "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-    
+    const baseClasses =
+      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
+
     switch (status) {
-      case 'Pending':
+      case "Pending":
         return `${baseClasses} bg-yellow-100 text-yellow-800`;
-      case 'Approved':
+      case "Approved":
         return `${baseClasses} bg-green-100 text-green-800`;
-      case 'Rejected':
+      case "Rejected":
         return `${baseClasses} bg-red-100 text-red-800`;
-      case 'Paid':
+      case "Paid":
         return `${baseClasses} bg-blue-100 text-blue-800`;
       default:
         return `${baseClasses} bg-gray-100 text-gray-800`;
@@ -65,22 +81,27 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
 
   const getCategoryColor = (category: string) => {
     const colors: Record<string, string> = {
-      'Supplies': 'bg-purple-100 text-purple-800',
-      'Equipment': 'bg-blue-100 text-blue-800',
-      'Utilities': 'bg-green-100 text-green-800',
-      'Rent': 'bg-orange-100 text-orange-800',
-      'Salaries': 'bg-pink-100 text-pink-800',
-      'Marketing': 'bg-indigo-100 text-indigo-800',
-      'Maintenance': 'bg-yellow-100 text-yellow-800',
-      'Transportation': 'bg-cyan-100 text-cyan-800',
-      'Insurance': 'bg-red-100 text-red-800',
-      'Other': 'bg-gray-100 text-gray-800',
+      Supplies: "bg-purple-100 text-purple-800",
+      Equipment: "bg-blue-100 text-blue-800",
+      Utilities: "bg-green-100 text-green-800",
+      Rent: "bg-orange-100 text-orange-800",
+      Salaries: "bg-pink-100 text-pink-800",
+      Marketing: "bg-indigo-100 text-indigo-800",
+      Maintenance: "bg-yellow-100 text-yellow-800",
+      Transportation: "bg-cyan-100 text-cyan-800",
+      Insurance: "bg-red-100 text-red-800",
+      Other: "bg-gray-100 text-gray-800",
     };
-    
-    return colors[category] || colors['Other'];
+
+    return colors[category] || colors["Other"];
   };
 
-  const showConfirmDialog = (title: string, message: string, onConfirm: () => void, type: 'danger' | 'warning' | 'info' = 'danger') => {
+  const showConfirmDialog = (
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    type: "danger" | "warning" | "info" = "danger"
+  ) => {
     setConfirmDialog({
       isOpen: true,
       title,
@@ -91,18 +112,24 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
   };
 
   const closeConfirmDialog = () => {
-    setConfirmDialog(prev => ({ ...prev, isOpen: false }));
+    setConfirmDialog((prev) => ({ ...prev, isOpen: false }));
   };
 
-  const handleApprove = async (expenseId: string, status: 'Approved' | 'Rejected') => {
+  const handleApprove = async (
+    expenseId: string,
+    status: "Approved" | "Rejected"
+  ) => {
     if (!userId) {
-      onShowToast?.('You must be logged in to perform this action', 'error');
+      onShowToast?.("You must be logged in to perform this action", "error");
       return;
     }
 
     const action = async () => {
-      setLoadingStates(prev => ({ ...prev, [`${expenseId}_${status}`]: true }));
-      
+      setLoadingStates((prev) => ({
+        ...prev,
+        [`${expenseId}_${status}`]: true,
+      }));
+
       try {
         const result = await approveExpense({
           expenseId,
@@ -111,15 +138,37 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
         });
 
         if (result.error) {
-          onShowToast?.(`Error ${status.toLowerCase()} expense: ${result.error.message || 'Unknown error'}`, 'error');
+          const errorMessage =
+            typeof result.error === "object" &&
+            result.error !== null &&
+            "message" in result.error
+              ? result.error.message
+              : String(result.error);
+          onShowToast?.(
+            `Error ${status.toLowerCase()} expense: ${
+              errorMessage || "Unknown error"
+            }`,
+            "error"
+          );
         } else {
-          onShowToast?.(`Expense ${status.toLowerCase()} successfully`, 'success');
+          onShowToast?.(
+            `Expense ${status.toLowerCase()} successfully`,
+            "success"
+          );
           // Refresh will be handled by parent component
         }
       } catch (error: any) {
-        onShowToast?.(`Error ${status.toLowerCase()} expense: ${error.message || 'Unknown error'}`, 'error');
+        onShowToast?.(
+          `Error ${status.toLowerCase()} expense: ${
+            error.message || "Unknown error"
+          }`,
+          "error"
+        );
       } finally {
-        setLoadingStates(prev => ({ ...prev, [`${expenseId}_${status}`]: false }));
+        setLoadingStates((prev) => ({
+          ...prev,
+          [`${expenseId}_${status}`]: false,
+        }));
       }
     };
 
@@ -127,73 +176,100 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
       `${status} Expense`,
       `Are you sure you want to ${status.toLowerCase()} this expense?`,
       action,
-      status === 'Rejected' ? 'danger' : 'warning'
+      status === "Rejected" ? "danger" : "warning"
     );
   };
 
   const handleMarkPaid = async (expenseId: string) => {
     if (!userId) {
-      onShowToast?.('You must be logged in to perform this action', 'error');
+      onShowToast?.("You must be logged in to perform this action", "error");
       return;
     }
 
     const action = async () => {
-      setLoadingStates(prev => ({ ...prev, [`${expenseId}_paid`]: true }));
-      
+      setLoadingStates((prev) => ({ ...prev, [`${expenseId}_paid`]: true }));
+
       try {
         const result = await markExpensePaid(expenseId, userId);
 
         if (result.error) {
-          onShowToast?.(`Error marking expense as paid: ${result.error.message || 'Unknown error'}`, 'error');
+          const errorMessage =
+            typeof result.error === "object" &&
+            result.error !== null &&
+            "message" in result.error
+              ? result.error.message
+              : String(result.error);
+          onShowToast?.(
+            `Error marking expense as paid: ${errorMessage || "Unknown error"}`,
+            "error"
+          );
         } else {
-          onShowToast?.('Expense marked as paid successfully', 'success');
+          onShowToast?.("Expense marked as paid successfully", "success");
           // Refresh will be handled by parent component
         }
       } catch (error: any) {
-        onShowToast?.(`Error marking expense as paid: ${error.message || 'Unknown error'}`, 'error');
+        onShowToast?.(
+          `Error marking expense as paid: ${error.message || "Unknown error"}`,
+          "error"
+        );
       } finally {
-        setLoadingStates(prev => ({ ...prev, [`${expenseId}_paid`]: false }));
+        setLoadingStates((prev) => ({ ...prev, [`${expenseId}_paid`]: false }));
       }
     };
 
     showConfirmDialog(
-      'Mark as Paid',
-      'Are you sure you want to mark this expense as paid?',
+      "Mark as Paid",
+      "Are you sure you want to mark this expense as paid?",
       action,
-      'warning'
+      "warning"
     );
   };
 
   const handleDelete = async (expenseId: string, expenseTitle: string) => {
     if (!userId) {
-      onShowToast?.('You must be logged in to perform this action', 'error');
+      onShowToast?.("You must be logged in to perform this action", "error");
       return;
     }
 
     const action = async () => {
-      setLoadingStates(prev => ({ ...prev, [`${expenseId}_delete`]: true }));
-      
+      setLoadingStates((prev) => ({ ...prev, [`${expenseId}_delete`]: true }));
+
       try {
         const result = await deleteExpense(expenseId);
 
         if (result.error) {
-          onShowToast?.(`Error deleting expense: ${result.error.message || 'Unknown error'}`, 'error');
+          const errorMessage =
+            typeof result.error === "object" &&
+            result.error !== null &&
+            "message" in result.error
+              ? result.error.message
+              : String(result.error);
+          onShowToast?.(
+            `Error deleting expense: ${errorMessage || "Unknown error"}`,
+            "error"
+          );
         } else {
-          onShowToast?.('Expense deleted successfully', 'success');
+          onShowToast?.("Expense deleted successfully", "success");
           // Refresh will be handled by parent component
         }
       } catch (error: any) {
-        onShowToast?.(`Error deleting expense: ${error.message || 'Unknown error'}`, 'error');
+        onShowToast?.(
+          `Error deleting expense: ${error.message || "Unknown error"}`,
+          "error"
+        );
       } finally {
-        setLoadingStates(prev => ({ ...prev, [`${expenseId}_delete`]: false }));
+        setLoadingStates((prev) => ({
+          ...prev,
+          [`${expenseId}_delete`]: false,
+        }));
       }
     };
 
     showConfirmDialog(
-      'Delete Expense',
+      "Delete Expense",
       `Are you sure you want to permanently delete "${expenseTitle}"? This action cannot be undone.`,
       action,
-      'danger'
+      "danger"
     );
   };
 
@@ -201,12 +277,26 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
     return (
       <div className="text-center py-12">
         <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          <svg
+            className="w-12 h-12 text-gray-400"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+            />
           </svg>
         </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">No expenses found</h3>
-        <p className="text-gray-500 mb-6">Get started by creating your first expense record.</p>
+        <h3 className="text-lg font-medium text-gray-900 mb-2">
+          No expenses found
+        </h3>
+        <p className="text-gray-500 mb-6">
+          Get started by creating your first expense record.
+        </p>
       </div>
     );
   }
@@ -263,7 +353,11 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
                 </div>
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(expense.category)}`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(
+                    expense.category
+                  )}`}
+                >
                   {expense.category}
                 </span>
               </td>
@@ -279,7 +373,7 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
                 {formatDate(expense.expense_date)}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {expense.branch_name || 'All Branches'}
+                {expense.branch_name || "All Branches"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <span className={getStatusBadgeClass(expense.status)}>
@@ -287,7 +381,7 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
                 </span>
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {expense.vendor_name || '-'}
+                {expense.vendor_name || "-"}
               </td>
               <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                 <div className="flex items-center justify-end space-x-2">
@@ -298,8 +392,9 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
                   >
                     View
                   </Button>
-                  
-                  {(expense.status === 'Pending' || expense.status === 'Rejected') && (
+
+                  {(expense.status === "Pending" ||
+                    expense.status === "Rejected") && (
                     <Button
                       variant="outline"
                       size="sm"
@@ -309,47 +404,56 @@ export function ExpenseTable({ data, onEdit, onView, onShowToast, onShowError }:
                     </Button>
                   )}
 
-                  {expense.status === 'Pending' && (
+                  {expense.status === "Pending" && (
                     <>
                       <Button
                         variant="primary"
                         size="sm"
-                        onClick={() => handleApprove(expense.id, 'Approved')}
+                        onClick={() => handleApprove(expense.id, "Approved")}
                         disabled={loadingStates[`${expense.id}_Approved`]}
                       >
-                        {loadingStates[`${expense.id}_Approved`] ? 'Approving...' : 'Approve'}
+                        {loadingStates[`${expense.id}_Approved`]
+                          ? "Approving..."
+                          : "Approve"}
                       </Button>
-                      
+
                       <Button
                         variant="danger"
                         size="sm"
-                        onClick={() => handleApprove(expense.id, 'Rejected')}
+                        onClick={() => handleApprove(expense.id, "Rejected")}
                         disabled={loadingStates[`${expense.id}_Rejected`]}
                       >
-                        {loadingStates[`${expense.id}_Rejected`] ? 'Rejecting...' : 'Reject'}
+                        {loadingStates[`${expense.id}_Rejected`]
+                          ? "Rejecting..."
+                          : "Reject"}
                       </Button>
                     </>
                   )}
 
-                  {expense.status === 'Approved' && (
+                  {expense.status === "Approved" && (
                     <Button
                       variant="primary"
                       size="sm"
                       onClick={() => handleMarkPaid(expense.id)}
                       disabled={loadingStates[`${expense.id}_paid`]}
                     >
-                      {loadingStates[`${expense.id}_paid`] ? 'Processing...' : 'Mark Paid'}
+                      {loadingStates[`${expense.id}_paid`]
+                        ? "Processing..."
+                        : "Mark Paid"}
                     </Button>
                   )}
 
-                  {(expense.status === 'Pending' || expense.status === 'Rejected') && (
+                  {(expense.status === "Pending" ||
+                    expense.status === "Rejected") && (
                     <Button
                       variant="danger"
                       size="sm"
                       onClick={() => handleDelete(expense.id, expense.title)}
                       disabled={loadingStates[`${expense.id}_delete`]}
                     >
-                      {loadingStates[`${expense.id}_delete`] ? 'Deleting...' : 'Delete'}
+                      {loadingStates[`${expense.id}_delete`]
+                        ? "Deleting..."
+                        : "Delete"}
                     </Button>
                   )}
                 </div>

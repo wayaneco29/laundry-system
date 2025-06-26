@@ -853,15 +853,16 @@ export function MainDashboardPage({
               </div>
               <div className="flex flex-col">
                 <OrdersTable
-                  data={recentOrders.map((order) => ({
+                  initialData={recentOrders.map((order) => ({
                     order_id: order.id,
                     customer_name: order.customer_name,
-                    order_date: order.created_at,
+                    created_at: order.created_at,
                     branch_name: order.branch_name,
                     order_status: order.status,
                     payment_status: order.payment_status,
                     total_price: order.total_amount.toLocaleString(),
                   }))}
+                  totalCount={recentOrders.length}
                 />
               </div>
             </div>
