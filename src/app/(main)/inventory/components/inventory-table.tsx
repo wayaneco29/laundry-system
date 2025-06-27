@@ -106,13 +106,13 @@ export function InventoryTable({
                     <div className="flex items-center">
                       <Package className="h-5 w-5 text-gray-400 mr-3" />
                       <div className="text-sm font-medium text-gray-900">
-                        {item.name || "Unnamed Item"}
+                        {item?.stock_name || "Unnamed Item"}
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="text-sm text-gray-900">
-                      {item.branches?.name || "N/A"}
+                      {item?.branch_name || "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">

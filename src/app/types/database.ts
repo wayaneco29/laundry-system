@@ -31,7 +31,6 @@ export interface Branch {
   name: string;
   description?: string;
   address: string;
-  branch_stocks: BranchStock[];
   created_at: Timestamp;
   updated_at: Timestamp;
   created_by?: UUID;
@@ -42,6 +41,26 @@ export interface BranchStock {
   id: UUID;
   name: string;
   quantity: number;
+}
+
+// BRANCH STOCKS Table
+export interface BranchStocks {
+  id: UUID;
+  branch_id: UUID;
+  name: string;
+  quantity: number;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+
+// STOCKS Table
+export interface Stocks {
+  id: UUID;
+  name: string;
+  category?: string;
+  supplier?: string;
+  created_at: Timestamp;
+  updated_at: Timestamp;
 }
 
 // CUSTOMERS Table
@@ -211,7 +230,6 @@ export interface UpsertBranchParams {
   p_name: string;
   p_description?: string;
   p_address: string;
-  p_branch_stocks?: BranchStock[];
   p_created_by?: UUID;
 }
 
@@ -370,7 +388,6 @@ export interface BranchFormData {
   name: string;
   description?: string;
   address: string;
-  branch_stocks?: BranchStock[];
 }
 
 // Staff Form

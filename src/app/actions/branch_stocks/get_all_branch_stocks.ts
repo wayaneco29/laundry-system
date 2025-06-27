@@ -1,46 +1,36 @@
 "use server";
 
-import { unstable_cache } from "next/cache";
 import { createClient } from "@/app/utils/supabase/server";
+import { unstable_noStore as noStore } from "next/cache";
 
-export const getAllBranchStocks = async (options?: {
+export const getAllBranchStocks = async (params: {
   page?: number;
   limit?: number;
-  search?: string;
   branchId?: string;
+  search?: string;
 }) => {
+  noStore();
+  const supabase = await createClient();
   try {
-    const supabase = await createClient();
-    const page = options?.page || 1;
-    const limit = options?.limit || 20;
-    const offset = (page - 1) * limit;
+    let query = supabase
+      .from("view_branch_stocks")
+      .select("*", { count: "exact" });
 
-    const fetchStocks = unstable_cache(
-      async () => {
-        let query = supabase.from("branches").select("*", { count: "exact" });
+    if (params?.branchId) {
+      query = query.eq("branch_id", params.branchId);
+    }
 
-        if (options?.branchId) {
-          query = query.eq("branch_id", options.branchId);
-        }
+    if (params?.search) {
+      query = query.ilike("name", `%${params?.search}%`);
+    }
 
-        query = query
-          .order("name", { ascending: true })
-          .range(offset, offset + limit - 1);
+    const { data, error, count } = await query;
 
-        const { data, error, count } = await query;
+    if (error) throw error;
 
-        if (error) throw error;
-
-        return { data, error: null, count };
-      },
-      ["getAllBranchStocks", JSON.stringify(options)],
-      { tags: ["getAllBranchStocks"] }
-    );
-
-    const res = await fetchStocks();
-
-    return res;
-  } catch (_error) {
-    return { data: null, error: _error, count: 0 };
+    return { success: true, data: data, count: count };
+  } catch (error: any) {
+    console.error("Error fetching branch stocks:", error);
+    return { success: false, data: null, message: error.message };
   }
 };

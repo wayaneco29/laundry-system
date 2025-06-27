@@ -70,6 +70,8 @@ export function MainInventoryPage({
         branchId: selectedBranch || undefined,
       });
 
+      console.log("================", inventoryResult);
+
       if (inventoryResult.data) {
         setInventoryList(inventoryResult.data);
         setTotalCount(inventoryResult.count || 0);
@@ -87,7 +89,9 @@ export function MainInventoryPage({
     setCurrentPage(1);
   };
 
-  const lowStockItems = inventoryList.filter((item) => item.quantity <= 10);
+  const lowStockItems = inventoryList.filter(
+    (item) => item.quantity > 0 && item.quantity <= 10
+  );
   const outOfStockItems = inventoryList.filter((item) => item.quantity === 0);
 
   const branchOptions = [
@@ -192,7 +196,7 @@ export function MainInventoryPage({
               setInitialValue({
                 isUpdate: true,
                 id: item?.id,
-                name: item?.name,
+                name: item?.stock_name,
                 quantity: item?.quantity?.toString() || "0",
                 branchId: item?.branch_id,
               });

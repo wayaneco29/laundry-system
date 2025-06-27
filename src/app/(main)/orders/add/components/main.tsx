@@ -99,7 +99,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
     try {
       // TODO: Replace hardcoded branch_id with proper branch context/selection
       const { error } = await addOrder({
-        p_branch_id: "f618210d-01ef-4bd5-8602-d6ff66e12ec7",
+        p_branch_id: "39ba4853-62a2-4c6b-99ea-117c7aa2393a",
         p_customer_id: selectedCustomer, // Use selected customer ID
         p_staff_id: userId!, // Use authenticated user ID
         p_items: selectedServices,

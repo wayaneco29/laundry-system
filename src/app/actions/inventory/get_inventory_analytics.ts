@@ -28,7 +28,7 @@ export type LowStockAlert = {
   name: string;
   branch_name: string;
   current_stock: number;
-  status: 'Low Stock' | 'Out of Stock' | 'Critical';
+  status: "Low Stock" | "Out of Stock" | "Critical";
   last_updated: string;
 };
 
@@ -46,12 +46,22 @@ export const getInventoryStockLevels = async (branchId?: string) => {
   const supabase = await createClient();
 
   try {
-    let query = supabase
-      .from("view_branches")
-      .select("branch_stocks");
+    let query = supabase.from("branch_stocks").select(`
+        id,
+        quantity,
+        updated_at,
+        stocks!inner(
+          id,
+          name
+        ),
+        branches!inner(
+          id,
+          name
+        )
+      `);
 
     if (branchId && branchId !== "") {
-      query = query.eq("id", branchId);
+      query = query.eq("branch_id", branchId);
     }
 
     const { data, error } = await query;
@@ -64,26 +74,18 @@ export const getInventoryStockLevels = async (branchId?: string) => {
     let outOfStock = 0;
     let criticalStock = 0;
 
-    data?.forEach((branch) => {
-      if (branch.branch_stocks) {
-        const stocks = Array.isArray(branch.branch_stocks) 
-          ? branch.branch_stocks 
-          : JSON.parse(branch.branch_stocks || '[]');
-        
-        stocks.forEach((item: any) => {
-          totalItems++;
-          const quantity = parseInt(item.quantity) || 0;
-          
-          if (quantity === 0) {
-            outOfStock++;
-          } else if (quantity <= 5) {
-            criticalStock++;
-          } else if (quantity <= 10) {
-            lowStock++;
-          } else {
-            inStock++;
-          }
-        });
+    data?.forEach((item) => {
+      totalItems++;
+      const quantity = item.quantity || 0;
+
+      if (quantity === 0) {
+        outOfStock++;
+      } else if (quantity <= 5) {
+        criticalStock++;
+      } else if (quantity <= 10) {
+        lowStock++;
+      } else {
+        inStock++;
       }
     });
 
@@ -92,7 +94,7 @@ export const getInventoryStockLevels = async (branchId?: string) => {
       in_stock: inStock,
       low_stock: lowStock,
       out_of_stock: outOfStock,
-      critical_stock: criticalStock
+      critical_stock: criticalStock,
     };
 
     return {
@@ -112,46 +114,51 @@ export const getInventoryByCategory = async (branchId?: string) => {
   const supabase = await createClient();
 
   try {
-    let query = supabase
-      .from("view_branches")
-      .select("branch_stocks");
+    let query = supabase.from("branch_stocks").select(`
+        id,
+        quantity,
+        stocks!inner(
+          id,
+          name
+        ),
+        branches!inner(
+          id,
+          name
+        )
+      `);
 
     if (branchId && branchId !== "") {
-      query = query.eq("id", branchId);
+      query = query.eq("branch_id", branchId);
     }
 
     const { data, error } = await query;
 
     if (error) throw error;
 
-    const categoryMap: Record<string, { count: number; total_quantity: number }> = {};
+    const categoryMap: Record<
+      string,
+      { count: number; total_quantity: number }
+    > = {};
 
-    data?.forEach((branch) => {
-      if (branch.branch_stocks) {
-        const stocks = Array.isArray(branch.branch_stocks) 
-          ? branch.branch_stocks 
-          : JSON.parse(branch.branch_stocks || '[]');
-        
-        stocks.forEach((item: any) => {
-          // Categorize items based on common laundry supply types
-          const category = categorizeInventoryItem(item.name);
-          const quantity = parseInt(item.quantity) || 0;
-          
-          if (!categoryMap[category]) {
-            categoryMap[category] = { count: 0, total_quantity: 0 };
-          }
-          
-          categoryMap[category].count++;
-          categoryMap[category].total_quantity += quantity;
-        });
+    data?.forEach((item) => {
+      const category = categorizeInventoryItem(item.stocks.name);
+      const quantity = item.quantity || 0;
+
+      if (!categoryMap[category]) {
+        categoryMap[category] = { count: 0, total_quantity: 0 };
       }
+
+      categoryMap[category].count++;
+      categoryMap[category].total_quantity += quantity;
     });
 
-    const categories: InventoryByCategory[] = Object.entries(categoryMap).map(([category, data]) => ({
-      category,
-      count: data.count,
-      total_quantity: data.total_quantity
-    }));
+    const categories: InventoryByCategory[] = Object.entries(categoryMap).map(
+      ([category, data]) => ({
+        category,
+        count: data.count,
+        total_quantity: data.total_quantity,
+      })
+    );
 
     return {
       data: categories,
@@ -171,55 +178,58 @@ export const getLowStockAlerts = async (branchId?: string) => {
 
   try {
     let query = supabase
-      .from("view_branches")
-      .select("id, name, branch_stocks, updated_at");
+      .from("branch_stocks")
+      .select(
+        `
+        id,
+        quantity,
+        updated_at,
+        stocks!inner(
+          id,
+          name
+        ),
+        branches!inner(
+          id,
+          name
+        )
+      `
+      )
+      .lte("quantity", 10); // Only get items with quantity <= 10
 
     if (branchId && branchId !== "") {
-      query = query.eq("id", branchId);
+      query = query.eq("branch_id", branchId);
     }
 
     const { data, error } = await query;
 
     if (error) throw error;
 
-    const alerts: LowStockAlert[] = [];
+    const alerts: LowStockAlert[] =
+      data?.map((item) => {
+        const quantity = item.quantity || 0;
+        let status: "Low Stock" | "Out of Stock" | "Critical";
 
-    data?.forEach((branch) => {
-      if (branch.branch_stocks) {
-        const stocks = Array.isArray(branch.branch_stocks) 
-          ? branch.branch_stocks 
-          : JSON.parse(branch.branch_stocks || '[]');
-        
-        stocks.forEach((item: any) => {
-          const quantity = parseInt(item.quantity) || 0;
-          
-          if (quantity <= 10) { // Low stock threshold
-            let status: 'Low Stock' | 'Out of Stock' | 'Critical';
-            
-            if (quantity === 0) {
-              status = 'Out of Stock';
-            } else if (quantity <= 5) {
-              status = 'Critical';
-            } else {
-              status = 'Low Stock';
-            }
+        if (quantity === 0) {
+          status = "Out of Stock";
+        } else if (quantity <= 5) {
+          status = "Critical";
+        } else {
+          status = "Low Stock";
+        }
 
-            alerts.push({
-              id: item.id || `${branch.id}_${item.name}`,
-              name: item.name,
-              branch_name: branch.name,
-              current_stock: quantity,
-              status,
-              last_updated: branch.updated_at
-            });
-          }
-        });
-      }
-    });
+        return {
+          id: item.id,
+          name: item.stocks.name,
+          branch_name: item.branches.name,
+          current_stock: quantity,
+          status,
+          last_updated: item.updated_at,
+        };
+      }) || [];
 
     // Sort by urgency (Out of Stock first, then Critical, then Low Stock)
     alerts.sort((a, b) => {
-      const urgencyOrder = { 'Out of Stock': 0, 'Critical': 1, 'Low Stock': 2 };
+      const urgencyOrder = { "Out of Stock": 0, Critical: 1, "Low Stock": 2 };
       return urgencyOrder[a.status] - urgencyOrder[b.status];
     });
 
@@ -236,68 +246,69 @@ export const getLowStockAlerts = async (branchId?: string) => {
   }
 };
 
-export const getInventoryItems = async (branchId?: string, limit: number = 20) => {
+export const getInventoryItems = async (
+  branchId?: string,
+  limit: number = 20
+) => {
   const supabase = await createClient();
 
   try {
     let query = supabase
-      .from("view_branches")
-      .select("id, name, branch_stocks, updated_at");
+      .from("branch_stocks")
+      .select(
+        `
+        id,
+        quantity,
+        updated_at,
+        stocks!inner(
+          id,
+          name
+        ),
+        branches!inner(
+          id,
+          name
+        )
+      `
+      )
+      .order("quantity", { ascending: true }) // Order by quantity to show low stock first
+      .limit(limit);
 
     if (branchId && branchId !== "") {
-      query = query.eq("id", branchId);
+      query = query.eq("branch_id", branchId);
     }
 
     const { data, error } = await query;
 
     if (error) throw error;
 
-    const items: InventoryItem[] = [];
+    const items: InventoryItem[] =
+      data?.map((item) => {
+        const quantity = item.quantity || 0;
+        let status: string;
 
-    data?.forEach((branch) => {
-      if (branch.branch_stocks) {
-        const stocks = Array.isArray(branch.branch_stocks) 
-          ? branch.branch_stocks 
-          : JSON.parse(branch.branch_stocks || '[]');
-        
-        stocks.forEach((item: any) => {
-          const quantity = parseInt(item.quantity) || 0;
-          let status: string;
-          
-          if (quantity === 0) {
-            status = 'Out of Stock';
-          } else if (quantity <= 5) {
-            status = 'Critical';
-          } else if (quantity <= 10) {
-            status = 'Low Stock';
-          } else {
-            status = 'In Stock';
-          }
+        if (quantity === 0) {
+          status = "Out of Stock";
+        } else if (quantity <= 5) {
+          status = "Critical";
+        } else if (quantity <= 10) {
+          status = "Low Stock";
+        } else {
+          status = "In Stock";
+        }
 
-          items.push({
-            id: item.id || `${branch.id}_${item.name}`,
-            name: item.name,
-            category: categorizeInventoryItem(item.name),
-            branch_name: branch.name,
-            quantity,
-            status,
-            last_updated: branch.updated_at
-          });
-        });
-      }
-    });
-
-    // Sort by urgency and then alphabetically
-    items.sort((a, b) => {
-      const statusOrder = { 'Out of Stock': 0, 'Critical': 1, 'Low Stock': 2, 'In Stock': 3 };
-      const statusComparison = statusOrder[a.status as keyof typeof statusOrder] - statusOrder[b.status as keyof typeof statusOrder];
-      
-      if (statusComparison !== 0) return statusComparison;
-      return a.name.localeCompare(b.name);
-    });
+        return {
+          id: item.id,
+          name: item.stocks.name,
+          category: categorizeInventoryItem(item.stocks.name),
+          branch_name: item.branches.name,
+          quantity,
+          status,
+          last_updated: item.updated_at,
+        };
+      }) || [];
 
     return {
-      data: items.slice(0, limit),
+      data: items,
       error: null,
     };
   } catch (error) {
@@ -312,20 +323,24 @@ export const getInventoryItems = async (branchId?: string, limit: number = 20) =
 // Helper function to categorize inventory items
 function categorizeInventoryItem(name: string): string {
   const lowerName = name.toLowerCase();
-  
-  if (lowerName.includes('detergent') || lowerName.includes('soap')) {
-    return 'Detergents';
-  } else if (lowerName.includes('softener') || lowerName.includes('fabric')) {
-    return 'Fabric Softeners';
-  } else if (lowerName.includes('bleach') || lowerName.includes('whitener')) {
-    return 'Bleach & Whiteners';
-  } else if (lowerName.includes('stain') || lowerName.includes('remover')) {
-    return 'Stain Removers';
-  } else if (lowerName.includes('fragrance') || lowerName.includes('scent')) {
-    return 'Fragrances';
-  } else if (lowerName.includes('bag') || lowerName.includes('hanger') || lowerName.includes('plastic')) {
-    return 'Packaging';
+
+  if (lowerName.includes("detergent") || lowerName.includes("soap")) {
+    return "Detergents";
+  } else if (lowerName.includes("softener") || lowerName.includes("fabric")) {
+    return "Fabric Softeners";
+  } else if (lowerName.includes("bleach") || lowerName.includes("whitener")) {
+    return "Bleach & Whiteners";
+  } else if (lowerName.includes("stain") || lowerName.includes("remover")) {
+    return "Stain Removers";
+  } else if (lowerName.includes("fragrance") || lowerName.includes("scent")) {
+    return "Fragrances";
+  } else if (
+    lowerName.includes("bag") ||
+    lowerName.includes("hanger") ||
+    lowerName.includes("plastic")
+  ) {
+    return "Packaging";
   } else {
-    return 'Others';
+    return "Others";
   }
 }
