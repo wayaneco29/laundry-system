@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import * as Yup from "yup";
 import {
@@ -12,6 +12,7 @@ import {
   CheckCircle,
   Save,
   X,
+  Search,
 } from "lucide-react";
 
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -30,23 +31,26 @@ import { PROMO_STATUS_DROPDOWN } from "@/app/constants";
 import { PromoTable } from "./promo-table";
 
 type MainPromoPageProps = {
-  promo_list: Array<Record<string, string>>;
-  totalCount: number;
-  searchParams: {
-    page?: string;
-    limit?: string;
-    search?: string;
-    status?: string;
-  };
+  initialData: Array<Record<string, string>>;
+  count: number;
 };
 
-export function MainPromoPage({
-  promo_list,
-  totalCount,
-  searchParams,
-}: MainPromoPageProps) {
+export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
   const { userId } = useCurrentUser();
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const [status, setStatus] = useState("");
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
 
   const {
     reset,
@@ -112,12 +116,54 @@ export function MainPromoPage({
           <Plus className="size-4" /> Add Promo
         </button>
       </div>
+
+      <div className="flex items-end gap-x-4">
+        <div className="relative mt-4 w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by promo name or code..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 h-12 bg-white pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+          />
+        </div>
+        <div className="w-full md:w-56">
+          <Select
+            options={[
+              {
+                label: "All Status",
+                value: "",
+              },
+              {
+                label: "Active",
+                value: "Active",
+              },
+              {
+                label: "Inactive",
+                value: "Inactive",
+              },
+              {
+                label: "Expired",
+                value: "Expired",
+              },
+            ]}
+            value={status}
+            onChange={(value: any) => {
+              setStatus(value?.value);
+            }}
+            placeholder="Select branch..."
+          />
+        </div>
+      </div>
+
       <div className="mt-4">
         <div className="flex flex-col">
           <PromoTable
-            data={promo_list}
-            totalCount={totalCount}
-            searchParams={searchParams}
+            initialData={initialData}
+            count={count}
+            search={debouncedSearch}
+            status={status}
             onEdit={(promo) => {
               customerRevalidateTag("getPromos");
               reset({

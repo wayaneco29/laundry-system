@@ -10,7 +10,6 @@ export const getAllExpenses = async (options?: {
   startDate?: string;
   endDate?: string;
   branchId?: string;
-  status?: string;
 }) => {
   const supabase = await createClient();
   const page = options?.page || 1;
@@ -53,9 +52,6 @@ export const getAllExpenses = async (options?: {
       }
       if (options?.branchId) {
         query = query.eq("branch_id", options.branchId);
-      }
-      if (options?.status) {
-        query = query.eq("status", options.status);
       }
 
       query = query

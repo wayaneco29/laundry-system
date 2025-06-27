@@ -14,12 +14,11 @@ export const getOrders = async (options?: {
 }) => {
   try {
     const supabase = await createClient();
-    const page = options?.page || 1;
-    const limit = options?.limit || 25;
-    const offset = (page - 1) * limit;
-
     const fetchOrders = unstable_cache(
       async () => {
+        const page = options?.page || 1;
+        const limit = options?.limit || 25;
+        const offset = (page - 1) * limit;
         let query = supabase
           .from("view_orders")
           .select("*", { count: "exact" });

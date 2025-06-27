@@ -1,14 +1,14 @@
 "use client";
 
-import { Edit2, Package, AlertTriangle } from "lucide-react";
+import { Edit2, Package, AlertTriangle, Loader2 } from "lucide-react";
 import { Pagination } from "@/app/components/common/pagination";
 
 type InventoryTableProps = {
   data: Array<Record<string, any>>;
-  selectedBranch: string;
   totalCount: number;
-  page: number;
-  limit: number;
+  currentPage: number;
+  itemsPerPage: number;
+  isLoading: boolean;
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
   onEdit: (item: Record<string, any>) => void;
@@ -16,18 +16,14 @@ type InventoryTableProps = {
 
 export function InventoryTable({
   data,
-  selectedBranch,
   totalCount,
-  page,
-  limit,
+  currentPage,
+  itemsPerPage,
+  isLoading,
   onPageChange,
   onLimitChange,
   onEdit,
 }: InventoryTableProps) {
-  const filteredData = selectedBranch
-    ? data.filter((item) => item.branch_id === selectedBranch)
-    : data;
-
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return "Out of Stock";
     if (quantity <= 10) return "Low Stock";
@@ -47,26 +43,25 @@ export function InventoryTable({
     return <Package className="h-4 w-4" />;
   };
 
-  if (filteredData.length === 0) {
+  if (isLoading && data.length === 0) {
     return (
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-12 text-center">
-          <Package className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
-            No inventory items
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            {selectedBranch
-              ? "No items found for the selected branch."
-              : "Get started by adding your first inventory item."}
-          </p>
-        </div>
-      </div>
+      <tr className="relative">
+        <td colSpan={8} className="px-6 py-12 text-center">
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        </td>
+      </tr>
     );
   }
 
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="bg-white shadow rounded-lg overflow-hidden relative">
+      {isLoading && (
+        <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -89,60 +84,74 @@ export function InventoryTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {filteredData.map((item, index) => (
-              <tr
-                key={`${item.branch_id}-${item.id || index}`}
-                className="hover:bg-gray-50"
-              >
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <Package className="h-5 w-5 text-gray-400 mr-3" />
-                    <div className="text-sm font-medium text-gray-900">
-                      {item.name || "Unnamed Item"}
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">
-                    {item.branch_name}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm font-medium text-gray-900">
-                    {item.quantity || 0}
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStockStatusColor(
-                      item.quantity || 0
-                    )}`}
-                  >
-                    {getStockIcon(item.quantity || 0)}
-                    {getStockStatus(item.quantity || 0)}
-                  </span>
-                </td>
-                <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
-                  <button
-                    onClick={() => onEdit(item)}
-                    className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
-                    title={`Edit ${item.name || "item"}`}
-                  >
-                    <Edit2 className="h-4 w-4" />
-                    Edit
-                  </button>
+            {data?.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-6 py-12 text-center">
+                  <Package className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No inventory items
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    No items found for the selected branch.
+                  </p>
                 </td>
               </tr>
-            ))}
+            ) : (
+              data?.map((item, index) => (
+                <tr
+                  key={`${item.branch_id}-${item.id || index}`}
+                  className="hover:bg-gray-50"
+                >
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <Package className="h-5 w-5 text-gray-400 mr-3" />
+                      <div className="text-sm font-medium text-gray-900">
+                        {item.name || "Unnamed Item"}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm text-gray-900">
+                      {item.branches?.name || "N/A"}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {item.quantity || 0}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStockStatusColor(
+                        item.quantity || 0
+                      )}`}
+                    >
+                      {getStockIcon(item.quantity || 0)}
+                      {getStockStatus(item.quantity || 0)}
+                    </span>
+                  </td>
+                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                    <button
+                      onClick={() => onEdit(item)}
+                      className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
+                      title={`Edit ${item.name || "item"}`}
+                    >
+                      <Edit2 className="h-4 w-4" />
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
       <div className="p-4">
         <Pagination
-          currentPage={page}
-          totalPages={Math.ceil(totalCount / limit) || 1}
+          currentPage={currentPage}
+          totalPages={Math.ceil(totalCount / itemsPerPage) || 1}
           totalItems={totalCount}
-          itemsPerPage={limit}
+          itemsPerPage={itemsPerPage}
           onPageChange={onPageChange}
           onItemsPerPageChange={onLimitChange}
         />

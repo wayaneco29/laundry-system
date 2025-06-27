@@ -1,18 +1,25 @@
 "use client";
 
-import { useState } from "react";
-import { Plus, Package, AlertTriangle } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus, Package, AlertTriangle, Search } from "lucide-react";
 
 import { InventoryTable } from "./inventory-table";
 import { InventoryModal } from "./inventory-modal";
 import { Select } from "@/app/components/common";
-import { Pagination } from "@/app/components/common/pagination";
+import { getAllBranches } from "@/app/actions";
+import { getAllBranchStocks } from "@/app/actions/branch_stocks";
 
 type MainInventoryPageProps = {
+  initialData: Array<Record<string, any>>;
+  count: number;
   branches: Array<Record<string, any>>;
 };
 
-export function MainInventoryPage({ branches }: MainInventoryPageProps) {
+export function MainInventoryPage({
+  initialData,
+  count,
+  branches,
+}: MainInventoryPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [isEditing, setIsEditing] = useState<boolean>(false);
@@ -29,49 +36,64 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
     quantity: "",
     branchId: "",
   });
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(20);
+  const [inventoryList, setInventoryList] = useState<Array<any>>(
+    initialData || []
+  );
+  const [totalCount, setTotalCount] = useState(count || 0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-  // Get all inventory items from all branches
-  const getAllInventoryItems = () => {
-    const items: any[] = [];
-    branches.forEach((branch) => {
-      if (branch.branch_stocks) {
-        const stocks =
-          typeof branch.branch_stocks === "string"
-            ? JSON.parse(branch.branch_stocks)
-            : branch.branch_stocks;
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
 
-        if (Array.isArray(stocks)) {
-          stocks.forEach((stock) => {
-            items.push({
-              ...stock,
-              branch_id: branch.id,
-              branch_name: branch.name,
-            });
-          });
-        }
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
+
+  useEffect(() => {
+    fetchData();
+  }, [currentPage, itemsPerPage, debouncedSearch, selectedBranch]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const inventoryResult = await getAllBranchStocks({
+        page: currentPage,
+        limit: itemsPerPage,
+        search: debouncedSearch,
+        branchId: selectedBranch || undefined,
+      });
+
+      if (inventoryResult.data) {
+        setInventoryList(inventoryResult.data);
+        setTotalCount(inventoryResult.count || 0);
       }
-    });
-    return items;
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const inventoryItems = getAllInventoryItems();
-  const filteredItems = selectedBranch
-    ? inventoryItems.filter((item) => item.branch_id === selectedBranch)
-    : inventoryItems;
-  const totalCount = filteredItems.length;
-  const totalPages = Math.ceil(totalCount / limit) || 1;
-  const paginatedItems = filteredItems.slice((page - 1) * limit, page * limit);
-
-  const handlePageChange = (newPage: number) => setPage(newPage);
+  const handlePageChange = (newPage: number) => setCurrentPage(newPage);
   const handleLimitChange = (newLimit: number) => {
-    setLimit(newLimit);
-    setPage(1);
+    setItemsPerPage(newLimit);
+    setCurrentPage(1);
   };
 
-  const lowStockItems = inventoryItems.filter((item) => item.quantity <= 10);
-  const outOfStockItems = inventoryItems.filter((item) => item.quantity === 0);
+  const lowStockItems = inventoryList.filter((item) => item.quantity <= 10);
+  const outOfStockItems = inventoryList.filter((item) => item.quantity === 0);
+
+  const branchOptions = [
+    { label: "All Branches", value: "" },
+    ...(branches?.map(({ id, name }) => ({ label: name, value: id })) || []),
+  ];
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
@@ -103,9 +125,7 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
             <Package className="h-8 w-8 text-blue-500" />
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-500">Total Items</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {inventoryItems.length}
-              </p>
+              <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
             </div>
           </div>
         </div>
@@ -135,31 +155,36 @@ export function MainInventoryPage({ branches }: MainInventoryPageProps) {
         </div>
       </div>
 
-      {/* Branch Filter */}
-      <div className="flex items-center gap-4 mb-4">
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row items-end gap-4 mb-4">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by item name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 pr-4 h-12 py-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+          />
+        </div>
         <Select
-          containerClassName="max-w-sm"
-          label="Filter by Branch:"
+          containerClassName="w-full md:w-64"
           value={selectedBranch}
           onChange={(newValue) =>
             setSelectedBranch((newValue as { value: string })?.value)
           }
-          options={[
-            { label: "All Branch", value: "" },
-            ...(branches?.map(({ id, name }) => ({ label: name, value: id })) ||
-              []),
-          ]}
+          options={branchOptions}
         />
       </div>
 
       <div className="mt-4">
         <div className="flex flex-col">
           <InventoryTable
-            data={paginatedItems}
-            selectedBranch={selectedBranch}
+            data={inventoryList}
             totalCount={totalCount}
-            page={page}
-            limit={limit}
+            currentPage={currentPage}
+            itemsPerPage={itemsPerPage}
+            isLoading={loading}
             onPageChange={handlePageChange}
             onLimitChange={handleLimitChange}
             onEdit={(item) => {

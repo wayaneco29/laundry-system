@@ -14,7 +14,7 @@ import {
 } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useToast } from "@/app/hooks/use-toast";
-import { PlusIcon } from "lucide-react";
+import { PlusIcon, Search } from "lucide-react";
 import {
   HeaderWithButtonSkeleton,
   StatsCardsSkeleton,
@@ -22,11 +22,7 @@ import {
 } from "../../dashboard/components/skeleton";
 
 interface ExpensesMainProps {
-  expenses: Array<Record<string, any>>;
-  totalCount: number;
   searchParams: {
-    page?: string;
-    limit?: string;
     search?: string;
     startDate?: string;
     endDate?: string;
@@ -35,11 +31,7 @@ interface ExpensesMainProps {
   };
 }
 
-export function ExpensesMain({
-  expenses,
-  totalCount,
-  searchParams,
-}: ExpensesMainProps) {
+export function ExpensesMain({ searchParams }: ExpensesMainProps) {
   const [branches, setBranches] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
@@ -47,6 +39,10 @@ export function ExpensesMain({
   const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
   const [yearlyExpense, setYearlyExpense] = useState<number>(0);
   const [loading, setLoading] = useState(true);
+  const [expenses, setExpenses] = useState<Array<Record<string, any>>>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
 
   // Toast notifications
   const { toasts, removeToast, success, error, warning, info } = useToast();
@@ -60,21 +56,20 @@ export function ExpensesMain({
 
   // Filter states
   const [filters, setFilters] = useState<{ branch_id: string }>({
-    branch_id: "",
+    branch_id: searchParams.branchId || "",
   });
 
-  // Fetch all data on component mount
+  // Fetch all data on component mount and when filters/pagination change
   useEffect(() => {
     fetchAllData();
-  }, []);
-
-  // Refetch expense data when branch filter changes
-  useEffect(() => {
-    if (branches.length > 0) {
-      fetchMonthlyExpense();
-      fetchYearlyExpense();
-    }
-  }, [filters.branch_id]);
+  }, [
+    currentPage,
+    itemsPerPage,
+    filters.branch_id,
+    searchParams.startDate,
+    searchParams.endDate,
+    searchParams.status,
+  ]);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -82,9 +77,6 @@ export function ExpensesMain({
       await Promise.all([
         fetchExpenses(),
         fetchBranches(),
-        fetchStats(),
-        fetchCategoryStats(),
-        fetchRecurringDue(),
         fetchMonthlyExpense(),
         fetchYearlyExpense(),
       ]);
@@ -96,9 +88,17 @@ export function ExpensesMain({
   };
 
   const fetchExpenses = async () => {
-    const result = await getAllExpenses();
+    const result = await getAllExpenses({
+      page: currentPage,
+      limit: itemsPerPage,
+      branchId: filters.branch_id || undefined,
+      startDate: searchParams.startDate || undefined,
+      endDate: searchParams.endDate || undefined,
+    });
+
     if (result.data) {
-      // setExpenses(result.data);
+      setExpenses(result.data);
+      setTotalCount(result.count || 0);
     }
   };
 
@@ -106,27 +106,6 @@ export function ExpensesMain({
     const result = await getAllBranches();
     if (result.data) {
       setBranches(result.data);
-    }
-  };
-
-  const fetchStats = async () => {
-    const result = await getExpenseStats();
-    if (result.data) {
-      setStats(result.data);
-    }
-  };
-
-  const fetchCategoryStats = async () => {
-    const result = await getExpensesByCategory();
-    if (result.data) {
-      setCategoryStats(result.data);
-    }
-  };
-
-  const fetchRecurringDue = async () => {
-    const result = await getRecurringExpensesDue(30); // Next 30 days
-    if (result.data) {
-      setRecurringDue(result.data);
     }
   };
 
@@ -146,34 +125,13 @@ export function ExpensesMain({
     }
   };
 
-  const applyFilters = () => {
-    let filtered = [...expenses];
-
-    // Branch filter
-    if (filters.branch_id) {
-      if (filters.branch_id !== "") {
-        filtered = filtered.filter(
-          (expense) => expense.branch_id === filters.branch_id
-        );
-      }
-    }
-
-    setFilteredExpenses(filtered);
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
   };
 
-  const handleFilterChange = (field: string, value: any) => {
-    // Extract value if it's an object from Select component
-    const actualValue =
-      typeof value === "object" && value?.value !== undefined
-        ? value.value
-        : value;
-    setFilters((prev) => ({ ...prev, [field]: actualValue }));
-  };
-
-  const clearFilters = () => {
-    setFilters({
-      branch_id: "",
-    });
+  const handleItemsPerPageChange = (limit: number) => {
+    setItemsPerPage(limit);
+    setCurrentPage(1);
   };
 
   const handleCreateExpense = () => {
@@ -197,16 +155,12 @@ export function ExpensesMain({
   const handleModalClose = () => {
     setModalOpen(false);
     setSelectedExpense(null);
-    // Refresh data after modal closes
-    setTimeout(() => {
-      fetchAllData();
-    }, 500);
   };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "PHP",
     }).format(amount);
   };
 
@@ -217,20 +171,6 @@ export function ExpensesMain({
       value: branch.id,
     })),
   ];
-
-  if (loading) {
-    return (
-      <div className="flex flex-col gap-4 p-4 lg:p-8 animate-pulse">
-        <HeaderWithButtonSkeleton />
-        <StatsCardsSkeleton count={2} />
-        <div className="flex gap-4 mb-2">
-          <div className="h-10 w-48 bg-gray-200 rounded"></div>
-          <div className="h-10 w-48 bg-gray-200 rounded"></div>
-        </div>
-        <TableSkeleton />
-      </div>
-    );
-  }
 
   return (
     <div className="p-6 space-y-6">
@@ -311,23 +251,21 @@ export function ExpensesMain({
       </div>
 
       {/* Filters */}
-      <div className="flex justify-between items-center mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <div className="w-64">
           <Select
             label="Filter by Branch"
             options={branchOptions}
             value={filters.branch_id}
-            onChange={(value) => handleFilterChange("branch_id", value)}
+            onChange={(value: any) => {
+              setFilters({
+                ...filters,
+                branch_id: value?.value,
+              });
+            }}
             placeholder="Select branch..."
           />
         </div>
-      </div>
-
-      {/* Results Summary */}
-      <div className="flex justify-between items-center">
-        <p className="text-sm text-gray-600">
-          Showing {expenses.length} of {expenses.length} expenses
-        </p>
       </div>
 
       {/* Expenses Table */}
@@ -335,7 +273,11 @@ export function ExpensesMain({
         <ExpenseTable
           data={expenses}
           totalCount={totalCount}
-          searchParams={searchParams}
+          currentPage={currentPage}
+          itemsPerPage={itemsPerPage}
+          isLoading={loading}
+          onPageChange={handlePageChange}
+          onItemsPerPageChange={handleItemsPerPageChange}
           onEdit={handleEditExpense}
           onView={handleViewExpense}
           onShowToast={(msg, type) => success(msg)}

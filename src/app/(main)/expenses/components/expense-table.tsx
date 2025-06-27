@@ -11,18 +11,16 @@ import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useRouter } from "next/navigation";
 import { Pagination } from "@/app/components/common/pagination";
 
+import { Loader2 } from "lucide-react";
+
 type ExpenseTableProps = {
   data: Array<Record<string, any>>;
   totalCount: number;
-  searchParams: {
-    page?: string;
-    limit?: string;
-    search?: string;
-    startDate?: string;
-    endDate?: string;
-    branchId?: string;
-    status?: string;
-  };
+  currentPage: number;
+  itemsPerPage: number;
+  isLoading: boolean;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (limit: number) => void;
   onEdit: (expense: any) => void;
   onView: (expense: any) => void;
   onShowToast?: (
@@ -35,7 +33,11 @@ type ExpenseTableProps = {
 export function ExpenseTable({
   data,
   totalCount,
-  searchParams,
+  currentPage,
+  itemsPerPage,
+  isLoading,
+  onPageChange,
+  onItemsPerPageChange,
   onEdit,
   onView,
   onShowToast,
@@ -59,29 +61,6 @@ export function ExpenseTable({
   });
 
   const { userId } = useCurrentUser();
-  const router = useRouter();
-
-  const currentPage = Number(searchParams.page) || 1;
-  const itemsPerPage = Number(searchParams.limit) || 20;
-  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
-
-  const handlePageChange = (page: number) => {
-    const params = new URLSearchParams({
-      ...searchParams,
-      page: String(page),
-      limit: String(itemsPerPage),
-    });
-    router.push(`?${params.toString()}`);
-  };
-
-  const handleItemsPerPageChange = (limit: number) => {
-    const params = new URLSearchParams({
-      ...searchParams,
-      page: "1",
-      limit: String(limit),
-    });
-    router.push(`?${params.toString()}`);
-  };
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -310,220 +289,236 @@ export function ExpenseTable({
     );
   };
 
-  if (!data || data.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-          <svg
-            className="w-12 h-12 text-gray-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-            />
-          </svg>
-        </div>
-        <h3 className="text-lg font-medium text-gray-900 mb-2">
-          No expenses found
-        </h3>
-        <p className="text-gray-500 mb-6">
-          Get started by creating your first expense record.
-        </p>
-      </div>
-    );
-  }
-
   return (
-    <div className="overflow-x-auto">
-      <table className="min-w-full divide-y divide-gray-200">
-        <thead className="bg-gray-50">
-          <tr>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Expense Details
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Category
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Amount
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Date
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Branch
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Status
-            </th>
-            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Vendor
-            </th>
-            <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
-          </tr>
-        </thead>
-        <tbody className="bg-white divide-y divide-gray-200">
-          {data.map((expense) => (
-            <tr key={expense.id} className="hover:bg-gray-50">
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex flex-col">
-                  <div className="text-sm font-medium text-gray-900">
-                    {expense.title}
-                  </div>
-                  {expense.description && (
-                    <div className="text-sm text-gray-500 truncate max-w-xs">
-                      {expense.description}
-                    </div>
-                  )}
-                  {expense.is_recurring && (
-                    <div className="text-xs text-blue-600 font-medium mt-1">
-                      🔄 {expense.recurring_frequency}
-                    </div>
-                  )}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(
-                    expense.category
-                  )}`}
-                >
-                  {expense.category}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <div className="text-sm font-medium text-gray-900">
-                  {formatCurrency(expense.amount)}
-                </div>
-                <div className="text-xs text-gray-500">
-                  {expense.payment_method}
-                </div>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {formatDate(expense.expense_date)}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {expense.branch_name || "All Branches"}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap">
-                <span className={getStatusBadgeClass(expense.status)}>
-                  {expense.status}
-                </span>
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                {expense.vendor_name || "-"}
-              </td>
-              <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <div className="flex items-center justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onView(expense)}
-                  >
-                    View
-                  </Button>
-
-                  {(expense.status === "Pending" ||
-                    expense.status === "Rejected") && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(expense)}
-                    >
-                      Edit
-                    </Button>
-                  )}
-
-                  {expense.status === "Pending" && (
-                    <>
-                      <Button
-                        variant="primary"
-                        size="sm"
-                        onClick={() => handleApprove(expense.id, "Approved")}
-                        disabled={loadingStates[`${expense.id}_Approved`]}
-                      >
-                        {loadingStates[`${expense.id}_Approved`]
-                          ? "Approving..."
-                          : "Approve"}
-                      </Button>
-
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => handleApprove(expense.id, "Rejected")}
-                        disabled={loadingStates[`${expense.id}_Rejected`]}
-                      >
-                        {loadingStates[`${expense.id}_Rejected`]
-                          ? "Rejecting..."
-                          : "Reject"}
-                      </Button>
-                    </>
-                  )}
-
-                  {expense.status === "Approved" && (
-                    <Button
-                      variant="primary"
-                      size="sm"
-                      onClick={() => handleMarkPaid(expense.id)}
-                      disabled={loadingStates[`${expense.id}_paid`]}
-                    >
-                      {loadingStates[`${expense.id}_paid`]
-                        ? "Processing..."
-                        : "Mark Paid"}
-                    </Button>
-                  )}
-
-                  {(expense.status === "Pending" ||
-                    expense.status === "Rejected") && (
-                    <Button
-                      variant="danger"
-                      size="sm"
-                      onClick={() => handleDelete(expense.id, expense.title)}
-                      disabled={loadingStates[`${expense.id}_delete`]}
-                    >
-                      {loadingStates[`${expense.id}_delete`]
-                        ? "Deleting..."
-                        : "Delete"}
-                    </Button>
-                  )}
-                </div>
-              </td>
+    <div className="bg-white shadow rounded-lg overflow-hidden relative">
+      <div className="overflow-x-auto">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-gray-50">
+            <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Expense Details
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Category
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Amount
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Date
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Branch
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Status
+              </th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Vendor
+              </th>
+              <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Actions
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="bg-white divide-y divide-gray-200">
+            {isLoading ? (
+              <tr className="relative">
+                <td colSpan={8} className="px-6 py-12 text-center">
+                  <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                  </div>
+                </td>
+              </tr>
+            ) : data.length === 0 ? (
+              <tr>
+                <td colSpan={8} className="px-6 py-12 text-center">
+                  <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                    <svg
+                      className="w-12 h-12 text-gray-400"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                      />
+                    </svg>
+                  </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">
+                    No expenses found
+                  </h3>
+                  <p className="text-gray-500 mb-6">
+                    Get started by creating your first expense record.
+                  </p>
+                </td>
+              </tr>
+            ) : (
+              data.map((expense) => (
+                <tr key={expense.id} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex flex-col">
+                      <div className="text-sm font-medium text-gray-900">
+                        {expense.title}
+                      </div>
+                      {expense.description && (
+                        <div className="text-sm text-gray-500 truncate max-w-xs">
+                          {expense.description}
+                        </div>
+                      )}
+                      {expense.is_recurring && (
+                        <div className="text-xs text-blue-600 font-medium mt-1">
+                          🔄 {expense.recurring_frequency}
+                        </div>
+                      )}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getCategoryColor(
+                        expense.category
+                      )}`}
+                    >
+                      {expense.category}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
+                      {formatCurrency(expense.amount)}
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {expense.payment_method}
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {formatDate(expense.expense_date)}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {expense.branch_name || "All Branches"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className={getStatusBadgeClass(expense.status)}>
+                      {expense.status}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                    {expense.vendor_name || "-"}
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                    <div className="flex items-center justify-end space-x-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onView(expense)}
+                      >
+                        View
+                      </Button>
 
-      <div className="p-4">
-        <Pagination
-          currentPage={currentPage}
-          totalPages={totalPages}
-          totalItems={totalCount}
-          itemsPerPage={itemsPerPage}
-          onPageChange={handlePageChange}
-          onItemsPerPageChange={handleItemsPerPageChange}
+                      {(expense.status === "Pending" ||
+                        expense.status === "Rejected") && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEdit(expense)}
+                        >
+                          Edit
+                        </Button>
+                      )}
+
+                      {expense.status === "Pending" && (
+                        <>
+                          <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() =>
+                              handleApprove(expense.id, "Approved")
+                            }
+                            disabled={loadingStates[`${expense.id}_Approved`]}
+                          >
+                            {loadingStates[`${expense.id}_Approved`]
+                              ? "Approving..."
+                              : "Approve"}
+                          </Button>
+
+                          <Button
+                            variant="danger"
+                            size="sm"
+                            onClick={() =>
+                              handleApprove(expense.id, "Rejected")
+                            }
+                            disabled={loadingStates[`${expense.id}_Rejected`]}
+                          >
+                            {loadingStates[`${expense.id}_Rejected`]
+                              ? "Rejecting..."
+                              : "Reject"}
+                          </Button>
+                        </>
+                      )}
+
+                      {expense.status === "Approved" && (
+                        <Button
+                          variant="primary"
+                          size="sm"
+                          onClick={() => handleMarkPaid(expense.id)}
+                          disabled={loadingStates[`${expense.id}_paid`]}
+                        >
+                          {loadingStates[`${expense.id}_paid`]
+                            ? "Processing..."
+                            : "Mark Paid"}
+                        </Button>
+                      )}
+
+                      {(expense.status === "Pending" ||
+                        expense.status === "Rejected") && (
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          onClick={() =>
+                            handleDelete(expense.id, expense.title)
+                          }
+                          disabled={loadingStates[`${expense.id}_delete`]}
+                        >
+                          {loadingStates[`${expense.id}_delete`]
+                            ? "Deleting..."
+                            : "Delete"}
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+
+        <div className="p-4">
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.ceil(totalCount / itemsPerPage) || 1}
+            totalItems={totalCount}
+            itemsPerPage={itemsPerPage}
+            onPageChange={onPageChange}
+            onItemsPerPageChange={onItemsPerPageChange}
+          />
+        </div>
+
+        {/* Confirmation Dialog */}
+        <ConfirmationDialog
+          isOpen={confirmDialog.isOpen}
+          onClose={closeConfirmDialog}
+          onConfirm={() => {
+            confirmDialog.onConfirm();
+            closeConfirmDialog();
+          }}
+          title={confirmDialog.title}
+          message={confirmDialog.message}
+          type={confirmDialog.type}
+          loading={Object.values(loadingStates).some(Boolean)}
         />
       </div>
-
-      {/* Confirmation Dialog */}
-      <ConfirmationDialog
-        isOpen={confirmDialog.isOpen}
-        onClose={closeConfirmDialog}
-        onConfirm={() => {
-          confirmDialog.onConfirm();
-          closeConfirmDialog();
-        }}
-        title={confirmDialog.title}
-        message={confirmDialog.message}
-        type={confirmDialog.type}
-        loading={Object.values(loadingStates).some(Boolean)}
-      />
     </div>
   );
 }

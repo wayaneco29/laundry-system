@@ -1,48 +1,66 @@
 "use client";
 
-import { Package, DollarSign, Edit2, CheckCircle, XCircle } from "lucide-react";
-import { useRouter } from "next/navigation";
+import {
+  Package,
+  DollarSign,
+  Edit2,
+  CheckCircle,
+  XCircle,
+  Loader2,
+} from "lucide-react";
+import { useState, useEffect } from "react";
 import { Pagination } from "@/app/components/common/pagination";
+import { getAllServices } from "@/app/actions";
 
 type ServiceTableProps = {
-  data: Array<Record<string, string>>;
-  totalCount: number;
-  searchParams: {
-    page?: string;
-    limit?: string;
-    search?: string;
-  };
+  initialData: Array<Record<string, string>>;
   onEdit: (service: Record<string, string>) => void;
+  search?: string;
 };
 
 export const ServiceTable = ({
-  data,
-  totalCount,
-  searchParams,
+  initialData,
   onEdit,
+  search,
 }: ServiceTableProps) => {
-  const router = useRouter();
+  const [data, setData] = useState<Array<Record<string, string>>>(
+    initialData || []
+  );
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const [totalItems, setTotalItems] = useState(0);
 
-  const currentPage = Number(searchParams.page) || 1;
-  const itemsPerPage = Number(searchParams.limit) || 15;
-  const totalPages = Math.ceil(totalCount / itemsPerPage) || 1;
+  const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
+
+  const fetchData = async (page: number, limit: number) => {
+    setLoading(true);
+    try {
+      const result = await getAllServices({
+        page,
+        limit,
+        search,
+      });
+      setData(result.data || []);
+      setTotalItems(result.count || 0);
+    } catch (error) {
+      console.error("Error fetching services:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchData(currentPage, itemsPerPage);
+  }, [currentPage, itemsPerPage, search]);
 
   const handlePageChange = (page: number) => {
-    const params = new URLSearchParams({
-      ...searchParams,
-      page: String(page),
-      limit: String(itemsPerPage),
-    });
-    router.push(`?${params.toString()}`);
+    setCurrentPage(page);
   };
 
   const handleItemsPerPageChange = (limit: number) => {
-    const params = new URLSearchParams({
-      ...searchParams,
-      page: "1",
-      limit: String(limit),
-    });
-    router.push(`?${params.toString()}`);
+    setItemsPerPage(limit);
+    setCurrentPage(1);
   };
 
   const getStatusColor = (status: string) => {
@@ -56,24 +74,8 @@ export const ServiceTable = ({
     }
   };
 
-  if (data.length === 0) {
-    return (
-      <div className="bg-white shadow rounded-lg">
-        <div className="px-6 py-12 text-center">
-          <Package className="mx-auto h-12 w-12 text-gray-400" />
-          <h3 className="mt-2 text-sm font-medium text-gray-900">
-            No services
-          </h3>
-          <p className="mt-1 text-sm text-gray-500">
-            Get started by adding your first service.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="bg-white shadow rounded-lg overflow-hidden">
+    <div className="bg-white shadow rounded-lg overflow-hidden relative">
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -93,49 +95,71 @@ export const ServiceTable = ({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data.map((service, index) => (
-              <tr key={service.id || index} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <Package className="h-5 w-5 text-gray-400 mr-3" />
-                    <div className="text-sm font-medium text-gray-900">
-                      {service.name}
-                    </div>
+            {loading ? (
+              <tr className="relative">
+                <td colSpan={4} className="px-6 py-12 text-center">
+                  <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                   </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex items-center">
-                    <DollarSign className="h-4 w-4 text-gray-400 mr-2" />
-                    <div className="text-sm text-gray-900">
-                      ₱{service.price}/KG
-                    </div>
-                  </div>
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                  <span
-                    className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(
-                      service.status
-                    )}`}
-                  >
-                    {service.status === "Active" ? (
-                      <CheckCircle className="h-4 w-4" />
-                    ) : (
-                      <XCircle className="h-4 w-4" />
-                    )}
-                    {service.status}
-                  </span>
-                </td>
-                <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
-                  <button
-                    onClick={() => onEdit(service)}
-                    className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                    Edit
-                  </button>
                 </td>
               </tr>
-            ))}
+            ) : data.length === 0 ? (
+              <tr>
+                <td colSpan={4} className="px-6 py-12 text-center">
+                  <Package className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No services
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Get started by adding your first service.
+                  </p>
+                </td>
+              </tr>
+            ) : (
+              data.map((service, index) => (
+                <tr key={service.id || index} className="hover:bg-gray-50">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <Package className="h-5 w-5 text-gray-400 mr-3" />
+                      <div className="text-sm font-medium text-gray-900">
+                        {service.name}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      <DollarSign className="h-4 w-4 text-gray-400 mr-2" />
+                      <div className="text-sm text-gray-900">
+                        ₱{service.price}/KG
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span
+                      className={`inline-flex items-center gap-x-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${getStatusColor(
+                        service.status
+                      )}`}
+                    >
+                      {service.status === "Active" ? (
+                        <CheckCircle className="h-4 w-4" />
+                      ) : (
+                        <XCircle className="h-4 w-4" />
+                      )}
+                      {service.status}
+                    </span>
+                  </td>
+                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                    <button
+                      onClick={() => onEdit(service)}
+                      className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                    >
+                      <Edit2 className="h-4 w-4" />
+                      Edit
+                    </button>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
@@ -143,7 +167,7 @@ export const ServiceTable = ({
         <Pagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={totalCount}
+          totalItems={totalItems}
           itemsPerPage={itemsPerPage}
           onPageChange={handlePageChange}
           onItemsPerPageChange={handleItemsPerPageChange}

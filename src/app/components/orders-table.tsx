@@ -5,7 +5,6 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Pagination } from "./common/pagination";
-import { usePagination } from "@/app/hooks/use-pagination";
 import {
   ChevronDown,
   Edit3,
@@ -15,39 +14,31 @@ import {
   Hash,
   Loader2,
   MapPin,
-  Search,
 } from "lucide-react";
 
 import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
+import "./loading-spinner.css";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
   totalCount?: number;
-  searchParams?: {
-    page?: string;
-    limit?: string;
-    search?: string;
-    status?: string;
-    branchId?: string;
-  };
+  search?: string;
 };
 
 export const OrdersTable = ({
   initialData = [],
   totalCount = 0,
-  searchParams,
+  search,
 }: OrdersTableProps) => {
   const router = useRouter();
   const { userId } = useCurrentUser();
-  const { updateURL, getPage, getLimit, getSearch } = usePagination();
 
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
-  const [currentPage, setCurrentPage] = useState(getPage());
-  const [itemsPerPage, setItemsPerPage] = useState(getLimit());
+  const [currentPage, setCurrentPage] = useState(1);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(totalCount);
-  const [search, setSearch] = useState(getSearch());
-  const [statusFilter, setStatusFilter] = useState(searchParams?.status || "");
+  const [statusFilter, setStatusFilter] = useState("");
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [loadingOrderStatus, setLoadingOrderStatus] = useState<Set<string>>(
     new Set()
@@ -73,10 +64,7 @@ export const OrdersTable = ({
         limit,
         search: search || undefined,
         status: statusFilter || undefined,
-        branchId: searchParams?.branchId,
       });
-
-      console.log("===================1", result);
 
       if (result.data) {
         setData(result.data);
@@ -91,50 +79,21 @@ export const OrdersTable = ({
 
   // Only fetch new data when pagination/search changes (not on initial load)
   useEffect(() => {
-    // Skip the initial fetch if we have initialData
-    if (
-      initialData &&
-      initialData.length > 0 &&
-      currentPage === getPage() &&
-      itemsPerPage === getLimit() &&
-      search === getSearch() &&
-      statusFilter === (searchParams?.status || "")
-    ) {
-      return;
-    }
-
-    // Only fetch if there are actual changes to pagination/search
-    const hasPaginationChanges =
-      currentPage !== getPage() || itemsPerPage !== getLimit();
-    const hasSearchChanges =
-      search !== getSearch() || statusFilter !== (searchParams?.status || "");
-
-    if (hasPaginationChanges || hasSearchChanges) {
-      fetchData(currentPage, itemsPerPage);
-    }
+    fetchData(currentPage, itemsPerPage);
   }, [currentPage, itemsPerPage, search, statusFilter]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
-    updateURL({ page: page === 1 ? "" : page });
   };
 
   const handleItemsPerPageChange = (limit: number) => {
     setItemsPerPage(limit);
     setCurrentPage(1);
-    updateURL({ limit, page: "" });
-  };
-
-  const handleSearchChange = (value: string) => {
-    setSearch(value);
-    setCurrentPage(1);
-    updateURL({ search: value || "", page: "" });
   };
 
   const handleStatusFilterChange = (value: string) => {
     setStatusFilter(value);
     setCurrentPage(1);
-    updateURL({ status: value || "", page: "" });
   };
 
   const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -344,75 +303,10 @@ export const OrdersTable = ({
     );
   };
 
-  if (!data || data.length === 0) {
-    return (
-      <div>
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search orders by customer name or order ID..."
-              value={search}
-              onChange={(e) => handleSearchChange(e.target.value)}
-              className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
-              disabled={loading}
-            />
-            {loading && (
-              <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-              </div>
-            )}
-          </div>
-          <select
-            value={statusFilter}
-            onChange={(e) => handleStatusFilterChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
-            disabled={loading}
-          >
-            <option value="">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Ongoing">Ongoing</option>
-            <option value="Ready for Pickup">Ready for Pickup</option>
-            <option value="Picked up">Picked up</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
-        </div>
-        <div className="bg-white shadow rounded-lg">
-          <div className="px-6 py-12 text-center">
-            <Hash className="mx-auto h-12 w-12 text-gray-400" />
-            <h3 className="mt-2 text-sm font-medium text-gray-900">
-              No orders
-            </h3>
-            <p className="mt-1 text-sm text-gray-500">
-              Get started by creating your first order.
-            </p>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-4">
       {/* Search and filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search orders by customer name or order ID..."
-            value={search}
-            onChange={(e) => handleSearchChange(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
-            disabled={loading}
-          />
-          {loading && (
-            <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-              <Loader2 className="h-4 w-4 animate-spin text-gray-400" />
-            </div>
-          )}
-        </div>
         <select
           value={statusFilter}
           onChange={(e) => handleStatusFilterChange(e.target.value)}
@@ -429,7 +323,12 @@ export const OrdersTable = ({
       </div>
 
       {/* Table */}
-      <div className="bg-white shadow rounded-lg overflow-hidden">
+      <div className="bg-white shadow rounded-lg overflow-hidden relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+          </div>
+        )}
         {loading && (!data || data.length === 0) ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
@@ -465,111 +364,127 @@ export const OrdersTable = ({
                   </tr>
                 </thead>
                 <tbody className="bg-white divide-y divide-gray-200">
-                  {data.map((order, index) => (
-                    <tr
-                      key={order?.order_id || index}
-                      className={`hover:bg-gray-50 ${
-                        loading ? "opacity-75" : ""
-                      }`}
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <Hash className="h-5 w-5 text-gray-400 mr-3" />
-                          <div>
-                            <div className="text-sm font-medium text-gray-900">
-                              #{order?.order_id || "N/A"}
-                            </div>
-                            <div className="flex items-center text-sm text-gray-500">
-                              <Calendar className="h-4 w-4 mr-1" />
-                              {order?.created_at
-                                ? moment(order.created_at).isValid()
-                                  ? moment(order.created_at).format(
-                                      "MMM DD, YYYY"
-                                    )
-                                  : "Invalid Date"
-                                : "N/A"}
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <User className="h-4 w-4 text-gray-400 mr-2" />
-                          <div className="text-sm font-medium text-gray-900">
-                            {order?.customer_name || "N/A"}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                          <div className="text-sm text-gray-900">
-                            {order?.branch_name || "N/A"}
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge
-                          status={order?.order_status || "Pending"}
-                          type="order"
-                          orderId={order?.order_id || ""}
-                          onClick={() =>
-                            handleOrderStatusClick(order?.order_id || "")
-                          }
-                          isLoading={loadingOrderStatus.has(
-                            order?.order_id || ""
-                          )}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <StatusBadge
-                          status={order?.payment_status || "Unpaid"}
-                          type="payment"
-                          orderId={order?.order_id || ""}
-                          onClick={() =>
-                            handlePaymentStatusClick(
-                              order?.order_id || "",
-                              order?.payment_status || "Unpaid"
-                            )
-                          }
-                          isLoading={loadingPaymentStatus.has(
-                            order?.order_id || ""
-                          )}
-                        />
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="text-sm font-medium text-gray-900">
-                          ₱{order?.total_price || "0"}
-                        </div>
-                      </td>
-                      <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
-                        <button
-                          onClick={() =>
-                            router.push(`/orders/${order?.order_id || ""}`)
-                          }
-                          className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
-                        >
-                          <Eye className="h-4 w-4" />
-                          View
-                        </button>
+                  {!data || data.length === 0 ? (
+                    <tr>
+                      <td colSpan={7} className="px-6 py-12 text-center">
+                        <Hash className="mx-auto h-12 w-12 text-gray-400" />
+                        <h3 className="mt-2 text-sm font-medium text-gray-900">
+                          No orders
+                        </h3>
+                        <p className="mt-1 text-sm text-gray-500">
+                          Get started by creating your first order.
+                        </p>
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    data.map((order, index) => (
+                      <tr
+                        key={order?.order_id || index}
+                        className={`hover:bg-gray-50 ${
+                          loading ? "opacity-75" : ""
+                        }`}
+                      >
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <Hash className="h-5 w-5 text-gray-400 mr-3" />
+                            <div>
+                              <div className="text-sm font-medium text-gray-900">
+                                #{order?.order_id || "N/A"}
+                              </div>
+                              <div className="flex items-center text-sm text-gray-500">
+                                <Calendar className="h-4 w-4 mr-1" />
+                                {order?.created_at
+                                  ? moment(order.created_at).isValid()
+                                    ? moment(order.created_at).format(
+                                        "MMM DD, YYYY"
+                                      )
+                                    : "Invalid Date"
+                                  : "N/A"}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <User className="h-4 w-4 text-gray-400 mr-2" />
+                            <div className="text-sm font-medium text-gray-900">
+                              {order?.customer_name || "N/A"}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                            <div className="text-sm text-gray-900">
+                              {order?.branch_name || "N/A"}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <StatusBadge
+                            status={order?.order_status || "Pending"}
+                            type="order"
+                            orderId={order?.order_id || ""}
+                            onClick={() =>
+                              handleOrderStatusClick(order?.order_id || "")
+                            }
+                            isLoading={loadingOrderStatus.has(
+                              order?.order_id || ""
+                            )}
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <StatusBadge
+                            status={order?.payment_status || "Unpaid"}
+                            type="payment"
+                            orderId={order?.order_id || ""}
+                            onClick={() =>
+                              handlePaymentStatusClick(
+                                order?.order_id || "",
+                                order?.payment_status || "Unpaid"
+                              )
+                            }
+                            isLoading={loadingPaymentStatus.has(
+                              order?.order_id || ""
+                            )}
+                          />
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="text-sm font-medium text-gray-900">
+                            ₱{order?.total_price || "0"}
+                          </div>
+                        </td>
+                        <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                          <button
+                            onClick={() =>
+                              router.push(`/orders/${order?.order_id || ""}`)
+                            }
+                            className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                          >
+                            <Eye className="h-4 w-4" />
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
 
             {/* Pagination */}
-            <div className="px-6 py-4 border-t border-gray-200">
-              <Pagination
-                currentPage={currentPage}
-                totalPages={Math.max(totalPages, 1)}
-                totalItems={totalItems}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
-              />
-            </div>
+            {data && data.length > 0 && (
+              <div className="px-6 py-4 border-t border-gray-200">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.max(totalPages, 1)}
+                  totalItems={totalItems}
+                  itemsPerPage={itemsPerPage}
+                  onPageChange={handlePageChange}
+                  onItemsPerPageChange={handleItemsPerPageChange}
+                />
+              </div>
+            )}
           </>
         )}
       </div>

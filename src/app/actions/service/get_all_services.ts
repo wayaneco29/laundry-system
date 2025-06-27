@@ -22,9 +22,7 @@ export const getAllServices = async (options?: {
 
       // Apply search filter
       if (options?.search) {
-        query = query.or(
-          `name.ilike.%${options.search}%,description.ilike.%${options.search}%`
-        );
+        query = query.or(`name.ilike.%${options.search}%`);
       }
 
       query = query

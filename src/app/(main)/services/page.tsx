@@ -1,26 +1,13 @@
-import { getAllServices } from "@/app/actions";
 import { MainServicePage } from "./components/main";
 
-interface ServicesPageProps {
-  searchParams: {
-    page?: string;
-    limit?: string;
-    search?: string;
-  };
-}
+import { getAllServices } from "@/app/actions";
 
-export default async function Page({ searchParams }: ServicesPageProps) {
-  const page = Number(searchParams?.page) || 1;
-  const limit = Number(searchParams?.limit) || 15;
-  const search = searchParams?.search || undefined;
+export default async function Page() {
+  const { data } = await getAllServices({
+    page: 1,
+    limit: 10,
+    search: "",
+  });
 
-  const { data, count } = await getAllServices({ page, limit, search });
-
-  return (
-    <MainServicePage
-      services_list={data || []}
-      totalCount={count || 0}
-      searchParams={searchParams}
-    />
-  );
+  return <MainServicePage initialData={data || []} />;
 }
