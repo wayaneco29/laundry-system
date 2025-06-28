@@ -115,20 +115,6 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
       iconColor: "bg-blue-500",
     },
     {
-      title: "Approved Expenses",
-      value: `₱${expenseStats?.approved_expenses?.toLocaleString() || "0"}`,
-      icon: ArrowTrendingUpIcon,
-      color: "from-green-100 to-green-50",
-      iconColor: "bg-green-500",
-    },
-    {
-      title: "Pending Expenses",
-      value: `₱${expenseStats?.pending_expenses?.toLocaleString() || "0"}`,
-      icon: ExclamationTriangleIcon,
-      color: "from-yellow-100 to-yellow-50",
-      iconColor: "bg-yellow-500",
-    },
-    {
       title: "Monthly Expense",
       value: `₱${monthlyExpense?.toLocaleString() || "0"}`,
       icon: CalendarIcon,
@@ -168,7 +154,7 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
       ) : (
         <>
           {/* Expense Metrics Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-2 xl:grid-cols-4  gap-6">
             {expenseMetrics.map((metric, index) => {
               const Icon = metric.icon;
               return (
@@ -460,24 +446,6 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
                     </span>
                     <span className="text-lg font-bold text-gray-900">
                       ₱{yearlyExpense?.toLocaleString() || "0"}
-                    </span>
-                  </div>
-                </div>
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-medium text-gray-600">
-                      Approval Rate
-                    </span>
-                    <span className="text-lg font-bold text-green-600">
-                      {expenseStats?.total_expenses &&
-                      expenseStats?.approved_expenses
-                        ? Math.round(
-                            (expenseStats.approved_expenses /
-                              expenseStats.total_expenses) *
-                              100
-                          )
-                        : 0}
-                      %
                     </span>
                   </div>
                 </div>

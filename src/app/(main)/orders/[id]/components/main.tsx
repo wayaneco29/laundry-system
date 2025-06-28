@@ -282,11 +282,11 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
               </p>
             </div>
             <Button
+              leftIcon={<ArrowLeft className="size-4" />}
               variant="outline"
               onClick={() => router.replace("/orders")}
               className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
             >
-              <ArrowLeft className="size-4" />
               Back to Orders
             </Button>
           </div>
@@ -342,7 +342,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
 
                   {/* Payment Status - Editable */}
                   <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-                    <StatusIcon className="size-5 text-current" />
+                    <StatusIcon className="size-5 text-slate-500" />
                     <div>
                       <p className="text-sm font-medium text-slate-600 mb-2">
                         Payment Status
@@ -450,11 +450,13 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
               <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Subtotal</span>
-                  <span className="font-medium">₱{data?.total_price}</span>
+                  <span className="font-medium text-slate-600">
+                    ₱{data?.total_price}
+                  </span>
                 </div>
                 <div className="flex justify-between text-sm">
                   <span className="text-slate-600">Tax</span>
-                  <span className="font-medium">₱0.00</span>
+                  <span className="font-medium text-slate-600">₱0.00</span>
                 </div>
                 <div className="border-t border-slate-200 pt-3">
                   <div className="flex justify-between">
@@ -481,15 +483,17 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                     Add Payment
                   </Button>
                 )}
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2">
-                  <Printer className="size-4" />
+                <Button
+                  leftIcon={<Printer className="size-4" />}
+                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                >
                   Print Receipt
                 </Button>
               </div>
             </div>
 
             {/* Quick Info */}
-            <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
+            {/* <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
               <h3 className="text-lg font-semibold text-blue-900 mb-3">
                 Need Help?
               </h3>
@@ -503,7 +507,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
               >
                 Contact Support
               </Button>
-            </div>
+            </div> */}
           </div>
         </div>
       </div>

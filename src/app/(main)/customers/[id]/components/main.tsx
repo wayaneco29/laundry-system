@@ -106,8 +106,8 @@ export const MainCustomerIdPage = ({
         </Button>
       </div>
       <div className="mt-4 text-gray-700">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-y-4 md:gap-y-8 2xl:gap-x-8">
-          <div className="col-span-1 lg:col-span-1">
+        <div className="flex flex-col 2xl:flex-row gap-y-4 md:gap-y-8 2xl:gap-x-8">
+          <div className="col-span-1 2xl:w-[800px]">
             <div className="bg-white rounded-md shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 text-blue-600 font-medium">
@@ -265,7 +265,7 @@ export const MainCustomerIdPage = ({
               </div>
             </div>
           </div>
-          <div className="col-span-1 lg:col-span-3">
+          <div className="col-span-1 2xl:flex-1">
             <div className="bg-white rounded-md shadow-md p-6">
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center gap-2 text-blue-600 font-medium">
