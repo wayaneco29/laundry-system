@@ -99,10 +99,10 @@ export const MainCustomerIdPage = ({
         </div>
         <Button
           leftIcon={<ArrowLeft className="w-4 h-4" />}
-          className="flex flex-row items-center gap-2"
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => router.back()}
         >
-          <span>Back</span>
+          Back
         </Button>
       </div>
       <div className="mt-4 text-gray-700">

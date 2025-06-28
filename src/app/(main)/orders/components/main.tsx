@@ -6,6 +6,7 @@ import { OrdersTable } from "@/app/components";
 import { OrderModal } from "./order-modal";
 import { useRouter } from "next/navigation";
 import { PlusIcon, Search } from "lucide-react";
+import { Button } from "@/app/components/common";
 
 type OrdersPageProps = {
   data: Array<any>;
@@ -40,13 +41,13 @@ export function OrdersPage({ data, totalCount }: OrdersPageProps) {
             Manage and track your orders efficiently
           </p>
         </div>
-        <button
-          type="button"
-          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+        <Button
+          leftIcon={<PlusIcon className="size-4" />}
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => router.push("/orders/add")}
         >
-          <PlusIcon className="size-4" /> Add Order
-        </button>
+          Add Order
+        </Button>
       </div>
 
       <div className="relative mt-4 w-full md:w-96">

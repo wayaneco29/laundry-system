@@ -5,6 +5,7 @@ import { Plus, Search } from "lucide-react";
 
 import { UpsertStaffModal } from "./upsert-staff-modal";
 import { StaffTable } from "./staff-table";
+import { Button } from "@/app/components/common";
 
 type MainStaffPageProps = {
   initialData: Array<Record<string, string>>;
@@ -48,13 +49,13 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
             Manage your team members and their information
           </p>
         </div>
-        <button
-          type="button"
-          className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-100 text-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+        <Button
+          leftIcon={<Plus className="size-4" />}
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setShowModal(true)}
         >
-          <Plus className="size-4" /> Add Staff
-        </button>
+          Add Staff
+        </Button>
       </div>
 
       <div className="relative mt-4 w-full md:w-96">

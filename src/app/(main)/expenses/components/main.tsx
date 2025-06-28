@@ -14,7 +14,7 @@ import {
 } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useToast } from "@/app/hooks/use-toast";
-import { PlusIcon, Search } from "lucide-react";
+import { Plus, PlusIcon, Search } from "lucide-react";
 import {
   HeaderWithButtonSkeleton,
   StatsCardsSkeleton,
@@ -173,19 +173,19 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
   ];
 
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-6 lg:p-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="text-2xl font-bold text-gray-900">Expenses</h1>
-          <p className="text-gray-600">
+          <h1 className="text-3xl font-bold text-slate-800 mb-2">Expenses</h1>
+          <p className="text-slate-600">
             Manage your business expenses and track spending
           </p>
         </div>
         <Button
-          variant="primary"
-          leftIcon={<PlusIcon />}
+          leftIcon={<Plus />}
           onClick={handleCreateExpense}
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add Expense
         </Button>

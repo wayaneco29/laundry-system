@@ -43,25 +43,8 @@ export function InventoryTable({
     return <Package className="h-4 w-4" />;
   };
 
-  if (isLoading && data.length === 0) {
-    return (
-      <tr className="relative">
-        <td colSpan={8} className="px-6 py-12 text-center">
-          <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
-            <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-          </div>
-        </td>
-      </tr>
-    );
-  }
-
   return (
     <div className="bg-white shadow rounded-lg overflow-hidden relative">
-      {isLoading && (
-        <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-        </div>
-      )}
       <div className="overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -84,7 +67,15 @@ export function InventoryTable({
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
-            {data?.length === 0 ? (
+            {isLoading ? (
+              <tr className="relative">
+                <td colSpan={5} className="px-6 py-12 text-center">
+                  <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
+                    <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+                  </div>
+                </td>
+              </tr>
+            ) : data?.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-6 py-12 text-center">
                   <Package className="mx-auto h-12 w-12 text-gray-400" />

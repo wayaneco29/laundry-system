@@ -42,9 +42,9 @@ export function MainBranchesPage({ initialData }: BranchesPageProps) {
           </p>
         </div>
         <Button
-          variant="outline"
           leftIcon={<Plus />}
           onClick={() => setShowModal(true)}
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Add Branch
         </Button>

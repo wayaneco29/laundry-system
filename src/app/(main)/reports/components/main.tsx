@@ -24,6 +24,7 @@ import { getOrders } from "@/app/actions/order";
 import { getAllCustomers } from "@/app/actions/customer";
 import { getAllExpenses } from "@/app/actions/expense";
 import { SalesSectionSkeleton } from "./skeleton";
+import { Button } from "@/app/components/common";
 
 type MainReportsPageProps = {
   monthlySalesData: MonthlySalesData | null;
@@ -142,14 +143,14 @@ export function MainReportsPage({
           </p>
         </div>
         <div className="flex gap-3">
-          <button
+          <Button
+            leftIcon={<DocumentArrowDownIcon className="h-4 w-4" />}
             onClick={handleExportReport}
             disabled={isLoadingExport}
-            className="inline-flex items-center gap-x-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <DocumentArrowDownIcon className="h-4 w-4" />
             {isLoadingExport ? "Preparing..." : "Export Report"}
-          </button>
+          </Button>
         </div>
       </div>
 
