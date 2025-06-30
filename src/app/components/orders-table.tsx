@@ -340,25 +340,25 @@ export const OrdersTable = ({
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Order Details
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Customer
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Branch
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Order Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Payment Status
                     </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Total
                     </th>
-                    <th className="sticky right-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    <th className="bg-blue-600 sticky right-0 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Actions
                     </th>
                   </tr>
@@ -384,7 +384,7 @@ export const OrdersTable = ({
                           loading ? "opacity-75" : ""
                         }`}
                       >
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <div className="flex items-center">
                             <Hash className="h-5 w-5 text-gray-400 mr-3" />
                             <div>
@@ -404,7 +404,7 @@ export const OrdersTable = ({
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <div className="flex items-center">
                             <User className="h-4 w-4 text-gray-400 mr-2" />
                             <div className="text-sm font-medium text-gray-900">
@@ -412,7 +412,7 @@ export const OrdersTable = ({
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <div className="flex items-center">
                             <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                             <div className="text-sm text-gray-900">
@@ -420,7 +420,7 @@ export const OrdersTable = ({
                             </div>
                           </div>
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <StatusBadge
                             status={order?.order_status || "Pending"}
                             type="order"
@@ -433,7 +433,7 @@ export const OrdersTable = ({
                             )}
                           />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <StatusBadge
                             status={order?.payment_status || "Unpaid"}
                             type="payment"
@@ -449,17 +449,17 @@ export const OrdersTable = ({
                             )}
                           />
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <div className="text-sm font-medium text-gray-900">
                             ₱{order?.total_price || "0"}
                           </div>
                         </td>
-                        <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                        <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm ">
                           <button
                             onClick={() =>
                               router.push(`/orders/${order?.order_id || ""}`)
                             }
-                            className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                            className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1 cursor-pointer"
                           >
                             <Eye className="h-4 w-4" />
                             View

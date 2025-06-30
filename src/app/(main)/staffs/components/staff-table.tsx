@@ -71,22 +71,22 @@ export const StaffTable = ({
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Staff Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Phone
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Email
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Employment Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Address
               </th>
-              <th className="sticky right-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -102,7 +102,7 @@ export const StaffTable = ({
               </tr>
             ) : data?.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-6 py-12 text-center">
+                <td colSpan={6} className="px-6 py-12 text-center bg-white">
                   <div className="mx-auto w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mb-4">
                     <svg
                       className="w-12 h-12 text-gray-400"
@@ -127,9 +127,9 @@ export const StaffTable = ({
                 </td>
               </tr>
             ) : (
-              data.map((staff, index) => (
+              data?.map((staff, index) => (
                 <tr key={staff.staff_id || index} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap bg-white">
                     <div className="flex items-center">
                       <Users className="h-5 w-5 text-gray-400 mr-3" />
                       <div className="text-sm font-medium text-gray-900">
@@ -137,13 +137,13 @@ export const StaffTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap bg-white">
                     <div className="flex items-center">
                       <Phone className="h-4 w-4 text-gray-400 mr-2" />
                       <div className="text-sm text-gray-900">{staff.phone}</div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap bg-white">
                     <div className="flex items-center">
                       <Mail className="h-4 w-4 text-gray-400 mr-2" />
                       <div className="text-sm text-gray-900">
@@ -151,7 +151,7 @@ export const StaffTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
+                  <td className="px-6 py-4 whitespace-nowrap bg-white">
                     <div className="flex items-center">
                       <Calendar className="h-4 w-4 text-gray-400 mr-2" />
                       <div className="text-sm text-gray-900">
@@ -159,7 +159,7 @@ export const StaffTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="px-6 py-4">
+                  <td className="px-6 py-4 bg-white">
                     <div className="flex items-center">
                       <MapPin className="h-4 w-4 text-gray-400 mr-2" />
                       <div className="text-sm text-gray-900">
@@ -170,7 +170,7 @@ export const StaffTable = ({
                   <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
                     <button
                       onClick={() => onEdit(staff)}
-                      className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                      className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1 cursor-pointer"
                     >
                       <Edit2 className="h-4 w-4" />
                       Edit

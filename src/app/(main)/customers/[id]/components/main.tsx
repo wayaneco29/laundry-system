@@ -117,7 +117,7 @@ export const MainCustomerIdPage = ({
                 <Button
                   leftIcon={<Save className="w-4 h-4" />}
                   disabled={isSubmitting || !isDirty}
-                  className="inline-flex items-center gap-2"
+                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
                   onClick={handleSubmit(async (data) => {
                     try {
                       const { error } = await upsertCustomer({
@@ -278,16 +278,16 @@ export const MainCustomerIdPage = ({
                 <table className="w-full text-left text-sm text-gray-500">
                   <thead className="group/head text-xs uppercase text-gray-700">
                     <tr>
-                      <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                      <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                         Date
                       </th>
-                      <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                      <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                         Branch / Service
                       </th>
-                      <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                      <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                         Services
                       </th>
-                      <th className="w-28 text-center bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                      <th className="w-28 text-center bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                         Status
                       </th>
                     </tr>
@@ -348,12 +348,12 @@ export const MainCustomerIdPage = ({
                           <td className="text-nowrap text-center px-6 py-4">
                             <span
                               className={twMerge(
-                                "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium text-white",
+                                "inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-full text-xs font-medium ",
                                 order.status === "Picked up"
-                                  ? "bg-green-500"
+                                  ? "bg-green-200 text-green-600"
                                   : order.status === "Pending"
-                                  ? "bg-blue-400"
-                                  : "bg-yellow-500"
+                                  ? "bg-blue-200 text-blue-600"
+                                  : "bg-yellow-200 text-yellow-600"
                               )}
                             >
                               {order.status}
