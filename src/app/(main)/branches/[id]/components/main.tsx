@@ -184,7 +184,10 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
             <div className="bg-white rounded-md shadow-md p-4 mt-10">
               <div className="flex items-center justify-between mb-4">
                 <div className="text-blue-600 mb-4 font-medium">Inventory</div>
-                <Button onClick={() => setShowStockModal(true)}>
+                <Button
+                  className="bg-blue-600 hover:bg-blue-700"
+                  onClick={() => setShowStockModal(true)}
+                >
                   Add Item
                 </Button>
               </div>
@@ -195,10 +198,10 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                     <table className="w-full text-left text-sm text-gray-500">
                       <thead className="group/head text-xs uppercase text-gray-700">
                         <tr>
-                          <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                          <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                             Stock Name
                           </th>
-                          <th className="bg-blue-400 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                          <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
                             Quantity
                           </th>
                         </tr>

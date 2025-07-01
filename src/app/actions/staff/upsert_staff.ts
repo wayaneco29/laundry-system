@@ -14,6 +14,10 @@ type UpsertStaffType = {
   p_address: string;
   p_employment_date: string;
   p_created_by: string;
+  p_username: string;
+  p_password?: string;
+  p_branch_id: string;
+  p_role_id: string;
 };
 
 export const upsertStaff = async (payload: UpsertStaffType) => {

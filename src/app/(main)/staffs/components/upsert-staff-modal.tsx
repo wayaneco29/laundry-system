@@ -17,6 +17,7 @@ import { upsertStaff } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input, Datepicker } from "@/app/components/common";
 import { useForm, Controller } from "react-hook-form";
+import { BranchProvider, RoleProvider } from "@/app/providers";
 
 type UpsertStaffModalProps = {
   initialValues: {
@@ -30,6 +31,10 @@ type UpsertStaffModalProps = {
     address: string;
     employment_date: string;
     created_by: string;
+    username: string;
+    password: string;
+    branch_id: string;
+    role_id: string;
   };
   showModal: boolean;
   onClose: () => void;
@@ -61,6 +66,14 @@ export const UpsertStaffModal = ({
         address: Yup.string().required("Address is required"),
         employment_date: Yup.string().required("Employment Date is required"),
         created_by: Yup.string(),
+        username: Yup.string().required("Username is required"),
+        password: Yup.string().when("isUpdate", {
+          is: false,
+          then: (schema) => schema.required("Password is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
+        branch_id: Yup.string().required("Branch ID is required"),
+        role_id: Yup.string().required("Role is required"),
       })
     ),
   });
@@ -79,6 +92,10 @@ export const UpsertStaffModal = ({
       address: "",
       employment_date: "",
       created_by: "",
+      username: "",
+      password: "",
+      branch_id: "",
+      role_id: "",
     });
 
     onClose();
@@ -100,6 +117,11 @@ export const UpsertStaffModal = ({
       <Controller
         control={control}
         name="staff_id"
+        render={() => <Input containerClassName="hidden" />}
+      />
+      <Controller
+        control={control}
+        name="isUpdate"
         render={() => <Input containerClassName="hidden" />}
       />
       <div className="grid grid-cols-1 gap-x-2 mb-4">
@@ -227,6 +249,76 @@ export const UpsertStaffModal = ({
           />
         </div>
       </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="username"
+            render={({ field, formState: { errors } }) => (
+              <Input
+                disabled={isSubmitting}
+                label="Username"
+                placeholder="Enter username"
+                error={!!errors.username}
+                icon={<User />}
+                {...field}
+              />
+            )}
+          />
+        </div>
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="password"
+            render={({ field, formState: { errors } }) => (
+              <Input
+                type="password"
+                disabled={isSubmitting}
+                label="Password"
+                placeholder="Enter password"
+                error={!!errors.password}
+                icon={<User />}
+                {...field}
+                value={field?.value || ""}
+              />
+            )}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="branch_id"
+            render={({ field, formState: { errors } }) => (
+              <BranchProvider
+                {...field}
+                placeholder="Select Branch"
+                onChange={({ value }: any) => {
+                  field?.onChange(value);
+                }}
+                error={!!errors?.branch_id}
+              />
+            )}
+          />
+        </div>
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="role_id"
+            render={({ field, formState: { errors } }) => (
+              <RoleProvider
+                {...field}
+                placeholder="Select Role"
+                onChange={({ value }: any) => {
+                  field?.onChange(value);
+                }}
+                error={!!errors?.role_id}
+              />
+            )}
+          />
+        </div>
+      </div>
       <div className="mt-8">
         <div className="flex justify-end items-center gap-x-2">
           <Button
@@ -253,7 +345,11 @@ export const UpsertStaffModal = ({
                   p_email: newData?.email || "",
                   p_address: newData?.address,
                   p_employment_date: newData?.employment_date,
-                  p_created_by: userId!, // Use authenticated user ID
+                  p_created_by: userId!,
+                  p_username: newData?.username,
+                  p_password: newData?.password,
+                  p_branch_id: newData?.branch_id,
+                  p_role_id: newData?.role_id,
                 });
 
                 if (error) throw error;

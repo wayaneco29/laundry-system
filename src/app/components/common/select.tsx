@@ -63,21 +63,37 @@ export const Select = ({
               return {
                 ...base,
                 width: "100%",
-                height: "48px",
-                minHeight: "48px",
+                height: "42px",
+                minHeight: "42px",
                 borderRadius: "0.5rem",
-                borderColor: "#ebe6e7",
+                borderColor: error ? "red" : "#ebe6e7",
+                fontSize: "0.875rem",
+                color: "#111827",
+                "&::placeholder": {
+                  color: "#6b7280",
+                  fontSize: "0.875rem",
+                },
                 "&:hover": { borderColor: error ? "red" : '"#ebe6e7"' },
                 ...(props?.isFocused && {
                   boxShadow: error ? "0 0 0 2px red" : "0 0 0 2px #51A2FF",
                 }),
               };
             },
+            placeholder(base) {
+              return {
+                ...base,
+                color: "#6b7280",
+                fontSize: "0.875rem",
+                display: "flex",
+                alignItems: "center",
+                height: "42px",
+              };
+            },
             valueContainer(base) {
               return {
                 ...base,
                 padding: icon ? "0 10px 0 35px" : "0 10px",
-                height: "48px",
+                height: "42px",
                 display: "flex",
                 alignItems: "center",
               };
@@ -99,7 +115,12 @@ export const Select = ({
           }}
           {...props}
         />
-      </div>
+      </div>{" "}
+      {error && (
+        <p className="mt-1 text-xs text-red-600">
+          {typeof error === "string" ? error : "This field is required"}
+        </p>
+      )}
     </div>
   );
 };
