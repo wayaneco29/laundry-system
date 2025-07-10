@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 
-import { UpsertStaffModal } from "./upsert-staff-modal";
+import { AddStaffModal } from "./add-staff-modal";
 import { StaffTable } from "./staff-table";
 import { Button } from "@/app/components/common";
 
@@ -16,8 +16,6 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [initialValues, setInitialValues] = useState({
-    isUpdate: false,
-    staff_id: "",
     first_name: "",
     middle_name: "",
     last_name: "",
@@ -76,8 +74,6 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
             search={debouncedSearch}
             onEdit={(staff) => {
               setInitialValues({
-                isUpdate: true,
-                staff_id: staff?.staff_id,
                 first_name: staff?.first_name,
                 middle_name: staff?.middle_name,
                 last_name: staff?.last_name,
@@ -92,12 +88,10 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
           />
         </div>
       </div>
-      <UpsertStaffModal
+      <AddStaffModal
         showModal={showModal}
         onClose={() => {
           setInitialValues({
-            isUpdate: false,
-            staff_id: "",
             first_name: "",
             middle_name: "",
             last_name: "",
@@ -109,7 +103,6 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
           });
           setShowModal(false);
         }}
-        initialValues={initialValues}
       />
     </div>
   );
