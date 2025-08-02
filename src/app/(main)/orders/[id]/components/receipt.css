@@ -1,15 +1,55 @@
+/* --- Screen Styles --- */
 @media screen {
   .print-only {
     display: none !important;
   }
 }
 
+/* --- Print Styles --- */
 @media print {
+  /* Set page size to content and remove margins */
+  @page {
+    size: auto;
+    margin: 0mm;
+  }
+
+  /* Force body and html to fit content */
+  html,
+  body {
+    height: auto !important;
+    width: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  /* Hide everything that is not the receipt */
   .no-print,
   nav {
     display: none !important;
   }
+
+  /* The print-only container should be a simple block element */
   .print-only {
     display: block !important;
+    position: static;
+    width: 100%;
+  }
+
+  /* The actual receipt content styling */
+  .receipt-container {
+    /* Define a width typical for a thermal printer */
+    width: 72mm; /* Common for 80mm paper rolls */
+    margin: 0;
+    padding: 5mm;
+    box-sizing: border-box;
+    font-family: "Courier New", Courier, monospace;
+    color: #000;
+    background: #fff;
+  }
+
+  .receipt-content {
+    font-size: 10pt;
+    line-height: 1.4;
   }
 }
