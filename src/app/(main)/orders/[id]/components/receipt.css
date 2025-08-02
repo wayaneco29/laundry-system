@@ -1,0 +1,15 @@
+@media screen {
+  .print-only {
+    display: none !important;
+  }
+}
+
+@media print {
+  .no-print,
+  nav {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}

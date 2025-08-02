@@ -22,10 +22,81 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { updatePaymentStatus, updateOrderStatus } from "@/app/actions";
+import "./receipt.css";
 
 type MainOrderIdPageProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: any;
+};
+
+const Receipt = ({ data }: MainOrderIdPageProps) => {
+  return (
+    <div className="receipt-container">
+      <div className="receipt-content">
+        <div className="text-center">
+          <h2 className="text-xl font-bold">Laundry Shop Inc.</h2>
+          <p className="text-sm">123 Main Street, Anytown, USA</p>
+          <p className="text-sm">Tel: (123) 456-7890</p>
+        </div>
+        <div className="my-4 border-t border-dashed" />
+        <div className="flex justify-between">
+          <p className="text-sm">Order Number:</p>
+          <p className="text-sm font-mono">#{data?.order_id}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-sm">Date:</p>
+          <p className="text-sm font-mono">
+            {moment(data?.order_date).format("MM/DD/YYYY, h:mm A")}
+          </p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-sm">Branch:</p>
+          <p className="text-sm font-mono">{data?.branch_name}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-sm">Cashier:</p>
+          <p className="text-sm font-mono">{data?.staff_name || "N/A"}</p>
+        </div>
+        <div className="my-4 border-t border-dashed" />
+        <table className="w-full">
+          <thead>
+            <tr>
+              <th className="text-left text-sm">Item</th>
+              <th className="text-center text-sm">Qty</th>
+              <th className="text-right text-sm">Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data?.items?.map((item: any, index: number) => (
+              <tr key={index}>
+                <td className="text-left text-sm">{item.name}</td>
+                <td className="text-center text-sm">{item.quantity}kg</td>
+                <td className="text-right text-sm">₱{item.total || 0}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+        <div className="my-4 border-t border-dashed" />
+        <div className="flex justify-between">
+          <p className="text-sm">Subtotal:</p>
+          <p className="text-sm font-mono">₱{data?.total_price}</p>
+        </div>
+        <div className="flex justify-between">
+          <p className="text-sm">Tax:</p>
+          <p className="text-sm font-mono">₱0.00</p>
+        </div>
+        <div className="my-2 border-t border-dashed" />
+        <div className="flex justify-between font-bold">
+          <p className="text-lg">Total:</p>
+          <p className="text-lg font-mono">₱{data?.total_price}</p>
+        </div>
+        <div className="my-4 border-t border-dashed" />
+        <div className="text-center">
+          <p className="text-xs">Thank you for your business!</p>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
@@ -233,318 +304,245 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
     );
   };
 
-  const getPaymentStatus = (status: string) => {
-    const isPaid = status === "Paid";
-    return {
-      color: isPaid
-        ? "text-emerald-700 bg-emerald-50 border-emerald-200"
-        : "text-red-700 bg-red-50 border-red-200",
-      icon: isPaid ? CheckCircle : XCircle,
-    };
-  };
-
-  const paymentStatus = getPaymentStatus(data?.payment_status);
-  const StatusIcon = paymentStatus.icon;
-
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50">
-      {/* Success/Error Messages */}
-      {successMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
-          <Check className="w-4 h-4" />
-          <span>{successMessage}</span>
-          <button onClick={() => setSuccessMessage("")}>
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      {errorMessage && (
-        <div className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
-          <AlertCircle className="w-4 h-4" />
-          <span>{errorMessage}</span>
-          <button onClick={() => setErrorMessage("")}>
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
-
-      <div className="mx-auto p-4 lg:p-8">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-          <div className="flex w-full items-center justify-between gap-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">
-                Order Details
-              </h1>
-              <p className="text-slate-600 mt-1">
-                View and manage order information
-              </p>
-            </div>
-            <Button
-              leftIcon={<ArrowLeft className="size-4" />}
-              variant="outline"
-              onClick={() => router.replace("/orders")}
-              className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
-            >
-              Back to Orders
-            </Button>
+    <div>
+      <div className="no-print">
+        {/* Success/Error Messages */}
+        {successMessage && (
+          <div className="fixed top-4 right-4 z-50 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <Check className="w-4 h-4" />
+            <span>{successMessage}</span>
+            <button onClick={() => setSuccessMessage("")}>
+              <X className="w-4 h-4" />
+            </button>
           </div>
-        </div>
+        )}
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Order Header Card */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
-                <h2 className="text-xl font-semibold text-white">
-                  Laundry Shop Inc.
-                </h2>
-                <p className="text-blue-100 text-sm mt-1">
-                  Professional Laundry Services
+        {errorMessage && (
+          <div className="fixed top-4 right-4 z-50 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg shadow-lg flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            <span>{errorMessage}</span>
+            <button onClick={() => setErrorMessage("")}>
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div className="mx-auto p-4 lg:p-8">
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+            <div className="flex w-full items-center justify-between gap-4">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">
+                  Order Details
+                </h1>
+                <p className="text-slate-600 mt-1">
+                  View and manage order information
                 </p>
               </div>
+              <Button
+                leftIcon={<ArrowLeft className="size-4" />}
+                variant="outline"
+                onClick={() => router.replace("/orders")}
+                className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+              >
+                Back to Orders
+              </Button>
+            </div>
+          </div>
 
-              <div className="p-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <InfoCard
-                    icon={FileText}
-                    label="Order Number"
-                    value={`#${data?.order_id}`}
-                    highlight
-                  />
-                  <InfoCard
-                    icon={Calendar}
-                    label="Order Date"
-                    value={moment(data?.order_date).format("MMMM DD, YYYY")}
-                  />
-                  <InfoCard
-                    icon={Store}
-                    label="Branch"
-                    value={data?.branch_name}
-                  />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-6">
+              {/* Order Header Card */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                  <h2 className="text-xl font-semibold text-white">
+                    Laundry Shop Inc.
+                  </h2>
+                  <p className="text-blue-100 text-sm mt-1">
+                    Professional Laundry Services
+                  </p>
+                </div>
 
-                  {/* Order Status - Editable */}
-                  <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-                    <FileText className="size-5 text-slate-500" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-600 mb-2">
-                        Order Status
-                      </p>
-                      <StatusBadge
-                        status={data?.order_status}
-                        type="order"
-                        onClick={() => setEditingField("order_status")}
-                      />
+                <div className="p-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Order Status - Editable */}
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
+                      <FileText className="size-5 text-slate-500" />
+                      <div>
+                        <p className="text-sm font-medium text-slate-600 mb-2">
+                          Order Status
+                        </p>
+                        <StatusBadge
+                          status={data?.order_status}
+                          type="order"
+                          onClick={() => setEditingField("order_status")}
+                        />
+                      </div>
                     </div>
-                  </div>
 
-                  {/* Payment Status - Editable */}
-                  <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
-                    <StatusIcon className="size-5 text-slate-500" />
-                    <div>
-                      <p className="text-sm font-medium text-slate-600 mb-2">
-                        Payment Status
-                      </p>
-                      <StatusBadge
-                        status={data?.payment_status}
-                        type="payment"
-                        onClick={() => setEditingField("payment_status")}
-                      />
+                    {/* Payment Status - Editable */}
+                    <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
+                      <CheckCircle className="size-5 text-slate-500" />
+                      <div>
+                        <p className="text-sm font-medium text-slate-600 mb-2">
+                          Payment Status
+                        </p>
+                        <StatusBadge
+                          status={data?.payment_status}
+                          type="payment"
+                          onClick={() => setEditingField("payment_status")}
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Items Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-              <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Order Items
-                </h3>
-                <p className="text-sm text-slate-600 mt-1">
-                  Services included in this order
-                </p>
-              </div>
+              {/* Items Table */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Order Items
+                  </h3>
+                  <p className="text-sm text-slate-600 mt-1">
+                    Services included in this order
+                  </p>
+                </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-slate-50 border-b border-slate-200">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        #
-                      </th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Service
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Price/KG
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Quantity
-                      </th>
-                      <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                        Total
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-200">
-                    {data?.items?.length ? (
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                      data.items.map((item: any, index: number) => (
-                        <tr
-                          key={index}
-                          className="hover:bg-slate-50 transition-colors"
-                        >
-                          <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                            {index + 1}
-                          </td>
-                          <td className="px-6 py-4">
-                            <div className="text-sm font-medium text-slate-900">
-                              {item.name}
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-slate-50 border-b border-slate-200">
+                      <tr>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                          #
+                        </th>
+                        <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                          Service
+                        </th>
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                          Price/KG
+                        </th>
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                          Quantity
+                        </th>
+                        <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                          Total
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-200">
+                      {data?.items?.length ? (
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        data.items.map((item: any, index: number) => (
+                          <tr
+                            key={index}
+                            className="hover:bg-slate-50 transition-colors"
+                          >
+                            <td className="px-6 py-4 text-sm font-medium text-slate-900">
+                              {index + 1}
+                            </td>
+                            <td className="px-6 py-4">
+                              <div className="text-sm font-medium text-slate-900">
+                                {item.name}
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-center text-sm text-slate-700">
+                              ₱{item.price}
+                            </td>
+                            <td className="px-6 py-4 text-center">
+                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {item.quantity} kg
+                              </span>
+                            </td>
+                            <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900">
+                              ₱{item.total || 0}
+                            </td>
+                          </tr>
+                        ))
+                      ) : (
+                        <tr>
+                          <td colSpan={5} className="px-6 py-12 text-center">
+                            <div className="text-slate-400">
+                              <FileText className="size-12 mx-auto mb-4" />
+                              <p className="text-sm font-medium">
+                                No services added
+                              </p>
+                              <p className="text-xs mt-1">
+                                Services will appear here when added to the
+                                order
+                              </p>
                             </div>
                           </td>
-                          <td className="px-6 py-4 text-center text-sm text-slate-700">
-                            ₱{item.price}
-                          </td>
-                          <td className="px-6 py-4 text-center">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                              {item.quantity} kg
-                            </span>
-                          </td>
-                          <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900">
-                            ₱{item.total || 0}
-                          </td>
                         </tr>
-                      ))
-                    ) : (
-                      <tr>
-                        <td colSpan={5} className="px-6 py-12 text-center">
-                          <div className="text-slate-400">
-                            <FileText className="size-12 mx-auto mb-4" />
-                            <p className="text-sm font-medium">
-                              No services added
-                            </p>
-                            <p className="text-xs mt-1">
-                              Services will appear here when added to the order
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Sidebar */}
-          <div className="space-y-6">
-            {/* Order Summary */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Order Summary
-              </h3>
-              <div className="space-y-3">
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Subtotal</span>
-                  <span className="font-medium text-slate-600">
-                    ₱{data?.total_price}
-                  </span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-slate-600">Tax</span>
-                  <span className="font-medium text-slate-600">₱0.00</span>
-                </div>
-                <div className="border-t border-slate-200 pt-3">
-                  <div className="flex justify-between">
-                    <span className="text-base font-semibold text-gray-900">
-                      Total
-                    </span>
-                    <span className="text-xl font-bold text-gray-900">
+            {/* Sidebar */}
+            <div className="space-y-6">
+              {/* Order Summary */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Order Summary
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-600">Subtotal</span>
+                    <span className="font-medium text-slate-600">
                       ₱{data?.total_price}
                     </span>
                   </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-slate-600">Tax</span>
+                    <span className="font-medium text-slate-600">₱0.00</span>
+                  </div>
+                  <div className="border-t border-slate-200 pt-3">
+                    <div className="flex justify-between">
+                      <span className="text-base font-semibold text-gray-900">
+                        Total
+                      </span>
+                      <span className="text-xl font-bold text-gray-900">
+                        ₱{data?.total_price}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Actions */}
+              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                  Actions
+                </h3>
+                <div className="space-y-3">
+                  {data?.payment_status === "Unpaid" && (
+                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2">
+                      <CreditCard className="size-4" />
+                      Add Payment
+                    </Button>
+                  )}
+                  <Button
+                    leftIcon={<Printer className="size-4" />}
+                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                    onClick={() => window.print()}
+                  >
+                    Print Receipt
+                  </Button>
                 </div>
               </div>
             </div>
-
-            {/* Actions */}
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                Actions
-              </h3>
-              <div className="space-y-3">
-                {data?.payment_status === "Unpaid" && (
-                  <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2">
-                    <CreditCard className="size-4" />
-                    Add Payment
-                  </Button>
-                )}
-                <Button
-                  leftIcon={<Printer className="size-4" />}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
-                >
-                  Print Receipt
-                </Button>
-              </div>
-            </div>
-
-            {/* Quick Info */}
-            {/* <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl border border-blue-200 p-6">
-              <h3 className="text-lg font-semibold text-blue-900 mb-3">
-                Need Help?
-              </h3>
-              <p className="text-sm text-blue-700 mb-4">
-                Contact our support team if you have any questions about this
-                order.
-              </p>
-              <Button
-                variant="outline"
-                className="w-full border-blue-300 text-blue-700 hover:bg-blue-100"
-              >
-                Contact Support
-              </Button>
-            </div> */}
           </div>
         </div>
+      </div>
+
+      <div className="print-only">
+        <Receipt data={data} />
       </div>
     </div>
   );
 };
-
-// Enhanced InfoCard component
-const InfoCard = ({
-  icon: Icon,
-  label,
-  value,
-  highlight = false,
-}: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  icon: any;
-  label: string;
-  value: string;
-  highlight?: boolean;
-}) => (
-  <div
-    className={`flex items-center gap-3 p-4 rounded-lg ${
-      highlight ? "bg-blue-50 border border-blue-200" : "bg-slate-50"
-    }`}
-  >
-    <Icon
-      className={`size-5 ${highlight ? "text-blue-600" : "text-slate-500"}`}
-    />
-    <div>
-      <p className="text-sm font-medium text-slate-600">{label}</p>
-      <p
-        className={`font-semibold ${
-          highlight ? "text-blue-900" : "text-slate-900"
-        }`}
-      >
-        {value}
-      </p>
-    </div>
-  </div>
-);
