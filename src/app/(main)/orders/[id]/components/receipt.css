@@ -24,8 +24,8 @@
   }
 
   /* Hide everything that is not the receipt */
-  .no-print,
-  nav {
+  nav,
+  .no-print {
     display: none !important;
   }
 
@@ -41,7 +41,7 @@
     /* Define a width typical for a thermal printer */
     width: 72mm; /* Common for 80mm paper rolls */
     margin: 0;
-    padding: 5mm;
+    padding: 0; /* Padding is now on the inner element */
     box-sizing: border-box;
     font-family: "Courier New", Courier, monospace;
     color: #000;
@@ -49,6 +49,7 @@
   }
 
   .receipt-content {
+    padding: 20mm 5mm; /* 20mm top/bottom, 5mm left/right */
     font-size: 10pt;
     line-height: 1.4;
   }

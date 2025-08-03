@@ -91,9 +91,10 @@ const Receipt = ({ data }: MainOrderIdPageProps) => {
           <p className="text-lg font-mono">₱{data?.total_price}</p>
         </div>
         <div className="my-4 border-t border-dashed" />
-        <div className="text-center">
+        <div className="text-center pb-10">
           <p className="text-xs">Thank you for your business!</p>
         </div>
+        <div className="my-2 border-t border-dashed" />
       </div>
     </div>
   );
