@@ -32,8 +32,11 @@ export const Select = ({
           ? value?.includes(option?.value)
           : option?.value === value
     );
+    if (customizedValue) {
+      return customizedValue;
+    }
 
-    return customizedValue;
+    return null;
   };
 
   return (

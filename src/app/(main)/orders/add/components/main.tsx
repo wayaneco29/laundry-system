@@ -15,7 +15,7 @@ import {
   Package,
   Loader2,
 } from "lucide-react";
-
+import * as Yup from "yup";
 import { Button, Input, Select } from "@/app/components/common";
 import { PaymentModal } from "../../components/payment-modal";
 import { addOrder, getAllBranches, getAllCustomers } from "@/app/actions";
@@ -23,6 +23,9 @@ import { useCurrentUser } from "@/app/hooks/use-current-user";
 import moment from "moment";
 import { useUserContext } from "@/app/context";
 import { twMerge } from "tailwind-merge";
+import { Controller, useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useToast } from "@/app/hooks";
 
 type MainAddPageProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,22 +33,37 @@ type MainAddPageProps = {
   branches: Array<any>;
 };
 
+const schema = Yup.object().shape({
+  customerId: Yup.string().required(),
+  branchId: Yup.string().required(),
+  services: Yup.array().min(1).required(),
+});
+
 export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const router = useRouter();
+
   const { is_admin, branch_id } = useUserContext();
   const { userId } = useCurrentUser();
+  const toast = useToast();
+
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedServices, setSelectedServices] = useState<Array<any>>([]);
-  const [isConfirming, setIsConfirming] = useState<boolean>(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [customers, setCustomers] = useState<Array<any>>([]);
-  const [selectedCustomer, setSelectedCustomer] = useState<string>("");
-  const [selectedBranch, setSelectedBranch] = useState<string>(branch_id || "");
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
 
-  const grossTotal = selectedServices?.reduce(
+  const { control, handleSubmit, setValue, watch, reset, formState } = useForm({
+    defaultValues: {
+      customerId: "",
+      branchId: branch_id || "",
+      services: [],
+    },
+    mode: "onChange",
+    resolver: yupResolver(schema),
+  });
+
+  const services = watch("services", []);
+
+  const grossTotal = services?.reduce(
     (acc, service) => acc + (service?.price * (service?.quantity || 0) || 0),
     0
   );
@@ -87,42 +105,36 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
     }));
   }, [customers]);
 
-  const handleConfirmOrder = async () => {
-    // Validate customer selection
-    if (!selectedCustomer) {
-      return;
-    }
-
-    if (!selectedCustomer) {
-      return;
-    }
-
-    // Validate services selection
-    if (selectedServices.length === 0) {
-      return;
-    }
-
-    setIsConfirming(true);
-
+  const onSubmit = handleSubmit(async (payload) => {
     try {
-      // TODO: Replace hardcoded branch_id with proper branch context/selection
       const { data, error } = await addOrder({
-        p_branch_id: selectedBranch || branch_id,
-        p_customer_id: selectedCustomer, // Use selected customer ID
+        p_branch_id: payload?.branchId || branch_id,
+        p_customer_id: payload?.customerId, // Use selected customer ID
         p_staff_id: userId!, // Use authenticated user ID
-        p_items: selectedServices,
+        p_items: payload?.services,
         p_order_date: moment().toISOString(),
         p_order_status: "Pending",
         p_payment_status: "Unpaid",
         p_total_price: grossTotal,
       });
 
+      console.log(error);
+
       if (error) throw error;
 
+      toast.success("Create order successfully");
       // Clear selected services and customer after successful order
-      setSelectedServices([]);
-      setSelectedCustomer("");
-      setSelectedBranch("");
+
+      reset(
+        {
+          branchId: "",
+          customerId: "",
+          services: [],
+        },
+        {
+          keepDefaultValues: false,
+        }
+      );
 
       // Add a small delay for better UX (optional)
       setTimeout(() => {
@@ -130,44 +142,45 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         router.push("/orders");
       }, 500);
     } catch (_error) {
-      console.error(_error);
-      alert("Failed to create order. Please try again.");
-    } finally {
-      setIsConfirming(false);
+      toast.error("Failed to create order.");
     }
-  };
+  });
 
-  const updateQuantity = (index: number, newQuantity: number) => {
+  const updateQuantity = async (index: number, newQuantity: number) => {
+    const watchServices = await watch("services", []);
+
     if (newQuantity < 1) return;
 
-    const clonedServices = [...selectedServices];
+    const clonedServices = [...watchServices];
     clonedServices[index] = {
       ...clonedServices[index],
       quantity: newQuantity,
       total: clonedServices[index].price * newQuantity,
     };
-    setSelectedServices(clonedServices);
+
+    setValue("services", clonedServices);
   };
 
-  const removeService = (index: number) => {
-    setSelectedServices((prev) => prev.filter((_, i) => i !== index));
+  const removeService = async (index: number) => {
+    const watchServices = await watch("services", []);
+    const filteredServices = watchServices.filter((_, i) => i !== index);
+
+    setValue("services", filteredServices);
   };
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const toggleService = (service: any) => {
-    const existing = selectedServices.find((x) => x.id === service.id);
+  const toggleService = async (service: any) => {
+    const watchServices = await watch("services", []);
+    const existingServices = watchServices.find((x) => x.id === service.id);
 
-    if (existing) {
-      setSelectedServices((prev) => prev.filter((x) => x.id !== service.id));
+    if (existingServices) {
+      const filteredServices = watchServices.filter((x) => x.id !== service.id);
+      setValue("services", filteredServices);
     } else {
-      setSelectedServices((prev) => [
-        ...prev,
+      setValue("services", [
+        ...watchServices,
         { ...service, quantity: 1, total: service.price },
       ]);
     }
-  };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const handleCustomerChange = (selectedOption: any) => {
-    setSelectedCustomer(selectedOption?.value || "");
   };
 
   const branchOptions = [
@@ -192,8 +205,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
               </p>
             </div>
             <div className="mt-4 sm:mt-0 text-sm text-gray-500">
-              {selectedServices.length} service
-              {selectedServices.length !== 1 ? "s" : ""} selected
+              {services?.length} service
+              {services?.length !== 1 ? "s" : ""} selected
             </div>
           </div>
         </div>
@@ -222,7 +235,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                     value={searchServices}
                     onChange={(event) => setSearchServices(event.target.value)}
                     className="pl-10 w-full bg-white rounded-md"
-                    disabled={isConfirming}
+                    disabled={formState?.isSubmitting}
                   />
                   <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 </div>
@@ -230,7 +243,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
               {/* Loading Overlay for Services Grid */}
               <div className="relative">
-                {isConfirming && (
+                {formState?.isSubmitting && (
                   <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10">
                     <div className="flex flex-col items-center space-y-3">
                       <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
@@ -245,7 +258,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                 <div className="p-6 pt-0">
                   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
                     {servicesList?.map((service) => {
-                      const isSelected = selectedServices.some(
+                      const isSelected = services.some(
                         (x) => x.id === service.id
                       );
 
@@ -253,12 +266,12 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                         <div
                           key={service.id}
                           onClick={() =>
-                            !isConfirming && toggleService(service)
+                            !formState?.isSubmitting && toggleService(service)
                           }
                           className={`
                             relative p-4 rounded-lg cursor-pointer transition-all duration-200
                             ${
-                              isConfirming
+                              formState?.isSubmitting
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
                             }
@@ -303,204 +316,228 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
           {/* Order Summary - Right Panel */}
           <div className="xl:col-span-1 order-1 xl:order-2">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden sticky top-8">
-              {/* Header with blue background */}
-              <div className="bg-blue-500 px-6 py-4">
-                <div className="flex items-center space-x-3">
-                  <ShoppingCart className="w-5 h-5 text-white" />
-                  <h2 className="text-lg font-semibold text-white">
-                    ORDER SUMMARY
-                  </h2>
+            <form onSubmit={onSubmit}>
+              <div className="bg-white rounded-xl shadow-sm overflow-hidden sticky top-8">
+                {/* Header with blue background */}
+                <div className="bg-blue-500 px-6 py-4">
+                  <div className="flex items-center space-x-3">
+                    <ShoppingCart className="w-5 h-5 text-white" />
+                    <h2 className="text-lg font-semibold text-white">
+                      ORDER SUMMARY
+                    </h2>
+                  </div>
                 </div>
-              </div>
 
-              {/* Customer Selection */}
-              <div className="p-6 pb-0 bg-gray-50">
-                <div className="flex items-center space-x-2 mb-3">
-                  <User className="w-4 h-4 text-gray-600" />
-                  <span className="text-sm font-medium text-gray-700">
-                    CUSTOMER
-                  </span>
-                </div>
-                <Select
-                  placeholder={
-                    loadingCustomers
-                      ? "Loading customers..."
-                      : "Select customer..."
-                  }
-                  options={customerOptions}
-                  value={selectedCustomer}
-                  onChange={handleCustomerChange}
-                  isDisabled={isConfirming || loadingCustomers}
-                  isLoading={loadingCustomers}
-                  containerClassName="w-full"
-                  noOptionsMessage={() => "No customers found"}
-                />
-                {!selectedCustomer && (
-                  <p className="text-xs text-red-500 mt-1">
-                    Please select a customer to continue
-                  </p>
-                )}
-              </div>
-              {is_admin && (
-                <div className="p-6 bg-gray-50">
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <div className="w-full">
+                {/* Customer Selection */}
+                <Controller
+                  name="customerId"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <div className="p-6 pb-0 bg-gray-50">
                       <div className="flex items-center space-x-2 mb-3">
-                        <Building className="w-4 h-4 text-gray-600" />
+                        <User className="w-4 h-4 text-gray-600" />
                         <span className="text-sm font-medium text-gray-700">
-                          BRANCH
+                          Customer
                         </span>
                       </div>
                       <Select
-                        options={branchOptions}
-                        value={selectedBranch}
-                        onChange={(value: any) => {
-                          setSelectedBranch(value?.value);
+                        placeholder={
+                          loadingCustomers
+                            ? "Loading customers..."
+                            : "Select customer..."
+                        }
+                        options={customerOptions}
+                        isDisabled={formState?.isSubmitting || loadingCustomers}
+                        isLoading={loadingCustomers}
+                        containerClassName="w-full"
+                        noOptionsMessage={() => "No customers found"}
+                        {...field}
+                        onChange={(data: any) => {
+                          field?.onChange(data?.value);
                         }}
-                        placeholder="Select branch..."
                       />
-                      {!selectedBranch && (
+                      {!!error && (
                         <p className="text-xs text-red-500 mt-1">
-                          Please select a branch to continue
+                          Please select a customer to continue
                         </p>
                       )}
                     </div>
-                  </div>
-                </div>
-              )}
-              {/* Selected Services */}
-              <div className="p-6 pt-0">
-                {selectedServices.length === 0 ? (
-                  <div className="text-center py-8">
-                    <ShoppingCart className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                    <p className="text-gray-500 text-sm">
-                      No services selected
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-3 max-h-80 overflow-y-auto">
-                    {selectedServices.map((service, index) => (
-                      <div
-                        key={index}
-                        className={`bg-gray-50 rounded-lg p-4 ${
-                          isConfirming ? "opacity-50" : ""
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-3">
-                          <div className="flex-1 min-w-0">
-                            <h4 className="font-medium text-gray-900 text-sm truncate">
-                              {service.name}
-                            </h4>
-                            <p className="text-xs text-gray-500">
-                              ₱{service.price}/kg
-                            </p>
-                          </div>
-                          <button
-                            onClick={() =>
-                              !isConfirming && removeService(index)
-                            }
-                            disabled={isConfirming}
-                            className="cursor-pointer ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                          >
-                            <X className="w-4 h-4" />
-                          </button>
-                        </div>
-
-                        {/* Quantity Controls */}
-                        <div className="flex items-center justify-between">
-                          <div className="flex items-center space-x-2">
-                            <button
-                              onClick={() =>
-                                !isConfirming &&
-                                updateQuantity(
-                                  index,
-                                  (service.quantity || 1) - 1
-                                )
-                              }
-                              disabled={isConfirming || service.quantity === 1}
-                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
-                            <span className="w-8 text-center text-sm font-medium text-gray-700">
-                              {service.quantity || 1}
-                            </span>
-                            <button
-                              onClick={() =>
-                                !isConfirming &&
-                                updateQuantity(
-                                  index,
-                                  (service.quantity || 1) + 1
-                                )
-                              }
-                              disabled={isConfirming}
-                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                          <div className="text-sm font-semibold text-gray-900">
-                            ₱{service.total || service.price}
+                  )}
+                />
+                <Controller
+                  name="branchId"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => {
+                    return is_admin ? (
+                      <div className="p-6 bg-gray-50">
+                        <div className="flex flex-col sm:flex-row gap-4">
+                          <div className="w-full">
+                            <div className="flex items-center space-x-2 mb-3">
+                              <Building className="w-4 h-4 text-gray-600" />
+                              <span className="text-sm font-medium text-gray-700">
+                                Branch
+                              </span>
+                            </div>
+                            <Select
+                              options={branchOptions}
+                              placeholder="Select branch..."
+                              {...field}
+                              onChange={(data: any) => {
+                                field?.onChange(data?.value);
+                              }}
+                            />
+                            {!!error && (
+                              <p className="text-xs text-red-500 mt-1">
+                                Please select a branch to continue
+                              </p>
+                            )}
                           </div>
                         </div>
                       </div>
-                    ))}
+                    ) : (
+                      <></>
+                    );
+                  }}
+                />
+                {/* Selected Services */}
+                <div className="p-6 pt-0">
+                  {services.length === 0 ? (
+                    <div className="text-center py-8">
+                      <ShoppingCart className="w-8 h-8 text-gray-300 mx-auto mb-3" />
+                      <p className="text-gray-500 text-sm">
+                        No services selected
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {services.map((service, index) => (
+                        <div
+                          key={index}
+                          className={`bg-gray-50 rounded-lg p-4 ${
+                            formState?.isSubmitting ? "opacity-50" : ""
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-gray-900 text-sm truncate">
+                                {service.name}
+                              </h4>
+                              <p className="text-xs text-gray-500">
+                                ₱{service.price}/kg
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                !formState?.isSubmitting && removeService(index)
+                              }
+                              disabled={formState?.isSubmitting}
+                              className="cursor-pointer ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {/* Quantity Controls */}
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center space-x-2">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  !formState?.isSubmitting &&
+                                  updateQuantity(
+                                    index,
+                                    (service.quantity || 1) - 1
+                                  )
+                                }
+                                disabled={
+                                  formState?.isSubmitting ||
+                                  service.quantity === 1
+                                }
+                                className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <Minus className="w-4 h-4" />
+                              </button>
+                              <span className="w-8 text-center text-sm font-medium text-gray-700">
+                                {service.quantity || 1}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  !formState?.isSubmitting &&
+                                  updateQuantity(
+                                    index,
+                                    (service.quantity || 1) + 1
+                                  )
+                                }
+                                disabled={formState?.isSubmitting}
+                                className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              >
+                                <Plus className="w-4 h-4" />
+                              </button>
+                            </div>
+                            <div className="text-sm font-semibold text-gray-900">
+                              ₱{service.total || service.price}
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Total and Actions */}
+                {services.length > 0 && (
+                  <div className="p-6 pt-0">
+                    <div className="bg-gray-50 rounded-lg p-4 mb-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-semibold text-gray-900">
+                          TOTAL
+                        </span>
+                        <span className="text-xl font-bold text-green-600">
+                          ₱{grossTotal}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <Button
+                        onClick={() => {
+                          setValue("services", []);
+                          setValue("customerId", "");
+
+                          if (is_admin) {
+                            setValue("branchId", "");
+                          }
+                        }}
+                        disabled={formState?.isSubmitting}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                        <span>Clear All</span>
+                      </Button>
+                      <Button
+                        type="submit"
+                        // disabled={isConfirm}
+                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {formState?.isSubmitting ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Confirming...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Check className="w-4 h-4" />
+                            <span>Confirm</span>
+                          </>
+                        )}
+                      </Button>
+                    </div>
                   </div>
                 )}
               </div>
-
-              {/* Total and Actions */}
-              {selectedServices.length > 0 && (
-                <div className="p-6 pt-0">
-                  <div className="bg-gray-50 rounded-lg p-4 mb-4">
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-semibold text-gray-900">
-                        TOTAL
-                      </span>
-                      <span className="text-xl font-bold text-green-600">
-                        ₱{grossTotal}
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      onClick={() => {
-                        setSelectedServices([]);
-                        setSelectedCustomer("");
-                      }}
-                      disabled={isConfirming}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                      <span>Clear All</span>
-                    </Button>
-                    <Button
-                      onClick={handleConfirmOrder}
-                      disabled={
-                        isConfirming ||
-                        !selectedCustomer ||
-                        selectedServices.length === 0
-                      }
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {isConfirming ? (
-                        <>
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                          <span>Confirming...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Check className="w-4 h-4" />
-                          <span>Confirm</span>
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                </div>
-              )}
-            </div>
+            </form>
           </div>
         </div>
       </div>

@@ -281,7 +281,9 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                     ? "Loading..."
                     : user?.user_metadata?.full_name || user?.email || "User"}
                 </div>
-                <div className="text-xs text-slate-500">Administrator</div>
+                <div className="text-xs text-slate-500">
+                  {role_name === ROLE_ADMIN ? "Administrator" : "Staff"}
+                </div>
               </div>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white font-semibold text-sm">

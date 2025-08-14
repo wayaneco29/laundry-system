@@ -22,6 +22,9 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { updatePaymentStatus, updateOrderStatus } from "@/app/actions";
+import { twMerge } from "tailwind-merge";
+import { useToast } from "@/app/hooks";
+
 import "./receipt.css";
 
 type MainOrderIdPageProps = {
@@ -103,11 +106,12 @@ const Receipt = ({ data }: MainOrderIdPageProps) => {
 export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
   const router = useRouter();
   const { userId } = useCurrentUser();
+  const toast = useToast();
+
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string>("");
   const [successMessage, setSuccessMessage] = useState<string>("");
-
   const orderStatuses = [
     "Pending",
     "Ongoing",
@@ -147,16 +151,6 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
     }
   };
 
-  const showMessage = (message: string, isError: boolean = false) => {
-    if (isError) {
-      setErrorMessage(message);
-      setTimeout(() => setErrorMessage(""), 3000);
-    } else {
-      setSuccessMessage(message);
-      setTimeout(() => setSuccessMessage(""), 3000);
-    }
-  };
-
   const handleUpdateOrderStatus = async (newStatus: string) => {
     if (newStatus === data?.order_status) {
       setEditingField(null);
@@ -173,11 +167,11 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
 
       if (error) throw error;
 
+      toast.success(`Order status updated to "${newStatus}" successfully!`);
+
       setEditingField(null);
-      showMessage(`Order status updated to "${newStatus}" successfully!`);
     } catch (error) {
-      console.error(error);
-      showMessage("Failed to update order status. Please try again.", true);
+      toast.error("Failed to update order status. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -199,12 +193,10 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
 
       if (error) throw error;
 
+      toast.success(`Payment status updated to "${newStatus}" successfully!`);
       setEditingField(null);
-      showMessage(`Payment status updated to "${newStatus}" successfully!`);
-      window.location.reload();
     } catch (error) {
-      console.error(error);
-      showMessage("Failed to update payment status. Please try again.", true);
+      toast.error("Failed to update payment status. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -279,6 +271,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
     }
 
     const isPaidStatus = type === "payment" && status === "Paid";
+    const isPickupStatus = type === "order" && status === "Picked up";
 
     return (
       <div
@@ -287,20 +280,28 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
             ? getOrderStatusColor(status)
             : getPaymentStatusColor(status)
         } ${
-          isPaidStatus
+          isPaidStatus || isPickupStatus
             ? "opacity-75 cursor-not-allowed"
             : "cursor-pointer hover:shadow-md"
         }`}
-        onClick={isPaidStatus ? undefined : onClick}
+        onClick={isPaidStatus || isPickupStatus ? undefined : onClick}
       >
         <span className="uppercase">{status}</span>
-        {isLoading ? (
-          <Loader2 className="w-3 h-3 animate-spin flex-shrink-0" />
-        ) : (
-          !isPaidStatus && (
-            <Edit3 className="w-3 h-3 opacity-60 flex-shrink-0" />
-          )
-        )}
+        {isLoading
+          ? editingField === type && (
+              <Loader2
+                className={twMerge(
+                  "w-3 h-3 animate-spin flex-shrink-0",
+                  type === "order"
+                    ? getOrderStatusColor(status)
+                    : getPaymentStatusColor(status)
+                )}
+              />
+            )
+          : !isPaidStatus &&
+            !isPickupStatus && (
+              <Edit3 className="w-3 h-3 opacity-60 flex-shrink-0" />
+            )}
       </div>
     );
   };
@@ -516,26 +517,22 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
               </div>
 
               {/* Actions */}
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                  Actions
-                </h3>
-                <div className="space-y-3">
-                  {data?.payment_status === "Unpaid" && (
-                    <Button className="w-full bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2">
-                      <CreditCard className="size-4" />
-                      Add Payment
+              {data?.payment_status === "Paid" && (
+                <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-4">
+                    Actions
+                  </h3>
+                  <div className="space-y-3">
+                    <Button
+                      leftIcon={<Printer className="size-4" />}
+                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                      onClick={() => window.print()}
+                    >
+                      Print Receipt
                     </Button>
-                  )}
-                  <Button
-                    leftIcon={<Printer className="size-4" />}
-                    className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
-                    onClick={() => window.print()}
-                  >
-                    Print Receipt
-                  </Button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         </div>

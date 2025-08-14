@@ -13,6 +13,7 @@ import {
   User,
   Hash,
   Loader2,
+  Search,
   MapPin,
 } from "lucide-react";
 
@@ -22,17 +23,17 @@ import "./loading-spinner.css";
 type OrdersTableProps = {
   initialData?: Array<any>;
   totalCount?: number;
-  search?: string;
 };
 
 export const OrdersTable = ({
   initialData = [],
   totalCount = 0,
-  search,
 }: OrdersTableProps) => {
   const router = useRouter();
   const { userId } = useCurrentUser();
 
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -62,7 +63,7 @@ export const OrdersTable = ({
       const result = await getOrders({
         page,
         limit,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         status: statusFilter || undefined,
       });
 
@@ -80,7 +81,17 @@ export const OrdersTable = ({
   // Only fetch new data when pagination/search changes (not on initial load)
   useEffect(() => {
     fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, search, statusFilter]);
+  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter]);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+    }, 500);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [search]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -306,11 +317,21 @@ export const OrdersTable = ({
   return (
     <div className="space-y-4">
       {/* Search and filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col items-center sm:flex-row gap-4 mb-6">
+        <div className="relative w-full md:w-96">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search by order ID or customer name..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full pl-10 h-10 text-sm pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+          />
+        </div>
         <select
           value={statusFilter}
           onChange={(e) => handleStatusFilterChange(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+          className="px-3 py-2 h-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
           disabled={loading}
         >
           <option value="">All Status</option>
