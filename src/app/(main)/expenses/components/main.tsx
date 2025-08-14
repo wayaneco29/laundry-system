@@ -23,10 +23,9 @@ import {
 import { useUserContext } from "@/app/context";
 
 export function ExpensesMain() {
+  const toast = useToast();
+
   const [branches, setBranches] = useState<any[]>([]);
-  const [stats, setStats] = useState<any>(null);
-  const [categoryStats, setCategoryStats] = useState<any[]>([]);
-  const [recurringDue, setRecurringDue] = useState<any[]>([]);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
   const [yearlyExpense, setYearlyExpense] = useState<number>(0);
   const [loading, setLoading] = useState(true);
@@ -36,7 +35,6 @@ export function ExpensesMain() {
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
   // Toast notifications
-  const { toasts, removeToast, success, error, warning, info } = useToast();
 
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
@@ -267,22 +265,18 @@ export function ExpensesMain() {
           onItemsPerPageChange={handleItemsPerPageChange}
           onEdit={handleEditExpense}
           onView={handleViewExpense}
-          onShowToast={(msg, type) => success(msg)}
-          onShowError={(msg) => error(msg)}
+          onShowToast={(msg, type) => toast?.success(msg)}
+          onShowError={(msg) => toast?.error(msg)}
         />
       </div>
 
-      {/* Expense Modal */}
       <ExpenseModal
         isOpen={modalOpen}
         onClose={handleModalClose}
         expense={selectedExpense}
         mode={modalMode}
-        onShowToast={(msg: string) => success(msg)}
+        onShowToast={(msg: string) => toast?.success(msg)}
       />
-
-      {/* Toast Container */}
-      <ToastContainer toasts={toasts} onRemove={removeToast} />
     </div>
   );
 }
