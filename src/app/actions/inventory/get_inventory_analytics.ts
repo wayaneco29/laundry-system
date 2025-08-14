@@ -140,7 +140,7 @@ export const getInventoryByCategory = async (branchId?: string) => {
       { count: number; total_quantity: number }
     > = {};
 
-    data?.forEach((item) => {
+    data?.forEach((item: any) => {
       const category = categorizeInventoryItem(item.stocks.name);
       const quantity = item.quantity || 0;
 
@@ -205,7 +205,7 @@ export const getLowStockAlerts = async (branchId?: string) => {
     if (error) throw error;
 
     const alerts: LowStockAlert[] =
-      data?.map((item) => {
+      data?.map((item: any) => {
         const quantity = item.quantity || 0;
         let status: "Low Stock" | "Out of Stock" | "Critical";
 
@@ -282,7 +282,7 @@ export const getInventoryItems = async (
     if (error) throw error;
 
     const items: InventoryItem[] =
-      data?.map((item) => {
+      data?.map((item: any) => {
         const quantity = item.quantity || 0;
         let status: string;
 
