@@ -365,6 +365,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                               </span>
                             </div>
                             <Select
+                              disabled={formState?.isSubmitting}
                               options={branchOptions}
                               placeholder="Select branch..."
                               {...field}
