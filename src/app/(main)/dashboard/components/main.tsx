@@ -296,7 +296,6 @@ export function MainDashboardPage({
   // Fetch branches and initial expense data on component mount
   useEffect(() => {
     const initializeData = async () => {
-      console.log("Initializing dashboard data...");
       setInitialLoading(true);
       try {
         await Promise.all([
@@ -304,7 +303,6 @@ export function MainDashboardPage({
           fetchInitialExpenseData(),
           fetchInitialRecentOrders(),
         ]);
-        console.log("Initial data loaded, selectedBranch:", selectedBranch);
       } catch (error) {
         console.error("Error initializing data:", error);
       } finally {
@@ -357,40 +355,24 @@ export function MainDashboardPage({
 
   // Fetch data when branch changes
   useEffect(() => {
-    console.log(
-      "useEffect triggered for selectedBranch:",
-      selectedBranch,
-      "isInitialRender:",
-      isInitialRender.current
-    );
-
     // Skip the first render to avoid fetching data twice
     if (isInitialRender.current) {
-      console.log("Skipping first render");
       isInitialRender.current = false;
       return;
     }
 
     // Fetch data for any branch change, including "All Branches" (empty string)
-    console.log("Branch changed, fetching data for:", selectedBranch);
     fetchDashboardData();
-  }, [selectedBranch]);
-
-  // Debug useEffect to track selectedBranch changes
-  useEffect(() => {
-    console.log("selectedBranch state changed to:", selectedBranch);
   }, [selectedBranch]);
 
   // Force chart re-render when chart data changes
   useEffect(() => {
-    console.log("Chart data changed, forcing re-render");
     // Force a small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       const chartElement = document.querySelector(
         '[data-apexcharts="sales-chart"]'
       );
       if (chartElement) {
-        console.log("Chart element found, triggering resize");
         window.dispatchEvent(new Event("resize"));
       }
     }, 100);
@@ -400,12 +382,9 @@ export function MainDashboardPage({
 
   const fetchBranches = async () => {
     try {
-      console.log("Fetching branches...");
       const result = await getAllBranches();
-      console.log("Branches result:", result);
       if (result.data) {
         setBranches(result.data);
-        console.log("Branches set:", result.data);
       }
     } catch (error) {
       console.error("Error fetching branches:", error);
@@ -413,14 +392,12 @@ export function MainDashboardPage({
   };
 
   const fetchDashboardData = async () => {
-    console.log("Fetching dashboard data for branch:", selectedBranch);
     setStatsLoading(true);
     setChartsLoading(true);
     setTableLoading(true);
 
     try {
       const branchId = selectedBranch === "" ? undefined : selectedBranch;
-      console.log("Using branchId:", branchId);
 
       const currentYear = new Date().getFullYear();
       const [
@@ -457,7 +434,6 @@ export function MainDashboardPage({
       setRecentOrders(recentOrdersResult.data || []);
       setExpensesByCategory(expensesByCategoryResult.data || []);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
     } finally {
       setStatsLoading(false);
       setChartsLoading(false);
@@ -466,8 +442,6 @@ export function MainDashboardPage({
   };
 
   const handleBranchChange = (newValue: any) => {
-    console.log("handleBranchChange called with:", newValue);
-
     let branchValue: string;
 
     if (newValue === null) {
@@ -481,7 +455,6 @@ export function MainDashboardPage({
       branchValue = newValue || "";
     }
 
-    console.log("Branch changed to:", branchValue);
     setSelectedBranch(branchValue);
   };
 
@@ -492,8 +465,6 @@ export function MainDashboardPage({
       value: branch.id,
     })),
   ];
-
-  console.log("Branch options:", branchOptions);
 
   // Prepare dynamic donut chart data
   const hasExpenseData = expensesByCategory.length > 0;
@@ -655,17 +626,6 @@ export function MainDashboardPage({
       },
     },
   };
-
-  // Debug chart data
-  console.log("Chart data:", chartData);
-  console.log(
-    "Chart options categories:",
-    dynamicChartOptions.xaxis?.categories
-  );
-  console.log(
-    "Chart series data:",
-    chartData?.monthlyData || [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-  );
 
   return (
     <div className="p-4 lg:p-8">

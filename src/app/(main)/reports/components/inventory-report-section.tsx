@@ -52,12 +52,6 @@ export function InventoryReportSection({
           getLowStockAlerts(),
           getInventoryItems(undefined, 20),
         ]);
-      console.log(
-        stockLevelsResult.data,
-        categoryResult.data,
-        alertsResult.data,
-        itemsResult.data
-      );
       if (stockLevelsResult.data) {
         setStockLevels(stockLevelsResult.data);
       }

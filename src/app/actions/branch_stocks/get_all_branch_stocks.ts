@@ -21,7 +21,7 @@ export const getAllBranchStocks = async (params: {
     }
 
     if (params?.search) {
-      query = query.ilike("name", `%${params?.search}%`);
+      query = query.ilike("stock_name", `%${params?.search}%`);
     }
 
     const { data, error, count } = await query;

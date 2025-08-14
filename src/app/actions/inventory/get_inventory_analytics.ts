@@ -238,7 +238,6 @@ export const getLowStockAlerts = async (branchId?: string) => {
       error: null,
     };
   } catch (error) {
-    console.error("getLowStockAlerts", error);
     return {
       data: [],
       error,

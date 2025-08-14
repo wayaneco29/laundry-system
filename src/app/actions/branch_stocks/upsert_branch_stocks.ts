@@ -22,7 +22,6 @@ export const upsertBranchStocks = async (payload: UpsertBranchStocksType) => {
       quantity: stock.quantity,
     }));
 
-    console.log(stocksToUpsert);
     const { data, error } = await supabase
       .from("stocks")
       .upsert(stocksToUpsert, { onConflict: "branch_id, id" })

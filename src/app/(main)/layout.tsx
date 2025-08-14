@@ -20,8 +20,6 @@ export default async function MainLayout(props: PropsWithChildren) {
     redirect("/login");
   }
 
-  console.log({ logged_in_user });
-
   return (
     <UserContextProvided user={logged_in_user as any}>
       <SidebarContextProvider>{props?.children}</SidebarContextProvider>

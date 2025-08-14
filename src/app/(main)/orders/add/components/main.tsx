@@ -3,6 +3,7 @@
 import { useMemo, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import {
+  Building,
   Search,
   ShoppingCart,
   Plus,
@@ -17,17 +18,21 @@ import {
 
 import { Button, Input, Select } from "@/app/components/common";
 import { PaymentModal } from "../../components/payment-modal";
-import { addOrder, getAllCustomers } from "@/app/actions";
+import { addOrder, getAllBranches, getAllCustomers } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import moment from "moment";
+import { useUserContext } from "@/app/context";
+import { twMerge } from "tailwind-merge";
 
 type MainAddPageProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
+  branches: Array<any>;
 };
 
-export const MainAddPage = ({ data }: MainAddPageProps) => {
+export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const router = useRouter();
+  const { is_admin, branch_id } = useUserContext();
   const { userId } = useCurrentUser();
   const [showModal, setShowModal] = useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
@@ -37,6 +42,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [customers, setCustomers] = useState<Array<any>>([]);
   const [selectedCustomer, setSelectedCustomer] = useState<string>("");
+  const [selectedBranch, setSelectedBranch] = useState<string>(branch_id || "");
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
 
   const grossTotal = selectedServices?.reduce(
@@ -84,13 +90,15 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
   const handleConfirmOrder = async () => {
     // Validate customer selection
     if (!selectedCustomer) {
-      alert("Please select a customer before confirming the order.");
+      return;
+    }
+
+    if (!selectedCustomer) {
       return;
     }
 
     // Validate services selection
     if (selectedServices.length === 0) {
-      alert("Please select at least one service before confirming the order.");
       return;
     }
 
@@ -98,8 +106,8 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
 
     try {
       // TODO: Replace hardcoded branch_id with proper branch context/selection
-      const { error } = await addOrder({
-        p_branch_id: "39ba4853-62a2-4c6b-99ea-117c7aa2393a",
+      const { data, error } = await addOrder({
+        p_branch_id: selectedBranch || branch_id,
         p_customer_id: selectedCustomer, // Use selected customer ID
         p_staff_id: userId!, // Use authenticated user ID
         p_items: selectedServices,
@@ -114,6 +122,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
       // Clear selected services and customer after successful order
       setSelectedServices([]);
       setSelectedCustomer("");
+      setSelectedBranch("");
 
       // Add a small delay for better UX (optional)
       setTimeout(() => {
@@ -129,7 +138,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
   };
 
   const updateQuantity = (index: number, newQuantity: number) => {
-    if (newQuantity < 0) return;
+    if (newQuantity < 1) return;
 
     const clonedServices = [...selectedServices];
     clonedServices[index] = {
@@ -161,6 +170,13 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
     setSelectedCustomer(selectedOption?.value || "");
   };
 
+  const branchOptions = [
+    ...branches.map((branch: any) => ({
+      label: branch.name,
+      value: branch.id,
+    })),
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
@@ -183,7 +199,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
         </div>
       </div>
 
-      <div className="px-4 sm:px-6 lg:px-8 py-8">
+      <div className={"px-4 sm:px-6 lg:px-8 py-8"}>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
           {/* Services Selection - Left Panel */}
           <div className="xl:col-span-2 order-2 xl:order-1">
@@ -201,14 +217,14 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
               {/* Search Section */}
               <div className="p-6 bg-gray-50">
                 <div className="relative">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                   <Input
                     placeholder="Search services..."
                     value={searchServices}
                     onChange={(event) => setSearchServices(event.target.value)}
-                    className="pl-10 w-full bg-white"
+                    className="pl-10 w-full bg-white rounded-md"
                     disabled={isConfirming}
                   />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
                 </div>
               </div>
 
@@ -299,8 +315,8 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
               </div>
 
               {/* Customer Selection */}
-              <div className="p-6 bg-gray-50">
-                <div className="flex items-center space-x-3 mb-3">
+              <div className="p-6 pb-0 bg-gray-50">
+                <div className="flex items-center space-x-2 mb-3">
                   <User className="w-4 h-4 text-gray-600" />
                   <span className="text-sm font-medium text-gray-700">
                     CUSTOMER
@@ -326,7 +342,33 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                   </p>
                 )}
               </div>
-
+              {is_admin && (
+                <div className="p-6 bg-gray-50">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="w-full">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <Building className="w-4 h-4 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          BRANCH
+                        </span>
+                      </div>
+                      <Select
+                        options={branchOptions}
+                        value={selectedBranch}
+                        onChange={(value: any) => {
+                          setSelectedBranch(value?.value);
+                        }}
+                        placeholder="Select branch..."
+                      />
+                      {!selectedBranch && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Please select a branch to continue
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              )}
               {/* Selected Services */}
               <div className="p-6 pt-0">
                 {selectedServices.length === 0 ? (
@@ -359,7 +401,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                               !isConfirming && removeService(index)
                             }
                             disabled={isConfirming}
-                            className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            className="cursor-pointer ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <X className="w-4 h-4" />
                           </button>
@@ -376,12 +418,12 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                                   (service.quantity || 1) - 1
                                 )
                               }
-                              disabled={isConfirming}
-                              className="p-1 hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              disabled={isConfirming || service.quantity === 1}
+                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <Minus className="w-4 h-4" />
                             </button>
-                            <span className="w-8 text-center text-sm font-medium">
+                            <span className="w-8 text-center text-sm font-medium text-gray-700">
                               {service.quantity || 1}
                             </span>
                             <button
@@ -393,7 +435,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                                 )
                               }
                               disabled={isConfirming}
-                              className="p-1 hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
                             >
                               <Plus className="w-4 h-4" />
                             </button>
@@ -429,7 +471,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                         setSelectedCustomer("");
                       }}
                       disabled={isConfirming}
-                      className="flex-1 bg-red-500 hover:bg-red-600 text-white flex items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       <Trash2 className="w-4 h-4" />
                       <span>Clear All</span>
@@ -441,7 +483,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                         !selectedCustomer ||
                         selectedServices.length === 0
                       }
-                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white flex items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isConfirming ? (
                         <>
@@ -451,7 +493,7 @@ export const MainAddPage = ({ data }: MainAddPageProps) => {
                       ) : (
                         <>
                           <Check className="w-4 h-4" />
-                          <span>Confirm Order</span>
+                          <span>Confirm</span>
                         </>
                       )}
                     </Button>

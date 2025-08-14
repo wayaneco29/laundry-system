@@ -1,6 +1,8 @@
 "use client";
 
 import { CalendarIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import { twMerge } from "tailwind-merge";
 
 type DateFilterSectionProps = {
   dateRange: {
@@ -14,8 +16,10 @@ export function DateFilterSection({
   dateRange,
   onDateRangeChange,
 }: DateFilterSectionProps) {
+  const [selected, setSelected] = useState<number | null>(null);
   const presetRanges = [
     {
+      id: 1,
       label: "Today",
       getValue: () => ({
         startDate: new Date(),
@@ -23,6 +27,7 @@ export function DateFilterSection({
       }),
     },
     {
+      id: 2,
       label: "This Week",
       getValue: () => {
         const today = new Date();
@@ -36,6 +41,7 @@ export function DateFilterSection({
       },
     },
     {
+      id: 3,
       label: "This Month",
       getValue: () => ({
         startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -43,6 +49,7 @@ export function DateFilterSection({
       }),
     },
     {
+      id: 4,
       label: "Last 30 Days",
       getValue: () => ({
         startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000),
@@ -50,6 +57,7 @@ export function DateFilterSection({
       }),
     },
     {
+      id: 5,
       label: "This Year",
       getValue: () => ({
         startDate: new Date(new Date().getFullYear(), 0, 1),
@@ -79,8 +87,14 @@ export function DateFilterSection({
           {presetRanges.map((preset) => (
             <button
               key={preset.label}
-              onClick={() => onDateRangeChange(preset.getValue())}
-              className="px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors"
+              onClick={() => {
+                onDateRangeChange(preset.getValue());
+                setSelected(preset?.id);
+              }}
+              className={twMerge(
+                "cursor-pointer px-3 py-1 text-sm font-medium text-gray-600 bg-gray-100 hover:bg-gray-200 rounded-md transition-colors",
+                selected === preset?.id && "bg-blue-500 text-white"
+              )}
             >
               {preset.label}
             </button>
@@ -92,24 +106,28 @@ export function DateFilterSection({
           <input
             type="date"
             value={dateRange.startDate.toISOString().split("T")[0]}
-            onChange={(e) =>
+            onChange={(e) => {
               onDateRangeChange({
                 ...dateRange,
                 startDate: new Date(e.target.value),
-              })
-            }
+              });
+
+              setSelected(null);
+            }}
             className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <span className="text-gray-500">to</span>
           <input
             type="date"
             value={dateRange.endDate.toISOString().split("T")[0]}
-            onChange={(e) =>
+            onChange={(e) => {
               onDateRangeChange({
                 ...dateRange,
                 endDate: new Date(e.target.value),
-              })
-            }
+              });
+
+              setSelected(null);
+            }}
             className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>

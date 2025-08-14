@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
+import { revalidateTag } from "next/cache";
 
 type AddOrderPayload = {
   p_branch_id: string;
@@ -18,8 +19,10 @@ export const addOrder = async (payload: AddOrderPayload) => {
   const supabase = await createClient();
   try {
     const { data, error } = await supabase.rpc("add_customer_order", payload);
-    console.log(error);
+
     if (error) throw error?.message;
+
+    revalidateTag("getOrders");
 
     return {
       data,

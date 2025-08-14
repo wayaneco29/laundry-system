@@ -13,21 +13,29 @@ export const getExpenseStats = async (filters: GetExpenseStatsType = {}) => {
 
   try {
     // Try the RPC function first
-    const { data: rpcData, error: rpcError } = await supabase.rpc("get_expense_stats", {
-      p_start_date: filters.startDate || null,
-      p_end_date: filters.endDate || null,
-      p_branch_id: filters.branchId || null,
-    });
+    const { data: rpcData, error: rpcError } = await supabase.rpc(
+      "get_expense_stats",
+      {
+        p_start_date: filters.startDate || null,
+        p_end_date: filters.endDate || null,
+        p_branch_id: filters.branchId || null,
+      }
+    );
 
     // If RPC fails due to column issues, use direct query as fallback
-    if (rpcError && (rpcError.message?.includes('status') || rpcError.message?.includes('column') || rpcError.message?.includes('does not exist'))) {
-      console.warn("getExpenseStats: RPC function has column issues, using direct query fallback");
-      
+    if (
+      rpcError &&
+      (rpcError.message?.includes("status") ||
+        rpcError.message?.includes("column") ||
+        rpcError.message?.includes("does not exist"))
+    ) {
+      console.warn(
+        "getExpenseStats: RPC function has column issues, using direct query fallback"
+      );
+
       try {
         // Try to select columns that should exist
-        let query = supabase
-          .from("view_expenses")
-          .select("*");
+        let query = supabase.from("view_expenses").select("*");
 
         // Apply filters
         if (filters.startDate) {
@@ -41,15 +49,10 @@ export const getExpenseStats = async (filters: GetExpenseStatsType = {}) => {
         }
 
         const { data: directData, error: directError } = await query;
-        
+
         if (directError) {
           console.error("Direct query failed:", directError);
           throw directError;
-        }
-
-        // Log the first record to see what columns are actually available
-        if (directData && directData.length > 0) {
-          console.log("Available columns in view_expenses:", Object.keys(directData[0]));
         }
 
         // Calculate stats manually
@@ -64,17 +67,22 @@ export const getExpenseStats = async (filters: GetExpenseStatsType = {}) => {
           totalExpenses += amount;
 
           // Handle different possible status field names
-          const statusField = expense.status || expense.approval_status || expense.expense_status || 'pending';
+          const statusField =
+            expense.status ||
+            expense.approval_status ||
+            expense.expense_status ||
+            "pending";
           const status = statusField.toString().toLowerCase();
-          
-          if (status === 'approved') {
+
+          if (status === "approved") {
             approvedExpenses += amount;
           } else {
             pendingExpenses += amount;
           }
 
           // Handle payment status - check multiple possible fields
-          const isPaid = expense.is_paid || expense.paid || status === 'paid' || false;
+          const isPaid =
+            expense.is_paid || expense.paid || status === "paid" || false;
           if (isPaid) {
             paidExpenses += amount;
           } else {
@@ -88,7 +96,7 @@ export const getExpenseStats = async (filters: GetExpenseStatsType = {}) => {
             approved_expenses: approvedExpenses,
             pending_expenses: pendingExpenses,
             paid_expenses: paidExpenses,
-            unpaid_expenses: unpaidExpenses
+            unpaid_expenses: unpaidExpenses,
           },
           error: null,
         };
@@ -100,7 +108,7 @@ export const getExpenseStats = async (filters: GetExpenseStatsType = {}) => {
             approved_expenses: 0,
             pending_expenses: 0,
             paid_expenses: 0,
-            unpaid_expenses: 0
+            unpaid_expenses: 0,
           },
           error: null,
         };

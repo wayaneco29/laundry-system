@@ -19,6 +19,7 @@ export const upsertBranch = async (payload: UpsertBranchType) => {
     if (error) throw error;
 
     revalidateTag("getAllBranches");
+    revalidateTag("getBranch");
     return { data, error: null };
   } catch (_error) {
     return {

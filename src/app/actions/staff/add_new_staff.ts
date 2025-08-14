@@ -36,7 +36,6 @@ export const addNewStaff = async (payload: AddNewStaffType) => {
       p_staff_id: user?.user?.id,
     });
 
-    console.log(error);
     if (error) throw error;
 
     revalidateTag("getAllStaffs");

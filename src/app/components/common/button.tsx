@@ -97,7 +97,14 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 
         {/* Button text */}
         {children && (
-          <span className={twMerge(loading && "ml-2")}>{children}</span>
+          <span
+            className={twMerge(
+              "flex flex-row items-center justify-center space-x-2",
+              loading && "ml-2"
+            )}
+          >
+            {children}
+          </span>
         )}
 
         {/* Right icon */}

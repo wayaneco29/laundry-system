@@ -9,21 +9,16 @@ export const getMonthlyExpense = async (branchId?: string) => {
     const currentDate = new Date();
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1;
-    
+
     // Create start and end dates for the current month
-    const startDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-01`;
+    const startDate = `${currentYear}-${currentMonth
+      .toString()
+      .padStart(2, "0")}-01`;
     // Get the last day of the current month
     const lastDay = new Date(currentYear, currentMonth, 0).getDate();
-    const endDate = `${currentYear}-${currentMonth.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`;
-
-    console.log('Monthly expense query params:', { 
-      currentYear, 
-      currentMonth, 
-      lastDay, 
-      startDate, 
-      endDate, 
-      branchId 
-    });
+    const endDate = `${currentYear}-${currentMonth
+      .toString()
+      .padStart(2, "0")}-${lastDay.toString().padStart(2, "0")}`;
 
     // Try querying the expenses table directly first
     let query = supabase
@@ -39,13 +34,10 @@ export const getMonthlyExpense = async (branchId?: string) => {
 
     const { data, error } = await query;
 
-    console.log('Monthly expense query result:', { data, error, count: data?.length });
-
     if (error) throw error;
 
-    const totalAmount = data?.reduce((sum, expense) => sum + Number(expense.amount), 0) || 0;
-
-    console.log('Monthly expense total:', totalAmount);
+    const totalAmount =
+      data?.reduce((sum, expense) => sum + Number(expense.amount), 0) || 0;
 
     return {
       data: totalAmount,

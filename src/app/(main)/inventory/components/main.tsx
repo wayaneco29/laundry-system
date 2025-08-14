@@ -73,8 +73,6 @@ export function MainInventoryPage({
         branchId: selectedBranch || branch_id || undefined,
       });
 
-      console.log("================", inventoryResult);
-
       if (inventoryResult.data) {
         setInventoryList(inventoryResult.data);
         setTotalCount(inventoryResult.count || 0);
@@ -171,7 +169,7 @@ export function MainInventoryPage({
             placeholder="Search by item name..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 pr-4 h-12 py-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+            className="w-full pl-10 pr-4 h-10 py-2 border bg-white border-gray-300 text-sm rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
           />
         </div>
         {is_admin && (
