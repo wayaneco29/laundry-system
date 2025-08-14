@@ -19,6 +19,7 @@ import {
 
 import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
 import "./loading-spinner.css";
+import { useToast } from "../hooks";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
@@ -29,6 +30,7 @@ export const OrdersTable = ({
   initialData = [],
   totalCount = 0,
 }: OrdersTableProps) => {
+  const toast = useToast();
   const router = useRouter();
   const { userId } = useCurrentUser();
 
@@ -81,7 +83,7 @@ export const OrdersTable = ({
   // Only fetch new data when pagination/search changes (not on initial load)
   useEffect(() => {
     fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter]);
+  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter, initialData]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -156,8 +158,10 @@ export const OrdersTable = ({
       setEditingCell(null);
       // Refresh data after update
       fetchData(currentPage, itemsPerPage);
+
+      toast.success(`${p_order_id} updated to ${p_order_status} successfully.`);
     } catch (error) {
-      console.error(error);
+      toast.error(`Failed tp update ${p_order_id}.`);
     } finally {
       setLoadingOrderStatus((prev) => {
         const newSet = new Set(prev);
@@ -182,7 +186,11 @@ export const OrdersTable = ({
       setEditingCell(null);
       // Refresh data after update
       fetchData(currentPage, itemsPerPage);
+      toast.success(
+        `${p_order_id} updated to ${p_payment_status} successfully.`
+      );
     } catch (error) {
+      toast.error(`Failed tp update ${p_order_id}.`);
       console.error(error);
     } finally {
       setLoadingPaymentStatus((prev) => {

@@ -58,7 +58,7 @@ export const PromoTable = ({
 
   useEffect(() => {
     fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, search, status]);
+  }, [currentPage, itemsPerPage, search, status, initialData]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

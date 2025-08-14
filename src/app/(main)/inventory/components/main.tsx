@@ -61,7 +61,7 @@ export function MainInventoryPage({
 
   useEffect(() => {
     fetchData();
-  }, [currentPage, itemsPerPage, debouncedSearch, selectedBranch]);
+  }, [currentPage, itemsPerPage, debouncedSearch, selectedBranch, initialData]);
 
   const fetchData = async () => {
     setLoading(true);

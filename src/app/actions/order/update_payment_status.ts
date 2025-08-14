@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 type TUpdatePaymentStatus = {
   p_order_id: string;
@@ -20,7 +20,7 @@ export const updatePaymentStatus = async (payload: TUpdatePaymentStatus) => {
 
     if (error) throw error?.message;
 
-    revalidatePath(`/orders/${payload?.p_order_id}`);
+    revalidateTag("getOrders");
 
     return { data, error: null };
   } catch (_error) {

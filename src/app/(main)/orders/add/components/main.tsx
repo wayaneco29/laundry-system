@@ -41,7 +41,6 @@ const schema = Yup.object().shape({
 
 export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const router = useRouter();
-
   const { is_admin, branch_id } = useUserContext();
   const { userId } = useCurrentUser();
   const toast = useToast();
@@ -118,23 +117,10 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         p_total_price: grossTotal,
       });
 
-      console.log(error);
-
       if (error) throw error;
 
       toast.success("Create order successfully");
       // Clear selected services and customer after successful order
-
-      reset(
-        {
-          branchId: "",
-          customerId: "",
-          services: [],
-        },
-        {
-          keepDefaultValues: false,
-        }
-      );
 
       // Add a small delay for better UX (optional)
       setTimeout(() => {

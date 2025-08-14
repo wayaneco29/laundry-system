@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 type UpsertBranchType = {
   p_branch_id: string | null;
@@ -18,7 +18,9 @@ export const upsertBranch = async (payload: UpsertBranchType) => {
 
     if (error) throw error;
 
-    revalidatePath("/branches");
+    revalidateTag("getAllBranches");
+    revalidateTag("getBranch");
+
     return { data, error: null };
   } catch (_error) {
     return {

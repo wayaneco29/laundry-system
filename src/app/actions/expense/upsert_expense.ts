@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 import { createClient } from "@/app/utils/supabase/server";
 
 type UpsertExpenseType = {
@@ -43,7 +43,7 @@ export const upsertExpense = async (expenseData: UpsertExpenseType) => {
     if (error) throw error;
 
     // Revalidate the cache
-    revalidatePath("/expenses");
+    revalidateTag("getAllExpenses");
 
     return {
       data,

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 type UpsertServiceType = {
   p_service_id: string | null;
@@ -19,7 +19,8 @@ export const upsertService = async (payload: UpsertServiceType) => {
 
     if (error) throw error;
 
-    revalidatePath("/services");
+    revalidateTag("getAllServices");
+
     return { data, error: null };
   } catch (_error) {
     return {

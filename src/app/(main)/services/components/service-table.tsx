@@ -52,7 +52,7 @@ export const ServiceTable = ({
 
   useEffect(() => {
     fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, search]);
+  }, [currentPage, itemsPerPage, search, initialData]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

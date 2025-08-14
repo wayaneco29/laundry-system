@@ -45,7 +45,7 @@ export const BranchTable = ({
 
   useEffect(() => {
     fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, search]);
+  }, [currentPage, itemsPerPage, search, initialData]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);

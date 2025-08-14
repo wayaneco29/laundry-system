@@ -43,7 +43,7 @@ export function MainCustomerPage({
 
   useEffect(() => {
     fetchCustomers(currentPage, itemsPerPage, debouncedSearch);
-  }, [currentPage, itemsPerPage, debouncedSearch]);
+  }, [currentPage, itemsPerPage, debouncedSearch, initialData]);
 
   const fetchCustomers = async (
     page: number,

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
-import { revalidatePath } from "next/cache";
+import { revalidateTag } from "next/cache";
 
 type UpsertCustomerType = {
   p_customer_id: string | null;
@@ -21,7 +21,9 @@ export const upsertCustomer = async (payload: UpsertCustomerType) => {
 
     if (error) throw error;
 
-    revalidatePath("/customers");
+    revalidateTag("getCustomer");
+    revalidateTag("getAllCustomers");
+
     return { data, error: null };
   } catch (_error) {
     return {

@@ -72,7 +72,6 @@ export function MainServicePage({ initialData }: MainServicePageProps) {
           className="w-full pl-10 pr-4 py-2 bg-white h-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
         />
       </div>
-
       <div className="mt-4">
         <div className="flex flex-col">
           <ServiceTable
