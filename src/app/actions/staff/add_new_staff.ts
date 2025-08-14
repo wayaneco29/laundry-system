@@ -1,6 +1,6 @@
 "use server";
 
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 
 import { createAdminClient } from "@/app/utils/supabase/server";
 
@@ -38,7 +38,7 @@ export const addNewStaff = async (payload: AddNewStaffType) => {
 
     if (error) throw error;
 
-    revalidateTag("getAllStaffs");
+    revalidatePath("/staffs");
 
     return { data, error: null };
   } catch (_error) {

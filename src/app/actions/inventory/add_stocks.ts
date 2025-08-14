@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
-import { revalidateTag } from "next/cache";
+import { revalidatePath } from "next/cache";
 
 type AddStocksType = {
   branchId: string;
@@ -26,7 +26,7 @@ export const addNewStock = async (payload: AddStocksType) => {
 
     if (error) throw error;
 
-    revalidateTag("getAllBranchStocks");
+    revalidatePath("/inventory");
 
     return {
       success: true,
