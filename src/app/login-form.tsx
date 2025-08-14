@@ -55,6 +55,7 @@ export function LoginForm() {
           <div>
             <Input
               label="Username"
+              disabled={formState?.isSubmitting}
               placeholder="Enter your username"
               error={!!error}
               icon={<User />}
@@ -70,6 +71,7 @@ export function LoginForm() {
           <div>
             <Input
               type="password"
+              disabled={formState?.isSubmitting}
               label="Password"
               placeholder="Enter your password"
               autoComplete="current-password"
@@ -102,10 +104,10 @@ export function LoginForm() {
       {/* Submit Button */}
       <Button
         type="submit"
-        disabled={formState?.isLoading}
+        disabled={formState?.isSubmitting}
         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
-        {formState?.isLoading ? (
+        {formState?.isSubmitting ? (
           <div className="flex items-center justify-center">
             <svg
               className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
