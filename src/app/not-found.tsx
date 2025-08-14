@@ -1,3 +1,5 @@
+"use client";
+
 import { SidebarContextProvider } from "@/app/context";
 import Image from "next/image";
 
