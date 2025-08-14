@@ -2,17 +2,7 @@ import { getOrders, getUserInfo } from "@/app/actions";
 import { OrdersPage } from "./components/main";
 import { Suspense } from "react";
 
-interface OrdersPageProps {
-  searchParams: {
-    page?: string;
-    limit?: string;
-    search?: string;
-    status?: string;
-    branchId?: string;
-  };
-}
-
-export default async function Page({ searchParams }: OrdersPageProps) {
+export default async function Page() {
   const {
     data: { branch_id },
   } = await getUserInfo();
