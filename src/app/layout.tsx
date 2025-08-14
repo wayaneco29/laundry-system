@@ -3,6 +3,7 @@ import Script from "next/script";
 import { Montserrat } from "next/font/google";
 
 import PrelineScriptWrapper from "./components/PrelineScriptWrapper";
+import { ToastProvider } from "./providers/toast-provider";
 
 import "./date-picker.css";
 import "./globals.css";
@@ -30,6 +31,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={`${montserrat.variable}  antialiased`}>
+        <ToastProvider />
         {children}
         <PrelineScriptWrapper />
         <Script

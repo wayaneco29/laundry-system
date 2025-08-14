@@ -1,0 +1,137 @@
+"use client";
+
+import { useRouter } from "next/navigation";
+import { Input, Button } from "@/app/components/common";
+import { User, Lock } from "lucide-react";
+import { Controller, useForm } from "react-hook-form";
+import * as Yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { loginUser } from "./actions/auth";
+import { useToast } from "./hooks";
+
+interface LoginFormData {
+  email: string;
+  password: string;
+}
+
+export function LoginForm() {
+  const router = useRouter();
+  const toast = useToast();
+
+  const { handleSubmit, control, formState } = useForm({
+    defaultValues: {
+      username: "",
+      password: "",
+    },
+    mode: "onChange",
+    resolver: yupResolver(
+      Yup.object().shape({
+        username: Yup.string().required(),
+        password: Yup.string().required(),
+      })
+    ),
+  });
+  const onSubmit = handleSubmit(
+    async (data: { username: string; password: string }) => {
+      try {
+        const response = await loginUser(data);
+
+        if (response?.error) throw response?.error;
+
+        router?.replace(response?.data!);
+      } catch (error) {
+        toast.error(typeof error !== "string" ? "Something went wrong" : error);
+      }
+    }
+  );
+
+  return (
+    <form onSubmit={onSubmit} className="space-y-6">
+      {/* Email Input */}
+      <Controller
+        name="username"
+        control={control}
+        render={({ field, fieldState: { error } }) => (
+          <div>
+            <Input
+              label="Username"
+              placeholder="Enter your username"
+              error={!!error}
+              icon={<User />}
+              {...field}
+            />
+          </div>
+        )}
+      />
+      <Controller
+        name="password"
+        control={control}
+        render={({ field, fieldState: { error } }) => (
+          <div>
+            <Input
+              type="password"
+              label="Password"
+              placeholder="Enter your password"
+              autoComplete="current-password"
+              error={!!error}
+              icon={<Lock />}
+              {...field}
+            />
+          </div>
+        )}
+      />
+
+      {/* Remember Me & Forgot Password */}
+      <div className="flex items-center justify-between">
+        <label className="flex items-center">
+          <input
+            type="checkbox"
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+          />
+          <span className="ml-2 text-sm text-gray-600">Remember me</span>
+        </label>
+
+        <a
+          href="#"
+          className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors"
+        >
+          Forgot password?
+        </a>
+      </div>
+
+      {/* Submit Button */}
+      <Button
+        type="submit"
+        disabled={formState?.isLoading}
+        className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+      >
+        {formState?.isLoading ? (
+          <div className="flex items-center justify-center">
+            <svg
+              className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              />
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+              />
+            </svg>
+            Signing in...
+          </div>
+        ) : (
+          "Sign In"
+        )}
+      </Button>
+    </form>
+  );
+}

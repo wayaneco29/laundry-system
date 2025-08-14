@@ -25,7 +25,7 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
         return;
       }
 
-      router.push("/login");
+      router.push("/");
       router.refresh();
     } catch (error) {
       console.error("Logout error:", error);
