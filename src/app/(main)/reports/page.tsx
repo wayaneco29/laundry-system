@@ -1,22 +1,26 @@
-import { 
-  getMonthSales, 
-  getMonthlySalesChart, 
-  getMonthlyCustomers, 
-  getTodayCustomers 
+import {
+  getMonthSales,
+  getMonthlySalesChart,
+  getMonthlyCustomers,
+  getTodayCustomers,
+  getUserInfo,
 } from "@/app/actions";
 import { MainReportsPage } from "./components/main";
 
 export default async function Page() {
+  const {
+    data: { branch_id },
+  } = await getUserInfo();
   const [
     monthlySalesData,
     chartData,
     monthlyCustomersCount,
-    todayCustomersCount
+    todayCustomersCount,
   ] = await Promise.all([
-    getMonthSales(),
-    getMonthlySalesChart(),
-    getMonthlyCustomers(),
-    getTodayCustomers()
+    getMonthSales(branch_id || undefined),
+    getMonthlySalesChart(branch_id || undefined),
+    getMonthlyCustomers(branch_id || undefined),
+    getTodayCustomers(branch_id || undefined),
   ]);
 
   return (

@@ -10,6 +10,7 @@ import { SERVICE_STATUS_DROPDOWN } from "@/app/constants";
 import { BranchProvider } from "@/app/providers";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { upsertService } from "@/app/actions";
+import { useUserContext } from "@/app/context";
 
 type ServiceModalProps = {
   showModal: boolean;
@@ -30,6 +31,7 @@ export const ServiceModal = ({
   initialValue,
 }: ServiceModalProps) => {
   const { userId } = useCurrentUser();
+  const { is_admin, branch_id } = useUserContext();
   const {
     reset,
     control,
@@ -44,7 +46,7 @@ export const ServiceModal = ({
         isUpdate: Yup.boolean(),
         name: Yup.string().required(),
         price: Yup.string().required(),
-        branchId: Yup.string().required(),
+        branchId: is_admin ? Yup.string().required() : Yup.string(),
         status: Yup.string().required(),
       })
     ),
@@ -58,7 +60,7 @@ export const ServiceModal = ({
       isUpdate: false,
       name: "",
       price: "",
-      branchId: "",
+      branchId: is_admin ? "" : branch_id,
       status: "Active",
     });
 
@@ -117,30 +119,36 @@ export const ServiceModal = ({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="branchId"
-            render={({
-              field: { value = [], onChange, ...field },
-              formState: { errors },
-            }) => (
-              <BranchProvider
-                disabled={isSubmitting}
-                label="Branch"
-                placeholder="Select branch"
-                error={!!errors?.branchId}
-                value={value}
-                {...field}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={(newValue: any) => {
-                  onChange(newValue?.value);
-                }}
-              />
-            )}
-          />
-        </div>
+      <div
+        className={`grid grid-cols-1 ${
+          is_admin && "md:grid-cols-2"
+        } gap-x-2 mb-4`}
+      >
+        {is_admin && (
+          <div className="col-span-1">
+            <Controller
+              control={control}
+              name="branchId"
+              render={({
+                field: { value = [], onChange, ...field },
+                formState: { errors },
+              }) => (
+                <BranchProvider
+                  disabled={isSubmitting}
+                  label="Branch"
+                  placeholder="Select branch"
+                  error={!!errors?.branchId}
+                  value={value}
+                  {...field}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onChange={(newValue: any) => {
+                    onChange(newValue?.value);
+                  }}
+                />
+              )}
+            />
+          </div>
+        )}
         <div className="col-span-1">
           <Controller
             control={control}
@@ -180,11 +188,11 @@ export const ServiceModal = ({
             onClick={handleSubmit(async (newData) => {
               try {
                 const { error } = await upsertService({
-                  p_service_id: newData.id as string,
-                  p_branch_id: newData.branchId,
-                  p_name: newData.name,
-                  p_price: newData.price,
-                  p_status: newData.status,
+                  p_service_id: newData?.id as string,
+                  p_branch_id: newData?.branchId || branch_id,
+                  p_name: newData?.name,
+                  p_price: newData?.price,
+                  p_status: newData?.status,
                   p_staff_id: userId!, // Use authenticated user ID
                 });
 

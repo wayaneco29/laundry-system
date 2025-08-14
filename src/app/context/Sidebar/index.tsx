@@ -30,6 +30,8 @@ import {
 import { twMerge } from "tailwind-merge";
 import { LogoutButton } from "@/app/components/auth/logout-button";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
+import { ROLE_ADMIN, ROLE_STAFF } from "@/app/types";
+import { useUserContext } from "../UserContext";
 
 type SidebarContextType = Record<string, never>;
 
@@ -40,51 +42,61 @@ const ROUTES = [
     path: "/dashboard",
     label: "Dashboard",
     icon: Home,
+    allowedRole: [ROLE_ADMIN],
   },
   {
     path: "/orders",
     label: "Orders",
     icon: ShoppingBag,
+    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
   },
   {
     path: "/customers",
     label: "Customers",
     icon: Users,
+    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
   },
   {
     path: "/staffs",
     label: "Staffs",
     icon: UserCheck,
+    allowedRole: [ROLE_ADMIN],
   },
   {
     path: "/branches",
     label: "Branches",
     icon: Building2,
+    allowedRole: [ROLE_ADMIN],
   },
   {
     path: "/services",
     label: "Services",
     icon: Package,
+    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
   },
   {
     path: "/expenses",
     label: "Expenses",
     icon: Receipt,
+    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
   },
   {
     path: "/promos",
     label: "Promos",
     icon: Tag,
+    allowedRole: [ROLE_ADMIN],
   },
   {
     path: "/inventory",
     label: "Inventory",
     icon: Archive,
+    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
   },
   {
     path: "/reports",
     label: "Reports",
     icon: FileBarChart,
+    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
   },
 ];
 
@@ -93,6 +105,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
   const [minimize, setMinimized] = useState<boolean>(false);
   const pathname = usePathname();
   const { user, loading: userLoading } = useCurrentUser();
+  const { role_name } = useUserContext();
 
   const isActive = (path: string) => {
     return pathname?.includes(path);
@@ -137,42 +150,47 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
           {/* Navigation */}
           <div className="flex-1 p-4 overflow-y-auto overflow-x-hidden">
             <div className="space-y-2">
-              {ROUTES?.map(({ path, label, icon: Icon }, index) => {
-                const isActiveRoute = isActive(path);
-                return (
-                  <Link
-                    key={index}
-                    href={path}
-                    className={twMerge(
-                      "group relative flex items-center rounded-xl font-medium transition-all duration-200 hover:bg-slate-700/50",
-                      isActiveRoute
-                        ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
-                        : "text-slate-300 hover:text-white",
-                      minimize
-                        ? "lg:justify-center lg:px-3 lg:py-3"
-                        : "gap-3 px-3 py-3"
-                    )}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    <span
+              {ROUTES?.map(
+                ({ path, label, icon: Icon, allowedRole }, index) => {
+                  const isActiveRoute = isActive(path);
+
+                  if (!allowedRole?.includes(role_name)) return null;
+
+                  return (
+                    <Link
+                      key={index}
+                      href={path}
                       className={twMerge(
-                        "transition-all duration-200 whitespace-nowrap",
-                        minimize ? "lg:hidden" : "opacity-100"
+                        "group relative flex items-center rounded-xl font-medium transition-all duration-200 hover:bg-slate-700/50",
+                        isActiveRoute
+                          ? "bg-blue-600 text-white shadow-lg shadow-blue-600/20"
+                          : "text-slate-300 hover:text-white",
+                        minimize
+                          ? "lg:justify-center lg:px-3 lg:py-3"
+                          : "gap-3 px-3 py-3"
                       )}
                     >
-                      {label}
-                    </span>
-
-                    {/* Tooltip for minimized state */}
-                    {minimize && (
-                      <div className="hidden lg:block absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
+                      <Icon className="w-5 h-5 flex-shrink-0" />
+                      <span
+                        className={twMerge(
+                          "transition-all duration-200 whitespace-nowrap",
+                          minimize ? "lg:hidden" : "opacity-100"
+                        )}
+                      >
                         {label}
-                        <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-900 rotate-45 border-l border-b border-slate-700"></div>
-                      </div>
-                    )}
-                  </Link>
-                );
-              })}
+                      </span>
+
+                      {/* Tooltip for minimized state */}
+                      {minimize && (
+                        <div className="hidden lg:block absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
+                          {label}
+                          <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-900 rotate-45 border-l border-b border-slate-700"></div>
+                        </div>
+                      )}
+                    </Link>
+                  );
+                }
+              )}
 
               {/* Logout Button */}
               <LogoutButton

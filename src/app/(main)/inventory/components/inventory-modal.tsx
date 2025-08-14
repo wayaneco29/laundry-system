@@ -6,6 +6,7 @@ import { Package, Save, Trash2 } from "lucide-react";
 import { Modal, Button, Select, Input } from "@/app/components/common";
 import { addNewStock } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
+import { useUserContext } from "@/app/context";
 
 type InventoryFormData = {
   id: string | null;
@@ -28,6 +29,9 @@ export function InventoryModal({
   branches,
   onClose,
 }: InventoryModalProps) {
+  const { userId } = useCurrentUser();
+  const { is_admin, branch_id } = useUserContext();
+
   const {
     control,
     handleSubmit,
@@ -38,15 +42,12 @@ export function InventoryModal({
     mode: "onChange",
   });
 
-  const { userId } = useCurrentUser();
-
   // Reset form when initialValue changes (for edit mode)
   React.useEffect(() => {
     reset(initialValue);
   }, [initialValue, reset]);
 
   const onSubmit = async (data: InventoryFormData) => {
-    console.log("Form data submitted:", data);
     try {
       const quantity = parseInt(data.quantity);
       if (isNaN(quantity) || quantity < 0) {
@@ -55,7 +56,7 @@ export function InventoryModal({
       }
 
       const result = await addNewStock({
-        branchId: data.branchId,
+        branchId: is_admin ? data?.branchId : branch_id,
         stockName: data.name.trim(),
         quantity: quantity,
         staff_id: userId!,
@@ -124,34 +125,35 @@ export function InventoryModal({
           )}
         />
 
-        <Controller
-          name="branchId"
-          control={control}
-          rules={{ required: "Branch is required" }}
-          render={({ field }) => (
-            <div>
-              <Select
-                {...field}
-                label="Branch"
-                placeholder="Select a branch"
-                isDisabled={!!initialValue.id} // Disable branch selection when editing
-                options={branches.map((branch) => ({
-                  value: branch.id,
-                  label: branch.name,
-                }))}
-                onChange={(newValue) => {
-                  field.onChange((newValue as { value: string })?.value!);
-                }}
-              />
-              {errors.branchId && (
-                <p className="mt-1 text-sm text-red-600">
-                  {errors.branchId.message}
-                </p>
-              )}
-            </div>
-          )}
-        />
-
+        {is_admin && (
+          <Controller
+            name="branchId"
+            control={control}
+            rules={{ required: "Branch is required" }}
+            render={({ field }) => (
+              <div>
+                <Select
+                  {...field}
+                  label="Branch"
+                  placeholder="Select a branch"
+                  isDisabled={!!initialValue.id} // Disable branch selection when editing
+                  options={branches.map((branch) => ({
+                    value: branch.id,
+                    label: branch.name,
+                  }))}
+                  onChange={(newValue) => {
+                    field.onChange((newValue as { value: string })?.value!);
+                  }}
+                />
+                {errors.branchId && (
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.branchId.message}
+                  </p>
+                )}
+              </div>
+            )}
+          />
+        )}
         <Controller
           name="quantity"
           control={control}

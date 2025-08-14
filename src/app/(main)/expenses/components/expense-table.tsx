@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { Pagination } from "@/app/components/common/pagination";
 
 import { Loader2 } from "lucide-react";
+import { useUserContext } from "@/app/context";
 
 type ExpenseTableProps = {
   data: Array<Record<string, any>>;

@@ -345,7 +345,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                 leftIcon={<ArrowLeft className="size-4" />}
                 variant="outline"
                 onClick={() => router.replace("/orders")}
-                className="py-3 px-4 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-transparent cursor-pointer bg-blue-400 text-white hover:bg-blue-500 focus:outline-hidden focus:bg-blue-500 disabled:opacity-50 disabled:pointer-events-none"
+                className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Back to Orders
               </Button>

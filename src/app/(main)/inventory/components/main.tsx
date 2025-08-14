@@ -8,6 +8,7 @@ import { InventoryModal } from "./inventory-modal";
 import { Button, Select } from "@/app/components/common";
 import { getAllBranches } from "@/app/actions";
 import { getAllBranchStocks } from "@/app/actions/branch_stocks";
+import { useUserContext } from "@/app/context";
 
 type MainInventoryPageProps = {
   initialData: Array<Record<string, any>>;
@@ -46,6 +47,8 @@ export function MainInventoryPage({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
+  const { is_admin, branch_id } = useUserContext();
+
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -67,7 +70,7 @@ export function MainInventoryPage({
         page: currentPage,
         limit: itemsPerPage,
         search: debouncedSearch,
-        branchId: selectedBranch || undefined,
+        branchId: selectedBranch || branch_id || undefined,
       });
 
       console.log("================", inventoryResult);
@@ -171,14 +174,16 @@ export function MainInventoryPage({
             className="w-full pl-10 pr-4 h-12 py-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
           />
         </div>
-        <Select
-          containerClassName="w-full md:w-64"
-          value={selectedBranch}
-          onChange={(newValue) =>
-            setSelectedBranch((newValue as { value: string })?.value)
-          }
-          options={branchOptions}
-        />
+        {is_admin && (
+          <Select
+            containerClassName="w-full md:w-64"
+            value={selectedBranch}
+            onChange={(newValue) =>
+              setSelectedBranch((newValue as { value: string })?.value)
+            }
+            options={branchOptions}
+          />
+        )}
       </div>
 
       <div className="mt-4">

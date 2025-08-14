@@ -8,6 +8,7 @@ export const getAllServices = async (options?: {
   page?: number;
   limit?: number;
   search?: string;
+  branchId?: string;
 }) => {
   const supabase = await createClient();
   const page = options?.page || 1;
@@ -23,6 +24,10 @@ export const getAllServices = async (options?: {
       // Apply search filter
       if (options?.search) {
         query = query.or(`name.ilike.%${options.search}%`);
+      }
+
+      if (options?.branchId) {
+        query = query.eq("branch_id", options.branchId);
       }
 
       query = query

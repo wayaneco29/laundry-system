@@ -1,13 +1,13 @@
-import { getAllBranches, getAllBranchStocks } from "@/app/actions";
+import { getAllBranches, getAllBranchStocks, getUserInfo } from "@/app/actions";
 import { MainInventoryPage } from "./components/main";
 
 export default async function Page() {
+  const {
+    data: { branch_id },
+  } = await getUserInfo();
   const [inventoryResult, branchesResult] = await Promise.all([
     getAllBranchStocks({
-      page: 1,
-      limit: 10,
-      search: "",
-      branchId: "",
+      branchId: branch_id || undefined,
     }),
     getAllBranches(),
   ]);

@@ -107,6 +107,77 @@ export const AddStaffModal = ({
       onClose={handleModalClose}
       size="xl"
     >
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="username"
+            render={({ field, formState: { errors } }) => (
+              <Input
+                disabled={isSubmitting}
+                label="Username"
+                placeholder="Enter username"
+                error={!!errors.username}
+                icon={<User />}
+                {...field}
+              />
+            )}
+          />
+        </div>
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="password"
+            render={({ field, formState: { errors } }) => (
+              <Input
+                type="password"
+                disabled={isSubmitting}
+                label="Password"
+                placeholder="Enter password"
+                error={!!errors.password}
+                icon={<KeyIcon />}
+                {...field}
+                value={field?.value || ""}
+              />
+            )}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="branch_id"
+            render={({ field, formState: { errors } }) => (
+              <BranchProvider
+                {...field}
+                placeholder="Select Branch"
+                onChange={({ value }: any) => {
+                  field?.onChange(value);
+                }}
+                error={!!errors?.branch_id}
+              />
+            )}
+          />
+        </div>
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="role_id"
+            render={({ field, formState: { errors } }) => (
+              <RoleProvider
+                {...field}
+                placeholder="Select Role"
+                onChange={({ value }: any) => {
+                  field?.onChange(value);
+                }}
+                error={!!errors?.role_id}
+              />
+            )}
+          />
+        </div>
+      </div>
+      <div className="h-4" />
       <div className="grid grid-cols-1 gap-x-2 mb-4">
         <div className="col-span-1">
           <Controller
@@ -228,76 +299,6 @@ export const AddStaffModal = ({
                   icon={<Calendar />}
                 />
               </div>
-            )}
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="username"
-            render={({ field, formState: { errors } }) => (
-              <Input
-                disabled={isSubmitting}
-                label="Username"
-                placeholder="Enter username"
-                error={!!errors.username}
-                icon={<User />}
-                {...field}
-              />
-            )}
-          />
-        </div>
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="password"
-            render={({ field, formState: { errors } }) => (
-              <Input
-                type="password"
-                disabled={isSubmitting}
-                label="Password"
-                placeholder="Enter password"
-                error={!!errors.password}
-                icon={<KeyIcon />}
-                {...field}
-                value={field?.value || ""}
-              />
-            )}
-          />
-        </div>
-      </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="branch_id"
-            render={({ field, formState: { errors } }) => (
-              <BranchProvider
-                {...field}
-                placeholder="Select Branch"
-                onChange={({ value }: any) => {
-                  field?.onChange(value);
-                }}
-                error={!!errors?.branch_id}
-              />
-            )}
-          />
-        </div>
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="role_id"
-            render={({ field, formState: { errors } }) => (
-              <RoleProvider
-                {...field}
-                placeholder="Select Role"
-                onChange={({ value }: any) => {
-                  field?.onChange(value);
-                }}
-                error={!!errors?.role_id}
-              />
             )}
           />
         </div>

@@ -20,6 +20,7 @@ import {
   StatsCardsSkeleton,
   TableSkeleton,
 } from "../../dashboard/components/skeleton";
+import { useUserContext } from "@/app/context";
 
 interface ExpensesMainProps {
   searchParams: {
@@ -59,6 +60,8 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
     branch_id: searchParams.branchId || "",
   });
 
+  const { is_admin, branch_id } = useUserContext();
+
   // Fetch all data on component mount and when filters/pagination change
   useEffect(() => {
     fetchAllData();
@@ -91,7 +94,7 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
     const result = await getAllExpenses({
       page: currentPage,
       limit: itemsPerPage,
-      branchId: filters.branch_id || undefined,
+      branchId: filters?.branch_id || branch_id,
       startDate: searchParams.startDate || undefined,
       endDate: searchParams.endDate || undefined,
     });
@@ -110,7 +113,7 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
   };
 
   const fetchMonthlyExpense = async () => {
-    const branchId = filters.branch_id || undefined;
+    const branchId = filters?.branch_id || branch_id;
     const result = await getMonthlyExpense(branchId);
     if (result.data !== undefined) {
       setMonthlyExpense(result.data);
@@ -118,7 +121,8 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
   };
 
   const fetchYearlyExpense = async () => {
-    const branchId = filters.branch_id || undefined;
+    const branchId = filters?.branch_id || branch_id;
+
     const result = await getYearlyExpense(branchId);
     if (result.data !== undefined) {
       setYearlyExpense(result.data);
@@ -251,22 +255,24 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
       </div>
 
       {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="w-64">
-          <Select
-            label="Filter by Branch"
-            options={branchOptions}
-            value={filters.branch_id}
-            onChange={(value: any) => {
-              setFilters({
-                ...filters,
-                branch_id: value?.value,
-              });
-            }}
-            placeholder="Select branch..."
-          />
+      {is_admin && (
+        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+          <div className="w-64">
+            <Select
+              label="Filter by Branch"
+              options={branchOptions}
+              value={filters.branch_id}
+              onChange={(value: any) => {
+                setFilters({
+                  ...filters,
+                  branch_id: value?.value,
+                });
+              }}
+              placeholder="Select branch..."
+            />
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Expenses Table */}
       <div className="bg-white rounded-lg shadow">

@@ -1,12 +1,14 @@
 import { MainServicePage } from "./components/main";
 
-import { getAllServices } from "@/app/actions";
+import { getAllServices, getUserInfo } from "@/app/actions";
 
 export default async function Page() {
+  const {
+    data: { branch_id },
+  } = await getUserInfo();
+
   const { data } = await getAllServices({
-    page: 1,
-    limit: 10,
-    search: "",
+    branchId: branch_id || undefined,
   });
 
   return <MainServicePage initialData={data || []} />;

@@ -11,6 +11,7 @@ import {
 import { upsertExpense } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
+import { useUserContext } from "@/app/context";
 
 type ExpenseModalProps = {
   isOpen: boolean;
@@ -57,6 +58,7 @@ export function ExpenseModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { userId } = useCurrentUser();
+  const { is_admin, branch_id } = useUserContext();
 
   useEffect(() => {
     if (isOpen) {
@@ -70,7 +72,7 @@ export function ExpenseModal({
           category: expense.category || "Supplies",
           expense_date:
             expense.expense_date || new Date().toISOString().split("T")[0],
-          branch_id: expense.branch_id || "",
+          branch_id: is_admin ? expense.branch_id || "" : branch_id,
         });
       } else {
         // Reset form for create mode
@@ -80,7 +82,7 @@ export function ExpenseModal({
           amount: "",
           category: "Supplies",
           expense_date: new Date().toISOString().split("T")[0],
-          branch_id: "",
+          branch_id: is_admin ? "" : branch_id,
         });
       }
       setErrors({});
@@ -148,7 +150,7 @@ export function ExpenseModal({
             p_amount: Number(formData.amount),
             p_category: formData.category as any,
             p_expense_date: formData.expense_date,
-            p_branch_id: branch.id,
+            p_branch_id: is_admin ? branch?.id : branch_id,
             p_created_by: userId!,
           })
         );
@@ -291,7 +293,7 @@ export function ExpenseModal({
             />
           </div>
 
-          <div>
+          <div className={is_admin ? "col-span-1" : "col-span-2"}>
             <Datepicker
               label="Expense Date *"
               value={
@@ -308,15 +310,17 @@ export function ExpenseModal({
             )}
           </div>
 
-          <div>
-            <Select
-              label="Branch"
-              options={branchOptions}
-              value={formData.branch_id}
-              onChange={(value) => handleInputChange("branch_id", value)}
-              disabled={mode === "view"}
-            />
-          </div>
+          {is_admin && (
+            <div>
+              <Select
+                label="Branch"
+                options={branchOptions}
+                value={formData.branch_id}
+                onChange={(value) => handleInputChange("branch_id", value)}
+                disabled={mode === "view"}
+              />
+            </div>
+          )}
         </div>
 
         {mode !== "view" && (
@@ -340,7 +344,7 @@ export function ExpenseModal({
         )}
 
         {mode === "view" && (
-          <div className="flex justify-end pt-6 border-t">
+          <div className="flex justify-end pt-6">
             <Button type="button" variant="outline" onClick={onClose}>
               Close
             </Button>

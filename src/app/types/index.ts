@@ -3,7 +3,8 @@
 // ====================================================================
 
 // Database types
-export * from './database';
+export * from "./database";
+export * from "./role";
 
 // Re-export commonly used types with shorter names
 export type {
@@ -19,5 +20,5 @@ export type {
   StaffViewType,
   OrderItemType,
   BranchStockType,
-  DashboardStatsType
-} from './database';
+  DashboardStatsType,
+} from "./database";
