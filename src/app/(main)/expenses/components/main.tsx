@@ -22,17 +22,7 @@ import {
 } from "../../dashboard/components/skeleton";
 import { useUserContext } from "@/app/context";
 
-interface ExpensesMainProps {
-  searchParams: {
-    search?: string;
-    startDate?: string;
-    endDate?: string;
-    branchId?: string;
-    status?: string;
-  };
-}
-
-export function ExpensesMain({ searchParams }: ExpensesMainProps) {
+export function ExpensesMain() {
   const [branches, setBranches] = useState<any[]>([]);
   const [stats, setStats] = useState<any>(null);
   const [categoryStats, setCategoryStats] = useState<any[]>([]);
@@ -57,7 +47,7 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
 
   // Filter states
   const [filters, setFilters] = useState<{ branch_id: string }>({
-    branch_id: searchParams.branchId || "",
+    branch_id: "",
   });
 
   const { is_admin, branch_id } = useUserContext();
@@ -65,14 +55,7 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
   // Fetch all data on component mount and when filters/pagination change
   useEffect(() => {
     fetchAllData();
-  }, [
-    currentPage,
-    itemsPerPage,
-    filters.branch_id,
-    searchParams.startDate,
-    searchParams.endDate,
-    searchParams.status,
-  ]);
+  }, [currentPage, itemsPerPage, filters.branch_id]);
 
   const fetchAllData = async () => {
     setLoading(true);
@@ -95,8 +78,6 @@ export function ExpensesMain({ searchParams }: ExpensesMainProps) {
       page: currentPage,
       limit: itemsPerPage,
       branchId: filters?.branch_id || branch_id,
-      startDate: searchParams.startDate || undefined,
-      endDate: searchParams.endDate || undefined,
     });
 
     if (result.data) {
