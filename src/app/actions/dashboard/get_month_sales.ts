@@ -34,7 +34,6 @@ export async function getMonthSales(
         .toISOString()
         .split("T")[0] + "T00:00:00.000Z";
 
-    console.log(monthStart, monthEnd);
     // Build queries with optional branch filter
     let paidQuery = supabase
       .from("sales")

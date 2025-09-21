@@ -156,6 +156,7 @@ export function ExpenseModal({
         );
 
         const results = await Promise.all(promises);
+        console.log(results);
 
         // Check if any failed
         const failed = results.filter((result) => result.error);

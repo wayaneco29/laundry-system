@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
+import moment from "moment";
 
 export type OrderStatusBreakdown = {
   status: string;
@@ -42,14 +43,25 @@ export const getOrderStatusBreakdown = async (
   const supabase = await createClient();
 
   try {
-    const start = startDate.toISOString().split("T")[0];
-    const end = endDate.toISOString().split("T")[0];
+    const today = new Date();
+    const monthStart =
+      (startDate || new Date(today.getFullYear(), today.getMonth(), 1))
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
+    const monthEnd =
+      moment(
+        endDate ||
+          new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59)
+      )
+        .add("day", 1)
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
 
     let query = supabase
       .from("view_orders")
       .select("order_status")
-      .gte("created_at", start)
-      .lte("created_at", end);
+      .gte("created_at", monthStart)
+      .lte("created_at", monthEnd);
 
     if (branchId && branchId !== "") {
       query = query.eq("branch_id", branchId);
@@ -101,14 +113,25 @@ export const getDailyOrderVolume = async (
   const supabase = await createClient();
 
   try {
-    const start = startDate.toISOString().split("T")[0];
-    const end = endDate.toISOString().split("T")[0];
+    const today = new Date();
+    const monthStart =
+      (startDate || new Date(today.getFullYear(), today.getMonth(), 1))
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
+    const monthEnd =
+      moment(
+        endDate ||
+          new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59)
+      )
+        .add("day", 1)
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
 
     let query = supabase
       .from("view_orders")
       .select("created_at, total_price")
-      .gte("created_at", start)
-      .lte("created_at", end);
+      .gte("created_at", monthStart)
+      .lte("created_at", monthEnd);
 
     if (branchId && branchId !== "") {
       query = query.eq("branch_id", branchId);
@@ -178,14 +201,25 @@ export const getOrderPerformanceMetrics = async (
   const supabase = await createClient();
 
   try {
-    const start = startDate.toISOString().split("T")[0];
-    const end = endDate.toISOString().split("T")[0];
+    const today = new Date();
+    const monthStart =
+      (startDate || new Date(today.getFullYear(), today.getMonth(), 1))
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
+    const monthEnd =
+      moment(
+        endDate ||
+          new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59)
+      )
+        .add("day", 1)
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
 
     let query = supabase
       .from("view_orders")
       .select("order_status, created_at, updated_at")
-      .gte("created_at", start)
-      .lte("created_at", end);
+      .gte("created_at", monthStart)
+      .lte("created_at", monthEnd);
 
     if (branchId && branchId !== "") {
       query = query.eq("branch_id", branchId);

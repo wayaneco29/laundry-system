@@ -73,7 +73,10 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
         yearlyResult,
         expensesResult,
       ] = await Promise.all([
-        getExpenseStats(),
+        getExpenseStats({
+          startDate: dateRange.startDate.toISOString().split("T")[0],
+          endDate: dateRange.endDate.toISOString().split("T")[0],
+        }),
         getExpensesByCategory({
           startDate: dateRange.startDate.toISOString().split("T")[0],
           endDate: dateRange.endDate.toISOString().split("T")[0],
