@@ -17,7 +17,6 @@ export async function getMonthSales(
 ): Promise<{ data: MonthlySalesData | null; error: string | null }> {
   const supabase = await createClient();
 
-  // T00:00:00.000Z
   try {
     // Use provided date range or default to current month
     const today = new Date();
