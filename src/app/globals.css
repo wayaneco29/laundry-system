@@ -20,6 +20,11 @@
   --font-mono: var(--font-montserrat);
 }
 
+.datepicker-dropdown {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
 #custom-sidebar-backdrop,
 #custom-modal-backdrop {
   inset: 0;

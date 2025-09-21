@@ -1,5 +1,6 @@
 "use client";
 
+import { Datepicker } from "@/app/components/common";
 import { CalendarIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { twMerge } from "tailwind-merge";
@@ -103,27 +104,26 @@ export function DateFilterSection({
 
         {/* Custom Date Inputs */}
         <div className="flex items-center gap-2 ml-auto">
-          <input
-            type="date"
+          <Datepicker
             value={dateRange.startDate.toISOString().split("T")[0]}
-            onChange={(e) => {
+            onChange={(newDate) => {
               onDateRangeChange({
                 ...dateRange,
-                startDate: new Date(e.target.value),
+                startDate: new Date(newDate),
               });
 
               setSelected(null);
             }}
             className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            // disableDate={(date) => date > new Date()}
           />
           <span className="text-gray-500">to</span>
-          <input
-            type="date"
+          <Datepicker
             value={dateRange.endDate.toISOString().split("T")[0]}
-            onChange={(e) => {
+            onChange={(newDate) => {
               onDateRangeChange({
                 ...dateRange,
-                endDate: new Date(e.target.value),
+                endDate: new Date(newDate),
               });
 
               setSelected(null);

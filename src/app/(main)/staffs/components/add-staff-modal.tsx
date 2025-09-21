@@ -295,8 +295,8 @@ export const AddStaffModal = ({
                   label="Date of Employment"
                   placeholder="Select employment date"
                   error={!!errors?.employment_date}
+                  dropdownPlacement="top"
                   {...field}
-                  icon={<Calendar />}
                 />
               </div>
             )}

@@ -188,6 +188,7 @@ export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
             {isUpdate ? "Update Promo" : "Add Promo"}
           </div>
         }
+        bodyClassName="!overflow-y-visible"
         isSubmitting={isSubmitting}
         onClose={handleModalClose}
       >
@@ -262,11 +263,11 @@ export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
               render={({ field, formState: { errors } }) => (
                 <div className="relative">
                   <Datepicker
-                    icon={<Calendar />}
                     disabled={isSubmitting}
                     label="Valid Until"
                     placeholder="Select expiry date"
                     error={!!errors.valid_until}
+                    dropdownPlacement="top"
                     {...field}
                   />
                 </div>
