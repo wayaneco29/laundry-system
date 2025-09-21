@@ -208,9 +208,6 @@ const chartOptions: ApexOptions = {
   // },
 };
 
-const defaultDonutChartSeries = [1000, 200, 2500];
-const defaultDonutChartLabels = ["Detergent", "Water", "Electricity"];
-
 const donutChartOptions = {
   colors: ["#FF9F29", "#487FFF", "#45B369", "#EF4444", "#8B5CF6", "#10B981"],
   legend: {
@@ -467,13 +464,12 @@ export function MainDashboardPage({
   ];
 
   // Prepare dynamic donut chart data
-  const hasExpenseData = expensesByCategory.length > 0;
-  const donutChartSeries = hasExpenseData
-    ? expensesByCategory.map((item) => Number(item.total_amount || 0))
-    : defaultDonutChartSeries;
-  const donutChartLabels = hasExpenseData
-    ? expensesByCategory.map((item) => item.category_name || "Unknown")
-    : defaultDonutChartLabels;
+  const donutChartSeries = expensesByCategory.map((item) =>
+    Number(item.total_amount || 0)
+  );
+  const donutChartLabels = expensesByCategory.map(
+    (item) => item.category_name || "Unknown"
+  );
 
   const dynamicDonutChartOptions = {
     ...donutChartOptions,

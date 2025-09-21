@@ -10,7 +10,14 @@ import {
   FunnelIcon,
   BanknotesIcon,
 } from "@heroicons/react/24/outline";
-import { MonthlySalesData, MonthlySalesChartData } from "@/app/actions";
+import {
+  MonthlySalesData,
+  MonthlySalesChartData,
+  getMonthSales,
+  getMonthlyCustomers,
+  getMonthlySalesChart,
+  getTodayCustomers,
+} from "@/app/actions";
 import { ApexChart } from "@/app/components/charts/apex-chart";
 import { SalesReportSection } from "./sales-report-section";
 import { CustomerReportSection } from "./customer-report-section";
@@ -39,6 +46,14 @@ export function MainReportsPage({
   monthlyCustomersCount,
   todayCustomersCount,
 }: MainReportsPageProps) {
+  const [initialMonthlySalesData, setInitialMonthlySalesData] =
+    useState<MonthlySalesData | null>(monthlySalesData);
+  const [initialChartData, setInitialChartData] =
+    useState<MonthlySalesChartData | null>(chartData);
+  const [initialMonthlyCustomerCount, setInitialMonthlyCustomerCount] =
+    useState<number>(monthlyCustomersCount);
+  const [initialTodayCustomersCount, setInitialTodayCustomersCount] =
+    useState<number>(todayCustomersCount);
   const [activeTab, setActiveTab] = useState<
     "overview" | "sales" | "customers" | "inventory" | "orders" | "expenses"
   >("overview");
@@ -130,6 +145,43 @@ export function MainReportsPage({
   // Add a loading state for overview
   const isOverviewLoading = !monthlySalesData || !chartData;
 
+  const [isLoading, setIsLoading] = useState<boolean>(isOverviewLoading);
+
+  useEffect(() => {
+    const getReportsData = async (dateRange: any) => {
+      setIsLoading(true);
+      const [
+        xMonthlySalesData,
+        xChartData,
+        xMonthlyCustomersCount,
+        xTodayCustomersCount,
+      ] = await Promise.all([
+        getMonthSales(undefined, dateRange?.startDate, dateRange?.endDate),
+        getMonthlySalesChart(
+          undefined,
+          dateRange?.startDate,
+          dateRange?.endDate
+        ),
+        getMonthlyCustomers(
+          undefined,
+          dateRange?.startDate,
+          dateRange?.endDate
+        ),
+        getTodayCustomers(undefined),
+      ]);
+
+      console.log(xMonthlySalesData?.data);
+      setInitialMonthlySalesData(xMonthlySalesData?.data);
+      setInitialChartData(xChartData?.data);
+      setInitialMonthlyCustomerCount(xMonthlyCustomersCount?.count);
+      setInitialTodayCustomersCount(xTodayCustomersCount?.count);
+
+      setIsLoading(false);
+    };
+
+    getReportsData(dateRange);
+  }, [dateRange]);
+
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-8">
       {/* Header */}
@@ -185,14 +237,14 @@ export function MainReportsPage({
       {/* Content Sections */}
       <div className="flex-1">
         {activeTab === "overview" &&
-          (isOverviewLoading ? (
+          (isLoading ? (
             <SalesSectionSkeleton />
           ) : (
             <OverviewSection
-              monthlySalesData={monthlySalesData}
-              chartData={chartData}
-              monthlyCustomersCount={monthlyCustomersCount}
-              todayCustomersCount={todayCustomersCount}
+              monthlySalesData={initialMonthlySalesData}
+              chartData={initialChartData}
+              monthlyCustomersCount={initialMonthlyCustomerCount}
+              todayCustomersCount={initialTodayCustomersCount}
             />
           ))}
 
