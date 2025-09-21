@@ -14,11 +14,13 @@ import {
   User,
   Package,
   Loader2,
+  CreditCard,
 } from "lucide-react";
 import * as Yup from "yup";
 import { Button, Input, Select } from "@/app/components/common";
 import { PaymentModal } from "../../components/payment-modal";
 import { addOrder, getAllBranches, getAllCustomers } from "@/app/actions";
+import { getAvailableInventory } from "@/app/actions/inventory";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import moment from "moment";
 import { useUserContext } from "@/app/context";
@@ -37,6 +39,8 @@ const schema = Yup.object().shape({
   customerId: Yup.string().required(),
   branchId: Yup.string().required(),
   services: Yup.array().min(1).required(),
+  modeOfPayment: Yup.string().required("Payment mode is required"),
+  inventoryUsage: Yup.array().optional(),
 });
 
 export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
@@ -49,18 +53,24 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const [searchServices, setSearchServices] = useState("");
   const [customers, setCustomers] = useState<Array<any>>([]);
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
+  const [availableInventory, setAvailableInventory] = useState<Array<any>>([]);
+  const [showInventorySection, setShowInventorySection] = useState<boolean>(false);
 
   const { control, handleSubmit, setValue, watch, reset, formState } = useForm({
     defaultValues: {
       customerId: "",
       branchId: branch_id || "",
       services: [],
+      modeOfPayment: "",
+      inventoryUsage: [],
     },
     mode: "onChange",
     resolver: yupResolver(schema),
   });
 
   const services = watch("services", []);
+  const inventoryUsage = watch("inventoryUsage", []);
+  const selectedBranchId = watch("branchId");
 
   const grossTotal = services?.reduce(
     (acc, service) => acc + (service?.price * (service?.quantity || 0) || 0),
@@ -96,6 +106,24 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
     fetchCustomers();
   }, []);
 
+  // Load available inventory when branch changes
+  useEffect(() => {
+    const loadInventory = async () => {
+      if (!selectedBranchId) return;
+      
+      try {
+        const { success, data } = await getAvailableInventory(selectedBranchId);
+        if (success) {
+          setAvailableInventory(data || []);
+        }
+      } catch (error) {
+        console.error("Error loading inventory:", error);
+      }
+    };
+
+    loadInventory();
+  }, [selectedBranchId]);
+
   // Format customers for Select component
   const customerOptions = useMemo(() => {
     return customers.map((customer) => ({
@@ -106,29 +134,80 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
   const onSubmit = handleSubmit(async (payload) => {
     try {
-      const { data, error } = await addOrder({
+      // Validate required fields before submission
+      if (!payload.customerId) {
+        toast.error("Please select a customer");
+        return;
+      }
+      
+      if (!payload.branchId && !branch_id) {
+        toast.error("Please select a branch");
+        return;
+      }
+      
+      if (!payload.services || payload.services.length === 0) {
+        toast.error("Please select at least one service");
+        return;
+      }
+      
+      if (!payload.modeOfPayment) {
+        toast.error("Please select a payment mode");
+        return;
+      }
+      
+      if (!userId) {
+        toast.error("User not authenticated");
+        return;
+      }
+
+      // Transform inventory usage to match database function format
+      const inventoryUsagePayload = payload?.inventoryUsage?.length > 0 
+        ? payload.inventoryUsage.map((item: any) => ({
+            stock_id: item.id,
+            quantity: item.quantity
+          }))
+        : undefined;
+
+      const orderPayload = {
         p_branch_id: payload?.branchId || branch_id,
-        p_customer_id: payload?.customerId, // Use selected customer ID
-        p_staff_id: userId!, // Use authenticated user ID
+        p_customer_id: payload?.customerId,
+        p_staff_id: userId,
         p_items: payload?.services,
         p_order_date: moment().toISOString(),
-        p_order_status: "Pending",
-        p_payment_status: "Unpaid",
+        p_order_status: "Pending" as const,
+        p_payment_status: "Paid" as const,
         p_total_price: grossTotal,
-      });
+        p_mode_of_payment: payload?.modeOfPayment,
+        p_inventory_usage: inventoryUsagePayload,
+      };
 
-      if (error) throw error;
+      console.log("Submitting order with payload:", orderPayload);
 
-      toast.success("Create order successfully");
-      // Clear selected services and customer after successful order
+      const { data, error } = await addOrder(orderPayload);
 
+      if (error) {
+        console.error("Order submission error:", error);
+        throw new Error(typeof error === 'string' ? error : 'Failed to create order');
+      }
+
+      const inventoryMessage = inventoryUsagePayload?.length 
+        ? ` and ${inventoryUsagePayload.length} inventory items deducted`
+        : "";
+      
+      toast.success(`Order created and payment processed successfully${inventoryMessage}`);
+
+      // Reset form
+      reset();
+      
       // Add a small delay for better UX (optional)
       setTimeout(() => {
         // Redirect to orders page
         router.push("/orders");
       }, 500);
     } catch (_error) {
-      toast.error("Failed to create order.");
+      console.error("Form submission error:", _error);
+      const errorMessage = _error instanceof Error ? _error.message : "Failed to create order";
+      toast.error(errorMessage);
     }
   });
 
@@ -175,6 +254,46 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
       value: branch.id,
     })),
   ];
+
+  const paymentModeOptions = [
+    { label: "Cash", value: "Cash" },
+    { label: "GCash", value: "GCash" },
+  ];
+
+  // Inventory management functions
+  const addInventoryUsage = (inventoryItem: any) => {
+    const currentUsage = watch("inventoryUsage", []);
+    const existingItem = currentUsage.find((item: any) => item.id === inventoryItem.id);
+    
+    if (!existingItem) {
+      setValue("inventoryUsage", [
+        ...currentUsage,
+        { ...inventoryItem, quantity: 1 }
+      ]);
+    }
+  };
+
+  const updateInventoryQuantity = (itemId: string, newQuantity: number) => {
+    const currentUsage = watch("inventoryUsage", []);
+    const availableItem = availableInventory.find(item => item.id === itemId);
+    
+    if (newQuantity < 1 || !availableItem) return;
+    if (newQuantity > availableItem.availableQuantity) {
+      toast.error(`Only ${availableItem.availableQuantity} units available for ${availableItem.name}`);
+      return;
+    }
+
+    const updatedUsage = currentUsage.map((item: any) =>
+      item.id === itemId ? { ...item, quantity: newQuantity } : item
+    );
+    setValue("inventoryUsage", updatedUsage);
+  };
+
+  const removeInventoryUsage = (itemId: string) => {
+    const currentUsage = watch("inventoryUsage", []);
+    const filteredUsage = currentUsage.filter((item: any) => item.id !== itemId);
+    setValue("inventoryUsage", filteredUsage);
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -386,6 +505,141 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                     );
                   }}
                 />
+
+                {/* Payment Mode Selection */}
+                <Controller
+                  name="modeOfPayment"
+                  control={control}
+                  render={({ field, fieldState: { error } }) => (
+                    <div className="p-6 pt-0 bg-gray-50">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <CreditCard className="w-4 h-4 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Payment Mode
+                        </span>
+                      </div>
+                      <Select
+                        placeholder="Select payment mode..."
+                        options={paymentModeOptions}
+                        isDisabled={formState?.isSubmitting}
+                        containerClassName="w-full"
+                        {...field}
+                        onChange={(data: any) => {
+                          field?.onChange(data?.value);
+                        }}
+                      />
+                      {!!error && (
+                        <p className="text-xs text-red-500 mt-1">
+                          Please select a payment mode to continue
+                        </p>
+                      )}
+                    </div>
+                  )}
+                />
+
+                {/* Inventory Usage Section (Optional) */}
+                <div className="p-6 pt-0 bg-gray-50 border-t">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-2">
+                      <Package className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Inventory Usage (Optional)
+                      </span>
+                    </div>
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowInventorySection(!showInventorySection)}
+                      disabled={formState?.isSubmitting || !selectedBranchId}
+                      className="text-blue-600 hover:text-blue-700"
+                    >
+                      {showInventorySection ? "Hide" : "Add Items"}
+                    </Button>
+                  </div>
+
+                  {/* Available Inventory Items */}
+                  {showInventorySection && (
+                    <div className="space-y-3 max-h-40 overflow-y-auto mb-3">
+                      {availableInventory.length === 0 ? (
+                        <p className="text-sm text-gray-500 text-center py-4">
+                          No inventory items available for this branch
+                        </p>
+                      ) : (
+                        <div className="grid grid-cols-1 gap-2">
+                          {availableInventory
+                            .filter(item => !inventoryUsage.find((usage: any) => usage.id === item.id))
+                            .map((item) => (
+                              <button
+                                key={item.id}
+                                type="button"
+                                onClick={() => !formState?.isSubmitting && addInventoryUsage(item)}
+                                disabled={formState?.isSubmitting}
+                                className="p-2 text-left bg-white border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                              >
+                                <div className="flex justify-between items-center">
+                                  <span className="text-sm font-medium text-gray-900">{item.name}</span>
+                                  <span className="text-xs text-gray-500">{item.availableQuantity} available</span>
+                                </div>
+                              </button>
+                            ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Selected Inventory Items */}
+                  {inventoryUsage.length > 0 && (
+                    <div className="space-y-2">
+                      <h4 className="text-sm font-medium text-gray-700">Items to Deduct:</h4>
+                      {inventoryUsage.map((item: any) => (
+                        <div key={item.id} className="bg-white rounded-lg p-3 border">
+                          <div className="flex items-center justify-between mb-2">
+                            <div className="flex-1 min-w-0">
+                              <span className="text-sm font-medium text-gray-900 truncate block">
+                                {item.name}
+                              </span>
+                              <span className="text-xs text-gray-500">
+                                {item.availableQuantity} available
+                              </span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => !formState?.isSubmitting && removeInventoryUsage(item.id)}
+                              disabled={formState?.isSubmitting}
+                              className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() => !formState?.isSubmitting && updateInventoryQuantity(item.id, item.quantity - 1)}
+                              disabled={formState?.isSubmitting || item.quantity <= 1}
+                              className="p-1 text-gray-600 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium text-gray-700">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => !formState?.isSubmitting && updateInventoryQuantity(item.id, item.quantity + 1)}
+                              disabled={formState?.isSubmitting || item.quantity >= item.availableQuantity}
+                              className="p-1 text-gray-600 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
                 {/* Selected Services */}
                 <div className="p-6 pt-0">
                   {services.length === 0 ? (
@@ -492,6 +746,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                         onClick={() => {
                           setValue("services", []);
                           setValue("customerId", "");
+                          setValue("modeOfPayment", "");
+                          setValue("inventoryUsage", []);
 
                           if (is_admin) {
                             setValue("branchId", "");
@@ -505,18 +761,17 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                       </Button>
                       <Button
                         type="submit"
-                        // disabled={isConfirm}
-                        className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {formState?.isSubmitting ? (
                           <>
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            <span>Confirming...</span>
+                            <span>Processing Payment...</span>
                           </>
                         ) : (
                           <>
-                            <Check className="w-4 h-4" />
-                            <span>Confirm</span>
+                            <CreditCard className="w-4 h-4" />
+                            <span>Pay & Confirm Order</span>
                           </>
                         )}
                       </Button>

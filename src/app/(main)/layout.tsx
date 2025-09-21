@@ -2,6 +2,7 @@ import { PropsWithChildren } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/app/utils/supabase/server";
 import { SidebarContextProvider, UserContextProvided } from "@/app/context";
+import StaffShiftProvider from "@/app/components/providers/staff-shift-provider";
 
 export default async function MainLayout(props: PropsWithChildren) {
   const supabase = await createClient();
@@ -22,7 +23,11 @@ export default async function MainLayout(props: PropsWithChildren) {
 
   return (
     <UserContextProvided user={logged_in_user as any}>
-      <SidebarContextProvider>{props?.children}</SidebarContextProvider>
+      <SidebarContextProvider>
+        <StaffShiftProvider>
+          {props?.children}
+        </StaffShiftProvider>
+      </SidebarContextProvider>
     </UserContextProvided>
   );
 }

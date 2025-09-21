@@ -11,6 +11,8 @@ import {
   Eye,
   Calendar,
   User,
+  Phone,
+  Mail,
   Hash,
   Loader2,
   Search,
@@ -440,6 +442,22 @@ export const OrdersTable = ({
                               {order?.customer_name || "N/A"}
                             </div>
                           </div>
+                          {order?.phone && (
+                            <div className="flex items-center">
+                              <Phone className="h-4 w-4 text-gray-400 mr-2" />
+                              <div className="text-sm font-medium text-gray-900">
+                                {order?.phone || "N/A"}
+                              </div>
+                            </div>
+                          )}
+                          {order?.email && (
+                            <div className="flex items-center">
+                              <Mail className="h-4 w-4 text-gray-400 mr-2" />
+                              <div className="text-sm font-medium text-gray-900">
+                                {order?.email || "N/A"}
+                              </div>
+                            </div>
+                          )}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <div className="flex items-center">

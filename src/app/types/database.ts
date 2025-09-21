@@ -19,6 +19,7 @@ export type StockStatus = 'In Stock' | 'Low Stock' | 'Critical' | 'Out of Stock'
 export type ExpenseCategory = 'Supplies' | 'Equipment' | 'Utilities' | 'Rent' | 'Salaries' | 'Marketing' | 'Maintenance' | 'Transportation' | 'Insurance' | 'Other';
 export type ExpenseStatus = 'Pending' | 'Approved' | 'Rejected' | 'Paid';
 export type PaymentMethod = 'Cash' | 'Bank Transfer' | 'Credit Card' | 'Check' | 'Other';
+export type PaymentMode = 'Cash' | 'GCash';
 export type RecurringFrequency = 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
 
 // ====================================================================
@@ -117,6 +118,8 @@ export interface Order {
   payment_status: PaymentStatus;
   order_date: Timestamp;
   total_price: number;
+  mode_of_payment?: PaymentMode;
+  staff_shift_id?: UUID;
   created_at: Timestamp;
   updated_at: Timestamp;
   created_by?: UUID;
@@ -171,6 +174,34 @@ export interface Expense {
   updated_at: Timestamp;
   created_by?: UUID;
   updated_by?: UUID;
+}
+
+// STAFF SHIFTS Table
+export interface StaffShift {
+  id: UUID;
+  primary_staff_id: UUID;
+  partner_staff_id?: UUID;
+  branch_id: UUID;
+  shift_date: string; // DATE format: YYYY-MM-DD
+  start_time: Timestamp;
+  end_time?: Timestamp;
+  is_active: boolean;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+  created_by?: UUID;
+  updated_by?: UUID;
+}
+
+// INVENTORY USAGE Table
+export interface InventoryUsage {
+  id: UUID;
+  order_id: string;
+  stock_id: UUID;
+  branch_id: UUID;
+  quantity_used: number;
+  usage_date: Timestamp;
+  created_at: Timestamp;
+  created_by?: UUID;
 }
 
 // ====================================================================
@@ -276,7 +307,22 @@ export interface AddOrderParams {
   p_total_price: number;
   p_order_status?: OrderStatus;
   p_payment_status?: PaymentStatus;
+  p_mode_of_payment?: PaymentMode;
+  p_inventory_usage?: InventoryUsageItem[];
   p_created_by?: UUID;
+}
+
+// Staff Shift Parameters
+export interface StartStaffShiftParams {
+  p_primary_staff_id: UUID;
+  p_branch_id: UUID;
+  p_partner_staff_id: UUID;
+}
+
+// Inventory Usage Item
+export interface InventoryUsageItem {
+  stock_id: UUID;
+  quantity: number;
 }
 
 // ====================================================================
@@ -348,6 +394,35 @@ export interface MonthlyCustomers {
   month_number: number;
   new_customers: number;
   total_customers: number;
+}
+
+// Active Staff Shift Function
+export interface ActiveStaffShift {
+  shift_id: UUID;
+  partner_staff_id?: UUID;
+  partner_name?: string;
+  branch_id: UUID;
+  branch_name: string;
+  start_time: Timestamp;
+}
+
+// Staff Sales Report Function
+export interface StaffSalesReport {
+  staff_name: string;
+  partner_name: string;
+  total_orders: number;
+  total_sales: number;
+  cash_sales: number;
+  gcash_sales: number;
+  commission_amount: number;
+  inventory_usage: InventoryUsageReport[];
+}
+
+// Inventory Usage Report
+export interface InventoryUsageReport {
+  stock_name: string;
+  quantity_used: number;
+  usage_date: Timestamp;
 }
 
 // ====================================================================
@@ -429,6 +504,15 @@ export interface OrderFormData {
   items: OrderItem[];
   order_status?: OrderStatus;
   payment_status?: PaymentStatus;
+  mode_of_payment?: PaymentMode;
+  inventory_usage?: InventoryUsageItem[];
+}
+
+// Staff Shift Form
+export interface StaffShiftFormData {
+  primary_staff_id: UUID;
+  partner_staff_id?: UUID;
+  branch_id: UUID;
 }
 
 // ====================================================================
@@ -489,6 +573,8 @@ export type {
   Order as OrderType,
   Promo as PromoType,
   Expense as ExpenseType,
+  StaffShift as StaffShiftType,
+  InventoryUsage as InventoryUsageType,
   
   // View types
   CustomerView as CustomerViewType,
@@ -497,14 +583,21 @@ export type {
   StaffView as StaffViewType,
   ExpenseView as ExpenseViewType,
   
+  // Report types
+  StaffSalesReport as StaffSalesReportType,
+  ActiveStaffShift as ActiveStaffShiftType,
+  InventoryUsageReport as InventoryUsageReportType,
+  
   // Other common types
   OrderItem as OrderItemType,
   BranchStock as BranchStockType,
   DashboardStats as DashboardStatsType,
+  InventoryUsageItem as InventoryUsageItemType,
   
   // Enum types
   ExpenseCategory as ExpenseCategoryType,
   ExpenseStatus as ExpenseStatusType,
   PaymentMethod as PaymentMethodType,
+  PaymentMode as PaymentModeType,
   RecurringFrequency as RecurringFrequencyType
 };

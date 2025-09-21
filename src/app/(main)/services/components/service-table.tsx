@@ -89,7 +89,7 @@ export const ServiceTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Status
               </th>
-              <th className="sticky right-0 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="sticky right-0 w-28 text-center bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -148,10 +148,11 @@ export const ServiceTable = ({
                       {service.status}
                     </span>
                   </td>
-                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                  <td className="sticky right-0px-6 py-4 whitespace-nowrap text-center text-sm font-medium shadow-sm">
                     <button
+                      type="button"
                       onClick={() => onEdit(service)}
-                      className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1"
+                      className="text-blue-600 inline-flex items-center gap-x-1 cursor-pointer"
                     >
                       <Edit2 className="h-4 w-4" />
                       Edit

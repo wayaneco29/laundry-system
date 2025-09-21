@@ -21,8 +21,7 @@ export async function loginUser({
       .single();
 
     if (!data?.email)
-      throw `Unable to find username ${username} in the auth users.
-  `;
+      throw `Unable to find username ${username} in the auth users.`;
 
     const { error } = await supabase.auth.signInWithPassword({
       email: data?.email,

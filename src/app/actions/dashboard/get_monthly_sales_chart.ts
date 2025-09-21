@@ -1,5 +1,7 @@
 "use server";
 
+import moment from "moment";
+
 import { createClient } from "@/app/utils/supabase/server";
 
 export type MonthlySalesChartData = {
@@ -9,7 +11,11 @@ export type MonthlySalesChartData = {
   useThousands: boolean;
 };
 
-export async function getMonthlySalesChart(branchId?: string, startDate?: Date, endDate?: Date): Promise<{
+export async function getMonthlySalesChart(
+  branchId?: string,
+  startDate?: Date,
+  endDate?: Date
+): Promise<{
   data: MonthlySalesChartData | null;
   error: string | null;
 }> {
@@ -18,21 +24,30 @@ export async function getMonthlySalesChart(branchId?: string, startDate?: Date, 
   try {
     // Use provided date range or default to current year
     const today = new Date();
-    const yearStart = startDate || new Date(today.getFullYear(), 0, 1);
-    const yearEnd = endDate || new Date(today.getFullYear(), 11, 31, 23, 59, 59);
-
+    const monthStart =
+      (startDate || new Date(today.getFullYear(), today.getMonth(), 1))
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
+    const monthEnd =
+      moment(
+        endDate ||
+          new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59)
+      )
+        .add("day", 1)
+        .toISOString()
+        .split("T")[0] + "T00:00:00.000Z";
     // Build query with optional branch filter
     let query = supabase
       .from("sales")
       .select("total_price, created_at")
-      .gte("created_at", yearStart.toISOString())
-      .lte("created_at", yearEnd.toISOString())
+      .gte("created_at", monthStart)
+      .lte("created_at", monthEnd)
       .eq("status", "Paid"); // Only include paid sales for the chart
-    
+
     if (branchId) {
       query = query.eq("branch_id", branchId);
     }
-    
+
     const { data: salesData, error } = await query;
 
     if (error) throw error;
