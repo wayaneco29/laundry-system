@@ -148,7 +148,7 @@ export const ServiceTable = ({
                       {service.status}
                     </span>
                   </td>
-                  <td className="sticky right-0px-6 py-4 whitespace-nowrap text-center text-sm font-medium shadow-sm">
+                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-center text-sm font-medium shadow-sm">
                     <button
                       type="button"
                       onClick={() => onEdit(service)}

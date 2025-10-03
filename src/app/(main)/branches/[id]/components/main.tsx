@@ -181,7 +181,7 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
             </div>
           </div>
           <div className="col-span-1">
-            <div className="bg-white rounded-md shadow-md p-4 mt-10">
+            <div className="bg-white rounded-md shadow-md p-4 mt-5 xl:mt-0">
               <div className="flex items-center justify-between mb-4">
                 <div className="text-blue-600 mb-4 font-medium">Inventory</div>
                 <Button
@@ -256,7 +256,7 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
         <Controller
           control={stockMethods?.control}
           name="id"
-          render={() => <Input hidden />}
+          render={() => <Input containerClassName="!hidden" />}
         />
         <div className="grid grid-cols-1 mb-4">
           <div className="col-span-1">

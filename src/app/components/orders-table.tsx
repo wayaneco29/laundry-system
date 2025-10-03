@@ -17,6 +17,10 @@ import {
   Loader2,
   Search,
   MapPin,
+  LocateIcon,
+  PinIcon,
+  LocationEdit,
+  Globe,
 } from "lucide-react";
 
 import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
@@ -417,10 +421,11 @@ export const OrdersTable = ({
                       >
                         <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <div className="flex items-center">
-                            <Hash className="h-5 w-5 text-gray-400 mr-3" />
+                            {/* <Hash className="h-5 w-5 text-gray-400 mr-3" /> */}
                             <div>
-                              <div className="text-sm font-medium text-gray-900">
-                                #{order?.order_id || "N/A"}
+                              <div className="flex items-center text-sm font-medium text-gray-900">
+                                <Hash className="h-4 w-4 text-gray-400 mr-1" />
+                                {order?.order_id || "N/A"}
                               </div>
                               <div className="flex items-center text-sm text-gray-500">
                                 <Calendar className="h-4 w-4 mr-1" />
@@ -431,6 +436,11 @@ export const OrdersTable = ({
                                       )
                                     : "Invalid Date"
                                   : "N/A"}
+                              </div>
+                              <div className="flex items-center text-sm font-medium text-gray-900">
+                                <PinIcon className="h-4 w-4 text-gray-400 mr-1" />
+                                {console.log(order)}
+                                {order?.customer || "N/A"}
                               </div>
                             </div>
                           </div>

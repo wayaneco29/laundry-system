@@ -244,7 +244,12 @@ export function ExpenseModal({
   };
 
   return (
-    <Modal show={isOpen} onClose={onClose} title={getModalTitle()}>
+    <Modal
+      show={isOpen}
+      onClose={onClose}
+      title={getModalTitle()}
+      bodyClassName="!overflow-y-visible"
+    >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Basic Information */}
@@ -296,6 +301,7 @@ export function ExpenseModal({
 
           <div className={is_admin ? "col-span-1" : "col-span-2"}>
             <Datepicker
+              dropdownPlacement="top"
               label="Expense Date *"
               value={
                 formData.expense_date

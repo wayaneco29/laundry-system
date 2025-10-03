@@ -24,6 +24,10 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
     address: "",
     employment_date: "",
     created_by: "",
+    username: "",
+    password: "",
+    branch_id: "",
+    role_id: "",
   });
 
   useEffect(() => {
@@ -81,7 +85,11 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
                 email: staff?.email,
                 address: staff?.address,
                 employment_date: staff?.employment_date,
-                created_by: "",
+                created_by: staff?.created_by,
+                branch_id: staff?.branch_id,
+                password: staff?.password,
+                role_id: staff?.role_id,
+                username: staff?.username,
               });
               setShowModal(true);
             }}
@@ -89,6 +97,7 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
         </div>
       </div>
       <AddStaffModal
+        initialValues={initialValues}
         showModal={showModal}
         onClose={() => {
           setInitialValues({
@@ -100,6 +109,10 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
             address: "",
             employment_date: "",
             created_by: "",
+            username: "",
+            password: "",
+            branch_id: "",
+            role_id: "",
           });
           setShowModal(false);
         }}

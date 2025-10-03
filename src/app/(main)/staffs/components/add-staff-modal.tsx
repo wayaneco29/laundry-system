@@ -48,7 +48,6 @@ export const AddStaffModal = ({
   const {
     reset,
     control,
-    watch,
     handleSubmit,
     formState: { isSubmitting, isDirty },
   } = useForm({
@@ -100,7 +99,7 @@ export const AddStaffModal = ({
       title={
         <div className="flex items-center gap-2">
           <UserCircle2 className="w-5 h-5" />
-          Add Staff
+          {`${initialValues?.username ? "Edit" : "Add"}`} Staff
         </div>
       }
       isSubmitting={isSubmitting}
@@ -325,7 +324,7 @@ export const AddStaffModal = ({
                   p_middle_name: newData?.middle_name,
                   p_last_name: newData?.last_name,
                   p_phone: newData?.phone,
-                  p_email: newData?.email || "",
+                  p_email: newData?.email || `${newData?.first_name}@gmail.com`,
                   p_address: newData?.address,
                   p_employment_date: newData?.employment_date,
                   p_created_by: userId!,
@@ -334,7 +333,7 @@ export const AddStaffModal = ({
                   p_branch_id: newData?.branch_id,
                   p_role_id: newData?.role_id,
                 });
-
+                console.log(error);
                 if (error) throw error;
 
                 handleModalClose();
