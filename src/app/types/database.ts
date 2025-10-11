@@ -11,16 +11,44 @@ export type Timestamp = string;
 // ENUM TYPES (matching your PostgreSQL ENUMs)
 // ====================================================================
 
-export type OrderStatus = 'Pending' | 'Ongoing' | 'Ready for Pickup' | 'Picked up';
-export type PaymentStatus = 'Paid' | 'Unpaid';
-export type ServiceStatus = 'Active' | 'Inactive';
-export type PromoStatus = 'Pending' | 'Active' | 'Expired' | 'Closed' | 'Deleted';
-export type StockStatus = 'In Stock' | 'Low Stock' | 'Critical' | 'Out of Stock';
-export type ExpenseCategory = 'Supplies' | 'Equipment' | 'Utilities' | 'Rent' | 'Salaries' | 'Marketing' | 'Maintenance' | 'Transportation' | 'Insurance' | 'Other';
-export type ExpenseStatus = 'Pending' | 'Approved' | 'Rejected' | 'Paid';
-export type PaymentMethod = 'Cash' | 'Bank Transfer' | 'Credit Card' | 'Check' | 'Other';
-export type PaymentMode = 'Cash' | 'GCash';
-export type RecurringFrequency = 'Weekly' | 'Monthly' | 'Quarterly' | 'Yearly';
+export type OrderStatus =
+  | "Pending"
+  | "Ongoing"
+  | "Ready for Pickup"
+  | "Picked up";
+export type PaymentStatus = "Paid" | "Unpaid";
+export type ServiceStatus = "Active" | "Inactive";
+export type PromoStatus =
+  | "Pending"
+  | "Active"
+  | "Expired"
+  | "Closed"
+  | "Deleted";
+export type StockStatus =
+  | "In Stock"
+  | "Low Stock"
+  | "Critical"
+  | "Out of Stock";
+export type ExpenseCategory =
+  | "Supplies"
+  | "Equipment"
+  | "Utilities"
+  | "Rent"
+  | "Salaries"
+  | "Marketing"
+  | "Maintenance"
+  | "Transportation"
+  | "Insurance"
+  | "Other";
+export type ExpenseStatus = "Pending" | "Approved" | "Rejected" | "Paid";
+export type PaymentMethod =
+  | "Cash"
+  | "Bank Transfer"
+  | "Credit Card"
+  | "Check"
+  | "Other";
+export type PaymentMode = "Cash" | "GCash";
+export type RecurringFrequency = "Weekly" | "Monthly" | "Quarterly" | "Yearly";
 
 // ====================================================================
 // DATABASE TABLE TYPES
@@ -82,6 +110,7 @@ export interface Customer {
 // STAFFS Table
 export interface Staff {
   id: UUID;
+  user_id: string;
   first_name: string;
   middle_name?: string;
   last_name: string;
@@ -316,7 +345,7 @@ export interface AddOrderParams {
 export interface StartStaffShiftParams {
   p_primary_staff_id: UUID;
   p_branch_id: UUID;
-  p_partner_staff_id: UUID;
+  p_partner_staff_id?: UUID;
 }
 
 // Inventory Usage Item
@@ -525,7 +554,7 @@ export interface SearchParams {
   limit?: number;
   offset?: number;
   sort_by?: string;
-  sort_order?: 'asc' | 'desc';
+  sort_order?: "asc" | "desc";
 }
 
 // Filter Parameters
@@ -548,7 +577,7 @@ export interface TableColumn {
 // Modal State
 export interface ModalState {
   isOpen: boolean;
-  mode: 'create' | 'edit' | 'view';
+  mode: "create" | "edit" | "view";
   data?: any;
 }
 
@@ -575,29 +604,29 @@ export type {
   Expense as ExpenseType,
   StaffShift as StaffShiftType,
   InventoryUsage as InventoryUsageType,
-  
+
   // View types
   CustomerView as CustomerViewType,
   OrderView as OrderViewType,
   ServiceView as ServiceViewType,
   StaffView as StaffViewType,
   ExpenseView as ExpenseViewType,
-  
+
   // Report types
   StaffSalesReport as StaffSalesReportType,
   ActiveStaffShift as ActiveStaffShiftType,
   InventoryUsageReport as InventoryUsageReportType,
-  
+
   // Other common types
   OrderItem as OrderItemType,
   BranchStock as BranchStockType,
   DashboardStats as DashboardStatsType,
   InventoryUsageItem as InventoryUsageItemType,
-  
+
   // Enum types
   ExpenseCategory as ExpenseCategoryType,
   ExpenseStatus as ExpenseStatusType,
   PaymentMethod as PaymentMethodType,
   PaymentMode as PaymentModeType,
-  RecurringFrequency as RecurringFrequencyType
+  RecurringFrequency as RecurringFrequencyType,
 };

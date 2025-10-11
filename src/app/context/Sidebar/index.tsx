@@ -32,6 +32,7 @@ import { LogoutButton } from "@/app/components/auth/logout-button";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { ROLE_ADMIN, ROLE_STAFF } from "@/app/types";
 import { useUserContext } from "../UserContext";
+import { SimpleShiftStatus } from "@/app/components/staff/simple-shift-status";
 
 type SidebarContextType = Record<string, never>;
 
@@ -273,8 +274,13 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
               </button>
             </div>
 
-            {/* User Profile */}
+            {/* Co-worker Status and User Profile */}
             <div className="flex items-center gap-3">
+              {/* Co-worker Status Indicator for Staff */}
+              {role_name === ROLE_STAFF && (
+                <SimpleShiftStatus />
+              )}
+              
               <div className="hidden sm:block text-right">
                 <div className="text-sm font-semibold text-slate-900">
                   {userLoading

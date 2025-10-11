@@ -15,6 +15,7 @@ import {
   Package,
   Loader2,
   CreditCard,
+  AlertTriangle,
 } from "lucide-react";
 import * as Yup from "yup";
 import { Button, Input, Select } from "@/app/components/common";
@@ -50,11 +51,15 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const toast = useToast();
 
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showConfirmationModal, setShowConfirmationModal] =
+    useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
   const [customers, setCustomers] = useState<Array<any>>([]);
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
   const [availableInventory, setAvailableInventory] = useState<Array<any>>([]);
-  const [showInventorySection, setShowInventorySection] = useState<boolean>(false);
+  const [showInventorySection, setShowInventorySection] =
+    useState<boolean>(false);
+  const [orderData, setOrderData] = useState<any>(null);
 
   const { control, handleSubmit, setValue, watch, reset, formState } = useForm({
     defaultValues: {
@@ -110,7 +115,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   useEffect(() => {
     const loadInventory = async () => {
       if (!selectedBranchId) return;
-      
+
       try {
         const { success, data } = await getAvailableInventory(selectedBranchId);
         if (success) {
@@ -139,34 +144,35 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         toast.error("Please select a customer");
         return;
       }
-      
+
       if (!payload.branchId && !branch_id) {
         toast.error("Please select a branch");
         return;
       }
-      
+
       if (!payload.services || payload.services.length === 0) {
         toast.error("Please select at least one service");
         return;
       }
-      
+
       if (!payload.modeOfPayment) {
         toast.error("Please select a payment mode");
         return;
       }
-      
+
       if (!userId) {
         toast.error("User not authenticated");
         return;
       }
 
       // Transform inventory usage to match database function format
-      const inventoryUsagePayload = payload?.inventoryUsage?.length > 0 
-        ? payload.inventoryUsage.map((item: any) => ({
-            stock_id: item.id,
-            quantity: item.quantity
-          }))
-        : undefined;
+      const inventoryUsagePayload =
+        payload?.inventoryUsage?.length > 0
+          ? payload.inventoryUsage.map((item: any) => ({
+              stock_id: item.id,
+              quantity: item.quantity,
+            }))
+          : undefined;
 
       const orderPayload = {
         p_branch_id: payload?.branchId || branch_id,
@@ -181,24 +187,45 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         p_inventory_usage: inventoryUsagePayload,
       };
 
-      console.log("Submitting order with payload:", orderPayload);
+      // Store order data and show confirmation modal
+      setOrderData(orderPayload);
+      setShowConfirmationModal(true);
+    } catch (_error) {
+      console.error("Form validation error:", _error);
+      const errorMessage =
+        _error instanceof Error ? _error.message : "Failed to validate order";
+      toast.error(errorMessage);
+    }
+  });
 
-      const { data, error } = await addOrder(orderPayload);
+  const handleConfirmOrder = async () => {
+    if (!orderData) return;
+
+    try {
+      console.log("Submitting order with payload:", orderData);
+
+      const { data, error } = await addOrder(orderData);
 
       if (error) {
         console.error("Order submission error:", error);
-        throw new Error(typeof error === 'string' ? error : 'Failed to create order');
+        throw new Error(
+          typeof error === "string" ? error : "Failed to create order"
+        );
       }
 
-      const inventoryMessage = inventoryUsagePayload?.length 
-        ? ` and ${inventoryUsagePayload.length} inventory items deducted`
+      const inventoryMessage = orderData?.p_inventory_usage?.length
+        ? ` and ${orderData.p_inventory_usage.length} inventory items deducted`
         : "";
-      
-      toast.success(`Order created and payment processed successfully${inventoryMessage}`);
 
-      // Reset form
+      toast.success(
+        `Order created and payment processed successfully${inventoryMessage}`
+      );
+
+      // Reset form and close modal
       reset();
-      
+      setShowConfirmationModal(false);
+      setOrderData(null);
+
       // Add a small delay for better UX (optional)
       setTimeout(() => {
         // Redirect to orders page
@@ -206,10 +233,11 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
       }, 500);
     } catch (_error) {
       console.error("Form submission error:", _error);
-      const errorMessage = _error instanceof Error ? _error.message : "Failed to create order";
+      const errorMessage =
+        _error instanceof Error ? _error.message : "Failed to create order";
       toast.error(errorMessage);
     }
-  });
+  };
 
   const updateQuantity = async (index: number, newQuantity: number) => {
     const watchServices = await watch("services", []);
@@ -263,23 +291,27 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   // Inventory management functions
   const addInventoryUsage = (inventoryItem: any) => {
     const currentUsage = watch("inventoryUsage", []);
-    const existingItem = currentUsage.find((item: any) => item.id === inventoryItem.id);
-    
+    const existingItem = currentUsage.find(
+      (item: any) => item.id === inventoryItem.id
+    );
+
     if (!existingItem) {
       setValue("inventoryUsage", [
         ...currentUsage,
-        { ...inventoryItem, quantity: 1 }
+        { ...inventoryItem, quantity: 1 },
       ]);
     }
   };
 
   const updateInventoryQuantity = (itemId: string, newQuantity: number) => {
     const currentUsage = watch("inventoryUsage", []);
-    const availableItem = availableInventory.find(item => item.id === itemId);
-    
+    const availableItem = availableInventory.find((item) => item.id === itemId);
+
     if (newQuantity < 1 || !availableItem) return;
     if (newQuantity > availableItem.availableQuantity) {
-      toast.error(`Only ${availableItem.availableQuantity} units available for ${availableItem.name}`);
+      toast.error(
+        `Only ${availableItem.availableQuantity} units available for ${availableItem.name}`
+      );
       return;
     }
 
@@ -291,7 +323,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
   const removeInventoryUsage = (itemId: string) => {
     const currentUsage = watch("inventoryUsage", []);
-    const filteredUsage = currentUsage.filter((item: any) => item.id !== itemId);
+    const filteredUsage = currentUsage.filter(
+      (item: any) => item.id !== itemId
+    );
     setValue("inventoryUsage", filteredUsage);
   };
 
@@ -550,7 +584,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                       type="button"
                       variant="ghost"
                       size="sm"
-                      onClick={() => setShowInventorySection(!showInventorySection)}
+                      onClick={() =>
+                        setShowInventorySection(!showInventorySection)
+                      }
                       disabled={formState?.isSubmitting || !selectedBranchId}
                       className="text-blue-600 hover:text-blue-700"
                     >
@@ -568,18 +604,30 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                       ) : (
                         <div className="grid grid-cols-1 gap-2">
                           {availableInventory
-                            .filter(item => !inventoryUsage.find((usage: any) => usage.id === item.id))
+                            .filter(
+                              (item) =>
+                                !inventoryUsage.find(
+                                  (usage: any) => usage.id === item.id
+                                )
+                            )
                             .map((item) => (
                               <button
                                 key={item.id}
                                 type="button"
-                                onClick={() => !formState?.isSubmitting && addInventoryUsage(item)}
+                                onClick={() =>
+                                  !formState?.isSubmitting &&
+                                  addInventoryUsage(item)
+                                }
                                 disabled={formState?.isSubmitting}
                                 className="p-2 text-left bg-white border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                               >
                                 <div className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-gray-900">{item.name}</span>
-                                  <span className="text-xs text-gray-500">{item.availableQuantity} available</span>
+                                  <span className="text-sm font-medium text-gray-900">
+                                    {item.name}
+                                  </span>
+                                  <span className="text-xs text-gray-500">
+                                    {item.availableQuantity} available
+                                  </span>
                                 </div>
                               </button>
                             ))}
@@ -591,9 +639,14 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                   {/* Selected Inventory Items */}
                   {inventoryUsage.length > 0 && (
                     <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">Items to Deduct:</h4>
+                      <h4 className="text-sm font-medium text-gray-700">
+                        Items to Deduct:
+                      </h4>
                       {inventoryUsage.map((item: any) => (
-                        <div key={item.id} className="bg-white rounded-lg p-3 border">
+                        <div
+                          key={item.id}
+                          className="bg-white rounded-lg p-3 border"
+                        >
                           <div className="flex items-center justify-between mb-2">
                             <div className="flex-1 min-w-0">
                               <span className="text-sm font-medium text-gray-900 truncate block">
@@ -605,19 +658,30 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                             </div>
                             <button
                               type="button"
-                              onClick={() => !formState?.isSubmitting && removeInventoryUsage(item.id)}
+                              onClick={() =>
+                                !formState?.isSubmitting &&
+                                removeInventoryUsage(item.id)
+                              }
                               disabled={formState?.isSubmitting}
                               className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <X className="w-4 h-4" />
                             </button>
                           </div>
-                          
+
                           <div className="flex items-center space-x-2">
                             <button
                               type="button"
-                              onClick={() => !formState?.isSubmitting && updateInventoryQuantity(item.id, item.quantity - 1)}
-                              disabled={formState?.isSubmitting || item.quantity <= 1}
+                              onClick={() =>
+                                !formState?.isSubmitting &&
+                                updateInventoryQuantity(
+                                  item.id,
+                                  item.quantity - 1
+                                )
+                              }
+                              disabled={
+                                formState?.isSubmitting || item.quantity <= 1
+                              }
                               className="p-1 text-gray-600 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <Minus className="w-4 h-4" />
@@ -627,8 +691,17 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                             </span>
                             <button
                               type="button"
-                              onClick={() => !formState?.isSubmitting && updateInventoryQuantity(item.id, item.quantity + 1)}
-                              disabled={formState?.isSubmitting || item.quantity >= item.availableQuantity}
+                              onClick={() =>
+                                !formState?.isSubmitting &&
+                                updateInventoryQuantity(
+                                  item.id,
+                                  item.quantity + 1
+                                )
+                              }
+                              disabled={
+                                formState?.isSubmitting ||
+                                item.quantity >= item.availableQuantity
+                              }
                               className="p-1 text-gray-600 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             >
                               <Plus className="w-4 h-4" />
@@ -790,6 +863,200 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         onClose={() => setShowModal(false)}
         onSubmit={() => setShowModal(false)}
       />
+
+      {/* Confirmation Modal */}
+      {showConfirmationModal && orderData && (
+        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4 sm:p-6">
+          <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-md h-[95vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
+            {/* Header - Fixed */}
+            <div className="bg-blue-500 px-6 py-4 rounded-t-xl sm:rounded-t-xl flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3">
+                  <AlertTriangle className="w-6 h-6 text-white" />
+                  <h2 className="text-xl font-semibold text-white">
+                    Confirm Order
+                  </h2>
+                </div>
+                <button
+                  onClick={() => {
+                    setShowConfirmationModal(false);
+                    setOrderData(null);
+                  }}
+                  className="text-white hover:bg-blue-600 rounded-full p-1 transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Content - Scrollable */}
+            <div className="flex-1 overflow-y-auto">
+              <div className="p-6">
+                <p className="text-gray-600 mb-6">
+                  Please review your order details before confirming. Once
+                  confirmed, the order will be created and payment will be
+                  processed.
+                </p>
+
+                {/* Order Summary */}
+                <div className="space-y-4">
+                  {/* Customer */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <User className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Customer
+                      </span>
+                    </div>
+                    <p className="text-gray-900">
+                      {customerOptions.find(
+                        (c) => c.value === orderData.p_customer_id
+                      )?.label || "Unknown Customer"}
+                    </p>
+                  </div>
+
+                  {/* Branch */}
+                  {is_admin && (
+                    <div className="bg-gray-50 rounded-lg p-4">
+                      <div className="flex items-center space-x-2 mb-2">
+                        <Building className="w-4 h-4 text-gray-600" />
+                        <span className="text-sm font-medium text-gray-700">
+                          Branch
+                        </span>
+                      </div>
+                      <p className="text-gray-900">
+                        {branchOptions.find(
+                          (b) => b.value === orderData.p_branch_id
+                        )?.label || "Unknown Branch"}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Services */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-3">
+                      <Package className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Services
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {orderData.p_items.map((service: any, index: number) => (
+                        <div
+                          key={index}
+                          className="flex justify-between items-center"
+                        >
+                          <div>
+                            <span className="text-gray-900 font-medium">
+                              {service.name}
+                            </span>
+                            <span className="text-gray-500 text-sm ml-2">
+                              x{service.quantity}
+                            </span>
+                          </div>
+                          <span className="text-gray-900 font-medium">
+                            ₱{service.total || service.price}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Inventory Usage */}
+                  {orderData.p_inventory_usage &&
+                    orderData.p_inventory_usage.length > 0 && (
+                      <div className="bg-gray-50 rounded-lg p-4">
+                        <div className="flex items-center space-x-2 mb-3">
+                          <Package className="w-4 h-4 text-gray-600" />
+                          <span className="text-sm font-medium text-gray-700">
+                            Inventory Items
+                          </span>
+                        </div>
+                        <div className="space-y-2">
+                          {orderData.p_inventory_usage.map(
+                            (item: any, index: number) => {
+                              const inventoryItem = inventoryUsage.find(
+                                (inv: any) => inv.id === item.stock_id
+                              );
+                              return (
+                                <div
+                                  key={index}
+                                  className="flex justify-between items-center"
+                                >
+                                  <span className="text-gray-900">
+                                    {inventoryItem?.name || "Unknown Item"}
+                                  </span>
+                                  <span className="text-gray-600 text-sm">
+                                    Qty: {item.quantity}
+                                  </span>
+                                </div>
+                              );
+                            }
+                          )}
+                        </div>
+                      </div>
+                    )}
+
+                  {/* Payment */}
+                  <div className="bg-gray-50 rounded-lg p-4">
+                    <div className="flex items-center space-x-2 mb-2">
+                      <CreditCard className="w-4 h-4 text-gray-600" />
+                      <span className="text-sm font-medium text-gray-700">
+                        Payment Mode
+                      </span>
+                    </div>
+                    <p className="text-gray-900">{orderData.p_mode_of_payment}</p>
+                  </div>
+
+                  {/* Total */}
+                  <div className="bg-green-50 rounded-lg p-4 border border-green-200">
+                    <div className="flex justify-between items-center">
+                      <span className="text-lg font-semibold text-gray-900">
+                        Total Amount
+                      </span>
+                      <span className="text-2xl font-bold text-green-600">
+                        ₱{orderData.p_total_price}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Actions - Fixed at bottom */}
+            <div className="flex-shrink-0 p-6 border-t bg-gray-50 rounded-b-xl sm:rounded-b-xl">
+              <div className="flex space-x-3">
+                <Button
+                  onClick={() => {
+                    setShowConfirmationModal(false);
+                    setOrderData(null);
+                  }}
+                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleConfirmOrder}
+                  disabled={formState?.isSubmitting}
+                  className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                >
+                  {formState?.isSubmitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      Creating Order...
+                    </>
+                  ) : (
+                    <>
+                      <Check className="w-4 h-4 mr-2" />
+                      Confirm Order
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

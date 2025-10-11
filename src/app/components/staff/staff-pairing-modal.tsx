@@ -1,11 +1,15 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/app/components/common';
-import { X, Users, Clock } from 'lucide-react';
-import { StaffView, StaffShiftFormData } from '@/app/types/database';
-import { startStaffShift, getStaffByBranch, getActiveStaffShift } from '@/app/actions/staff/shift_actions';
-import { toast } from 'sonner';
+import { useState, useEffect } from "react";
+import { Button } from "@/app/components/common";
+import { X, Users, Clock } from "lucide-react";
+import { StaffView, StaffShiftFormData } from "@/app/types/database";
+import {
+  startStaffShift,
+  getStaffByBranch,
+  getActiveStaffShift,
+} from "@/app/actions/staff/shift_actions";
+import { toast } from "sonner";
 
 interface StaffPairingModalProps {
   isOpen: boolean;
@@ -27,7 +31,9 @@ export default function StaffPairingModal({
   onShiftStarted,
 }: StaffPairingModalProps) {
   const [availableStaff, setAvailableStaff] = useState<StaffView[]>([]);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(null);
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [isStartingShift, setIsStartingShift] = useState(false);
 
@@ -43,11 +49,11 @@ export default function StaffPairingModal({
       setLoading(true);
       const staff = await getStaffByBranch(branchId);
       // Filter out current staff member
-      const otherStaff = staff.filter(s => s.id !== currentStaffId);
+      const otherStaff = staff.filter((s) => s.user_id !== currentStaffId);
       setAvailableStaff(otherStaff);
     } catch (error) {
-      console.error('Error loading staff:', error);
-      toast.error('Failed to load available staff');
+      console.error("Error loading staff:", error);
+      toast.error("Failed to load available staff");
     } finally {
       setLoading(false);
     }
@@ -69,21 +75,26 @@ export default function StaffPairingModal({
   const handleStartShift = async () => {
     try {
       setIsStartingShift(true);
-      
+
+      console.log({
+        p_primary_staff_id: currentStaffId,
+        p_branch_id: branchId,
+        p_partner_staff_id: selectedPartnerId || undefined,
+      });
       const shiftData = await startStaffShift({
         p_primary_staff_id: currentStaffId,
         p_branch_id: branchId,
         p_partner_staff_id: selectedPartnerId || undefined,
       });
 
-      const partnerName = selectedPartnerId 
-        ? availableStaff.find(s => s.id === selectedPartnerId)?.full_name 
+      const partnerName = selectedPartnerId
+        ? availableStaff.find((s) => s.user_id === selectedPartnerId)?.full_name
         : null;
 
       toast.success(
-        selectedPartnerId 
-          ? `Shift started with ${partnerName}` 
-          : 'Solo shift started successfully'
+        selectedPartnerId
+          ? `Shift started with ${partnerName}`
+          : "Solo shift started successfully"
       );
 
       onShiftStarted({
@@ -97,8 +108,8 @@ export default function StaffPairingModal({
 
       onClose();
     } catch (error) {
-      console.error('Error starting shift:', error);
-      toast.error('Failed to start shift');
+      console.error("Error starting shift:", error);
+      toast.error("Failed to start shift");
     } finally {
       setIsStartingShift(false);
     }
@@ -144,16 +155,18 @@ export default function StaffPairingModal({
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {branchName} • {new Date().toLocaleDateString('en-US', {
-                  weekday: 'long',
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric',
+                {branchName} •{" "}
+                {new Date().toLocaleDateString("en-US", {
+                  weekday: "long",
+                  year: "numeric",
+                  month: "long",
+                  day: "numeric",
                 })}
               </span>
             </div>
             <p className="text-sm text-gray-600">
-              Select a partner to work with today, or work solo. Your sales and commission will be tracked for the day.
+              Select a partner to work with today, or work solo. Your sales and
+              commission will be tracked for the day.
             </p>
           </div>
 
@@ -165,8 +178,10 @@ export default function StaffPairingModal({
             <>
               {/* Partner Selection */}
               <div className="space-y-3 mb-6">
-                <h3 className="font-medium text-gray-900">Choose Your Partner</h3>
-                
+                <h3 className="font-medium text-gray-900">
+                  Choose Your Partner
+                </h3>
+
                 {availableStaff.length === 0 ? (
                   <div className="text-center py-6 text-gray-500">
                     <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
@@ -176,20 +191,24 @@ export default function StaffPairingModal({
                   <div className="grid gap-2">
                     {availableStaff.map((staff) => (
                       <button
-                        key={staff.id}
-                        onClick={() => setSelectedPartnerId(staff.id)}
+                        key={staff.user_id}
+                        onClick={() => setSelectedPartnerId(staff.user_id)}
                         className={`p-3 border rounded-lg text-left transition-colors ${
-                          selectedPartnerId === staff.id
-                            ? 'border-blue-500 bg-blue-50'
-                            : 'border-gray-200 hover:border-gray-300'
+                          selectedPartnerId === staff.user_id
+                            ? "border-blue-500 bg-blue-50"
+                            : "border-gray-200 hover:border-gray-300"
                         }`}
                       >
                         <div className="flex items-center justify-between">
                           <div>
-                            <p className="font-medium text-gray-900">{staff.full_name}</p>
-                            <p className="text-sm text-gray-500">{staff.phone}</p>
+                            <p className="font-medium text-gray-900">
+                              {staff.full_name}
+                            </p>
+                            <p className="text-sm text-gray-500">
+                              {staff.phone}
+                            </p>
                           </div>
-                          {selectedPartnerId === staff.id && (
+                          {selectedPartnerId === staff.user_id && (
                             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                           )}
                         </div>
@@ -207,12 +226,18 @@ export default function StaffPairingModal({
                     disabled={isStartingShift}
                     loading={isStartingShift}
                     fullWidth
-                    leftIcon={!isStartingShift ? <Users className="h-4 w-4" /> : undefined}
+                    leftIcon={
+                      !isStartingShift ? (
+                        <Users className="h-4 w-4" />
+                      ) : undefined
+                    }
                   >
-                    {isStartingShift ? 'Starting Shift...' : 'Start Shift with Partner'}
+                    {isStartingShift
+                      ? "Starting Shift..."
+                      : "Start Shift with Partner"}
                   </Button>
                 )}
-                
+
                 <Button
                   onClick={handleWorkSolo}
                   disabled={isStartingShift}
@@ -220,7 +245,7 @@ export default function StaffPairingModal({
                   variant={selectedPartnerId ? "outline" : "primary"}
                   fullWidth
                 >
-                  {isStartingShift ? 'Starting Shift...' : 'Work Solo Today'}
+                  {isStartingShift ? "Starting Shift..." : "Work Solo Today"}
                 </Button>
               </div>
             </>
@@ -228,8 +253,9 @@ export default function StaffPairingModal({
 
           <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <p className="text-xs text-yellow-800">
-              <strong>Note:</strong> Commission will be calculated based on your sales for this shift. 
-              You can end your shift anytime from the dashboard.
+              <strong>Note:</strong> Commission will be calculated based on your
+              sales for this shift. You can end your shift anytime from the
+              dashboard.
             </p>
           </div>
         </div>

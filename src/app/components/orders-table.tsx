@@ -439,7 +439,6 @@ export const OrdersTable = ({
                               </div>
                               <div className="flex items-center text-sm font-medium text-gray-900">
                                 <PinIcon className="h-4 w-4 text-gray-400 mr-1" />
-                                {console.log(order)}
                                 {order?.customer || "N/A"}
                               </div>
                             </div>

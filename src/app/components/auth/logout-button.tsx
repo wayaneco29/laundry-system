@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/app/utils/supabase/client";
+import { useCurrentUser } from "@/app/hooks/use-current-user";
+import { endStaffShift, updateShiftPartner } from "@/app/actions/staff/shift_actions";
 
 interface LogoutButtonProps {
   children?: React.ReactNode;
@@ -13,11 +15,47 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const supabase = createClient();
+  const { userId } = useCurrentUser();
 
   const handleLogout = async () => {
     setIsLoading(true);
 
     try {
+      // Handle staff shift before logging out if user exists
+      if (userId) {
+        try {
+          const supabase = createClient();
+          const today = new Date().toISOString().split('T')[0];
+          
+          // Check if user is primary staff in an active shift
+          const { data: primaryShifts } = await supabase
+            .from("staff_shifts")
+            .select("id")
+            .eq("primary_staff_id", userId)
+            .eq("is_active", true)
+            .eq("shift_date", today);
+          
+          // Check if user is a partner in an active shift
+          const { data: partnerShifts } = await supabase
+            .from("staff_shifts")
+            .select("id")
+            .eq("partner_staff_id", userId)
+            .eq("is_active", true)
+            .eq("shift_date", today);
+          
+          if (primaryShifts && primaryShifts.length > 0) {
+            // User is primary staff - end the entire shift
+            await endStaffShift(userId);
+          } else if (partnerShifts && partnerShifts.length > 0) {
+            // User is just a partner - remove them from the shift
+            await updateShiftPartner(partnerShifts[0].id, undefined);
+          }
+        } catch (error) {
+          // Log the error but don't prevent logout
+          console.error("Error handling staff shift during logout:", error);
+        }
+      }
+
       const { error } = await supabase.auth.signOut();
 
       if (error) {

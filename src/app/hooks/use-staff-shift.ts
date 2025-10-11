@@ -46,6 +46,7 @@ export function useStaffShift(): StaffShiftHook {
       }
     } catch (error) {
       console.error('Error checking staff shift status:', error);
+      setActiveShift(null);
       setNeedsPairing(true);
     } finally {
       setIsLoading(false);
