@@ -10,12 +10,12 @@ type AddOrderPayload = {
   p_order_date: string;
   p_payment_status: "Paid" | "Unpaid";
   p_total_price: number;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   p_items: Array<any>;
   p_staff_id: string;
   p_mode_of_payment?: "Cash" | "GCash";
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   p_inventory_usage?: Array<any>;
+  p_co_staff_id?: string;
+  p_staff_shift_id?: string;
 };
 
 export const addOrder = async (payload: AddOrderPayload) => {

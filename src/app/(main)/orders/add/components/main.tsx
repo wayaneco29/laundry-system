@@ -29,6 +29,7 @@ import { twMerge } from "tailwind-merge";
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@/app/hooks";
+import { useStaffShift } from "@/app/hooks/use-staff-shift";
 
 type MainAddPageProps = {
   data: Array<any>;
@@ -48,6 +49,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const { is_admin, branch_id } = useUserContext();
   const { userId } = useCurrentUser();
   const toast = useToast();
+  const { activeShift } = useStaffShift();
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmationModal, setShowConfirmationModal] =
@@ -184,6 +186,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         p_total_price: grossTotal,
         p_mode_of_payment: payload?.modeOfPayment,
         p_inventory_usage: inventoryUsagePayload,
+        p_co_staff_id: activeShift?.partner_staff_id || undefined,
+        p_staff_shift_id: activeShift?.shift_id || undefined,
       };
 
       // Store order data and show confirmation modal
