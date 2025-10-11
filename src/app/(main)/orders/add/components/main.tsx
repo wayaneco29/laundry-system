@@ -31,7 +31,6 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@/app/hooks";
 
 type MainAddPageProps = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   data: Array<any>;
   branches: Array<any>;
 };
@@ -74,7 +73,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   });
 
   const services = watch("services", []);
-  const inventoryUsage = watch("inventoryUsage", []);
+  const inventoryUsage = watch("inventoryUsage", []) as Array<any>;
   const selectedBranchId = watch("branchId");
 
   const grossTotal = services?.reduce(
@@ -167,7 +166,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
       // Transform inventory usage to match database function format
       const inventoryUsagePayload =
-        payload?.inventoryUsage?.length > 0
+        payload?.inventoryUsage && payload.inventoryUsage.length > 0
           ? payload.inventoryUsage.map((item: any) => ({
               stock_id: item.id,
               quantity: item.quantity,
@@ -260,7 +259,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
     setValue("services", filteredServices);
   };
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+
   const toggleService = async (service: any) => {
     const watchServices = await watch("services", []);
     const existingServices = watchServices.find((x) => x.id === service.id);
@@ -290,10 +289,10 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
   // Inventory management functions
   const addInventoryUsage = (inventoryItem: any) => {
-    const currentUsage = watch("inventoryUsage", []);
-    const existingItem = currentUsage.find(
-      (item: any) => item.id === inventoryItem.id
-    );
+    const currentUsage = watch("inventoryUsage", []) as Array<any>;
+    const existingItem =
+      currentUsage?.length &&
+      currentUsage.find((item: any) => item.id === inventoryItem.id);
 
     if (!existingItem) {
       setValue("inventoryUsage", [
@@ -304,7 +303,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   };
 
   const updateInventoryQuantity = (itemId: string, newQuantity: number) => {
-    const currentUsage = watch("inventoryUsage", []);
+    const currentUsage = watch("inventoryUsage", []) as Array<any>;
     const availableItem = availableInventory.find((item) => item.id === itemId);
 
     if (newQuantity < 1 || !availableItem) return;
@@ -322,7 +321,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   };
 
   const removeInventoryUsage = (itemId: string) => {
-    const currentUsage = watch("inventoryUsage", []);
+    const currentUsage = watch("inventoryUsage", []) as Array<any>;
     const filteredUsage = currentUsage.filter(
       (item: any) => item.id !== itemId
     );
@@ -1005,7 +1004,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                         Payment Mode
                       </span>
                     </div>
-                    <p className="text-gray-900">{orderData.p_mode_of_payment}</p>
+                    <p className="text-gray-900">
+                      {orderData.p_mode_of_payment}
+                    </p>
                   </div>
 
                   {/* Total */}
