@@ -17,10 +17,7 @@ import {
   Loader2,
   Search,
   MapPin,
-  LocateIcon,
   PinIcon,
-  LocationEdit,
-  Globe,
 } from "lucide-react";
 
 import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
@@ -295,7 +292,9 @@ export const OrdersTable = ({
       );
     }
 
-    const isPaidStatus = type === "payment" && safeStatus === "Paid";
+    const isPaidStatus =
+      (type === "payment" && safeStatus === "Paid") ||
+      (type === "order" && safeStatus === "Picked up");
 
     return (
       <div
