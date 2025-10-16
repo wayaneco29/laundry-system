@@ -7,12 +7,17 @@
       "Bash(grep:*)",
       "Bash(npx supabase:*)",
       "Bash(npm run dev:*)",
-      "Bash(npm run build:*)"
+      "Bash(npm run build:*)",
+      "Bash(yarn build)",
+      "Bash(rm:*)",
+      "Bash(yarn install)",
+      "Bash(yarn install:*)",
+      "Bash(yarn add lightningcss)"
     ],
     "deny": []
   },
+  "enableAllProjectMcpServers": true,
   "enabledMcpjsonServers": [
     "supabase"
-  ],
-  "enableAllProjectMcpServers": true
+  ]
 }

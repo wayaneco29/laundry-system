@@ -129,7 +129,7 @@ export function PartnerManagementModal({
   const hasPartner = !!currentPartner;
 
   return (
-    <Modal isOpen={isOpen} onClose={handleClose} title="Manage Co-worker">
+    <Modal show={isOpen} onClose={handleClose} title="Manage Co-worker">
       <div className="space-y-6">
         {/* Current Status */}
         <div className="bg-gray-50 rounded-lg p-4">
