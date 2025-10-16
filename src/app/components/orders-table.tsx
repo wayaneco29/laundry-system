@@ -56,8 +56,6 @@ export const OrdersTable = ({
 
   const { branch_id, role_name } = useUserContext();
 
-  console.log(role_name);
-
   const orderStatuses = ["Pending", "Ready for Pickup", "Picked up"];
   const paymentStatuses = ["Unpaid", "Paid"];
 
