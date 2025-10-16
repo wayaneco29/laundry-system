@@ -16,6 +16,8 @@ export const getAllExpenses = async (options?: {
   const limit = options?.limit || 20;
   const offset = (page - 1) * limit;
 
+  console.log({ options });
+
   const fetchExpenses = unstable_cache(
     async () => {
       let query = supabase

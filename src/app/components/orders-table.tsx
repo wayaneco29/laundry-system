@@ -54,7 +54,9 @@ export const OrdersTable = ({
     new Set()
   );
 
-  const { branch_id } = useUserContext();
+  const { branch_id, role_name } = useUserContext();
+
+  console.log(role_name);
 
   const orderStatuses = ["Pending", "Ready for Pickup", "Picked up"];
   const paymentStatuses = ["Unpaid", "Paid"];
@@ -372,19 +374,21 @@ export const OrdersTable = ({
                     <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Customer
                     </th>
-                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
-                      Branch
-                    </th>
-                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    {role_name === "ADMIN" && (
+                      <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                        Branch
+                      </th>
+                    )}
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-40">
                       Order Status
                     </th>
-                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-48">
                       Payment Status
                     </th>
-                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-40">
                       Total
                     </th>
-                    <th className="bg-blue-600 sticky right-0 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
+                    <th className="bg-blue-600 sticky right-0 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-40">
                       Actions
                     </th>
                   </tr>
@@ -428,10 +432,6 @@ export const OrdersTable = ({
                                     : "Invalid Date"
                                   : "N/A"}
                               </div>
-                              <div className="flex items-center text-sm font-medium text-gray-900">
-                                <PinIcon className="h-4 w-4 text-gray-400 mr-1" />
-                                {order?.customer || "N/A"}
-                              </div>
                             </div>
                           </div>
                         </td>
@@ -459,14 +459,16 @@ export const OrdersTable = ({
                             </div>
                           )}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap bg-white">
-                          <div className="flex items-center">
-                            <MapPin className="h-4 w-4 text-gray-400 mr-2" />
-                            <div className="text-sm text-gray-900">
-                              {order?.branch_name || "N/A"}
+                        {role_name === "ADMIN" && (
+                          <td className="px-6 py-4 whitespace-nowrap bg-white">
+                            <div className="flex items-center">
+                              <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                              <div className="text-sm text-gray-900">
+                                {order?.branch_name || "N/A"}
+                              </div>
                             </div>
-                          </div>
-                        </td>
+                          </td>
+                        )}
                         <td className="px-6 py-4 whitespace-nowrap bg-white">
                           <StatusBadge
                             status={order?.order_status || "Pending"}

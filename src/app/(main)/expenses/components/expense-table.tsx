@@ -7,8 +7,6 @@ import {
   markExpensePaid,
   deleteExpense,
 } from "@/app/actions/expense";
-import { useCurrentUser } from "@/app/hooks/use-current-user";
-import { useRouter } from "next/navigation";
 import { Pagination } from "@/app/components/common/pagination";
 
 import { Loader2 } from "lucide-react";
@@ -42,7 +40,6 @@ export function ExpenseTable({
   onEdit,
   onView,
   onShowToast,
-  onShowError,
 }: ExpenseTableProps) {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
     {}
@@ -61,7 +58,7 @@ export function ExpenseTable({
     type: "danger",
   });
 
-  const { userId } = useCurrentUser();
+  const { user_id, role_name } = useUserContext();
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -76,24 +73,6 @@ export function ExpenseTable({
       month: "short",
       day: "numeric",
     });
-  };
-
-  const getStatusBadgeClass = (status: string) => {
-    const baseClasses =
-      "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium";
-
-    switch (status) {
-      case "Pending":
-        return `${baseClasses} bg-yellow-100 text-yellow-800`;
-      case "Approved":
-        return `${baseClasses} bg-green-100 text-green-800`;
-      case "Rejected":
-        return `${baseClasses} bg-red-100 text-red-800`;
-      case "Paid":
-        return `${baseClasses} bg-blue-100 text-blue-800`;
-      default:
-        return `${baseClasses} bg-gray-100 text-gray-800`;
-    }
   };
 
   const getCategoryColor = (category: string) => {
@@ -136,7 +115,7 @@ export function ExpenseTable({
     expenseId: string,
     status: "Approved" | "Rejected"
   ) => {
-    if (!userId) {
+    if (!user_id) {
       onShowToast?.("You must be logged in to perform this action", "error");
       return;
     }
@@ -150,7 +129,7 @@ export function ExpenseTable({
       try {
         const result = await approveExpense({
           expenseId,
-          approvedBy: userId,
+          approvedBy: user_id,
           status,
         });
 
@@ -198,7 +177,7 @@ export function ExpenseTable({
   };
 
   const handleMarkPaid = async (expenseId: string) => {
-    if (!userId) {
+    if (!user_id) {
       onShowToast?.("You must be logged in to perform this action", "error");
       return;
     }
@@ -207,7 +186,7 @@ export function ExpenseTable({
       setLoadingStates((prev) => ({ ...prev, [`${expenseId}_paid`]: true }));
 
       try {
-        const result = await markExpensePaid(expenseId, userId);
+        const result = await markExpensePaid(expenseId, user_id);
 
         if (result.error) {
           const errorMessage =
@@ -243,7 +222,7 @@ export function ExpenseTable({
   };
 
   const handleDelete = async (expenseId: string, expenseTitle: string) => {
-    if (!userId) {
+    if (!user_id) {
       onShowToast?.("You must be logged in to perform this action", "error");
       return;
     }
@@ -308,9 +287,11 @@ export function ExpenseTable({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Date
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Branch
-              </th>
+              {role_name === "ADMIN" && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Branch
+                </th>
+              )}
               <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
@@ -391,9 +372,11 @@ export function ExpenseTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(expense.expense_date)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    {expense.branch_name || "All Branches"}
-                  </td>
+                  {role_name === "ADMIN" && (
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {expense.branch_name || "All Branches"}
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <div className="flex items-center justify-end space-x-2">
                       <Button

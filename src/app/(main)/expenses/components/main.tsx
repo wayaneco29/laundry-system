@@ -35,7 +35,8 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const [yearlyExpense, setYearlyExpense] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [expensesLoading, setExpensesLoading] = useState(false);
-  const [expenses, setExpenses] = useState<Array<Record<string, any>>>(initialData);
+  const [expenses, setExpenses] =
+    useState<Array<Record<string, any>>>(initialData);
   const [totalCount, setTotalCount] = useState(initialCount);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
@@ -89,7 +90,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
       const result = await getAllExpenses({
         page: currentPage,
         limit: itemsPerPage,
-        branchId: filters?.branch_id || branch_id,
+        branchId: branch_id || filters?.branch_id,
       });
 
       if (result.data) {

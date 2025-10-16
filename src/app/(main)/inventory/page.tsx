@@ -5,6 +5,7 @@ export default async function Page() {
   const {
     data: { branch_id },
   } = await getUserInfo();
+
   const [inventoryResult, branchesResult] = await Promise.all([
     getAllBranchStocks({
       branchId: branch_id || undefined,
