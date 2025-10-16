@@ -22,15 +22,21 @@ import {
 } from "../../dashboard/components/skeleton";
 import { useUserContext } from "@/app/context";
 
-export function ExpensesMain() {
+interface ExpensesMainProps {
+  initialData: Array<Record<string, any>>;
+  initialCount: number;
+}
+
+export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const toast = useToast();
 
   const [branches, setBranches] = useState<any[]>([]);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
   const [yearlyExpense, setYearlyExpense] = useState<number>(0);
-  const [loading, setLoading] = useState(true);
-  const [expenses, setExpenses] = useState<Array<Record<string, any>>>([]);
-  const [totalCount, setTotalCount] = useState(0);
+  const [loading, setLoading] = useState(false);
+  const [expensesLoading, setExpensesLoading] = useState(false);
+  const [expenses, setExpenses] = useState<Array<Record<string, any>>>(initialData);
+  const [totalCount, setTotalCount] = useState(initialCount);
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
@@ -50,37 +56,50 @@ export function ExpensesMain() {
 
   const { is_admin, branch_id } = useUserContext();
 
-  // Fetch all data on component mount and when filters/pagination change
+  // Fetch initial non-expense data on mount
   useEffect(() => {
-    fetchAllData();
+    fetchInitialData();
+  }, []);
+
+  // Fetch expenses when filters/pagination change (but not on initial mount)
+  useEffect(() => {
+    if (currentPage !== 1 || itemsPerPage !== 20 || filters.branch_id) {
+      fetchExpenses();
+    }
   }, [currentPage, itemsPerPage, filters.branch_id]);
 
-  const fetchAllData = async () => {
+  const fetchInitialData = async () => {
     setLoading(true);
     try {
       await Promise.all([
-        fetchExpenses(),
         fetchBranches(),
         fetchMonthlyExpense(),
         fetchYearlyExpense(),
       ]);
     } catch (error) {
-      console.error("Error fetching data:", error);
+      console.error("Error fetching initial data:", error);
     } finally {
       setLoading(false);
     }
   };
 
   const fetchExpenses = async () => {
-    const result = await getAllExpenses({
-      page: currentPage,
-      limit: itemsPerPage,
-      branchId: filters?.branch_id || branch_id,
-    });
+    setExpensesLoading(true);
+    try {
+      const result = await getAllExpenses({
+        page: currentPage,
+        limit: itemsPerPage,
+        branchId: filters?.branch_id || branch_id,
+      });
 
-    if (result.data) {
-      setExpenses(result.data);
-      setTotalCount(result.count || 0);
+      if (result.data) {
+        setExpenses(result.data);
+        setTotalCount(result.count || 0);
+      }
+    } catch (error) {
+      console.error("Error fetching expenses:", error);
+    } finally {
+      setExpensesLoading(false);
     }
   };
 
@@ -138,6 +157,13 @@ export function ExpensesMain() {
   const handleModalClose = () => {
     setModalOpen(false);
     setSelectedExpense(null);
+  };
+
+  const handleExpenseSuccess = () => {
+    // Refetch expenses after successful operation
+    fetchExpenses();
+    fetchMonthlyExpense();
+    fetchYearlyExpense();
   };
 
   const formatCurrency = (amount: number) => {
@@ -260,7 +286,7 @@ export function ExpensesMain() {
           totalCount={totalCount}
           currentPage={currentPage}
           itemsPerPage={itemsPerPage}
-          isLoading={loading}
+          isLoading={expensesLoading}
           onPageChange={handlePageChange}
           onItemsPerPageChange={handleItemsPerPageChange}
           onEdit={handleEditExpense}
@@ -276,6 +302,7 @@ export function ExpensesMain() {
         expense={selectedExpense}
         mode={modalMode}
         onShowToast={(msg: string) => toast?.success(msg)}
+        onSuccess={handleExpenseSuccess}
       />
     </div>
   );

@@ -3,7 +3,7 @@
 import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { Package, DollarSign, CheckCircle, Save, X } from "lucide-react";
+import { Package, CheckCircle, Save, X, PhilippinePeso } from "lucide-react";
 
 import { Modal, Button, Select, Input } from "@/app/components/common";
 import { SERVICE_STATUS_DROPDOWN } from "@/app/constants";
@@ -85,7 +85,7 @@ export const ServiceModal = ({
         name="id"
         render={() => <Input containerClassName="hidden" />}
       />
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
+      <div className="grid grid-cols-1  gap-y-4 mb-4">
         <div className="col-span-1">
           <Controller
             control={control}
@@ -112,18 +112,14 @@ export const ServiceModal = ({
                 label="Price per KG"
                 placeholder="Enter price"
                 error={!!errors.price}
-                icon={<DollarSign />}
+                icon={<PhilippinePeso />}
                 {...field}
               />
             )}
           />
         </div>
       </div>
-      <div
-        className={`grid grid-cols-1 ${
-          is_admin && "md:grid-cols-2"
-        } gap-x-2 mb-4`}
-      >
+      <div className={`grid grid-cols-1 gap-y-4 mb-4`}>
         {is_admin && (
           <div className="col-span-1">
             <Controller
@@ -149,26 +145,27 @@ export const ServiceModal = ({
             />
           </div>
         )}
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="status"
-            render={({ field: { onChange, ...field } }) => (
-              <Select
-                icon={<CheckCircle />}
-                label="Status"
-                placeholder="Select status"
-                isDisabled={!isUpdate}
-                options={SERVICE_STATUS_DROPDOWN}
-                {...field}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                onChange={({ value }: any) => {
-                  onChange(value);
-                }}
-              />
-            )}
-          />
-        </div>
+        {isUpdate && (
+          <div className="col-span-1">
+            <Controller
+              control={control}
+              name="status"
+              render={({ field: { onChange, ...field } }) => (
+                <Select
+                  icon={<CheckCircle />}
+                  label="Status"
+                  placeholder="Select status"
+                  options={SERVICE_STATUS_DROPDOWN}
+                  {...field}
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  onChange={({ value }: any) => {
+                    onChange(value);
+                  }}
+                />
+              )}
+            />
+          </div>
+        )}
       </div>
       <div className="mt-8">
         <div className="flex justify-end items-center gap-x-2">

@@ -12,6 +12,7 @@ import { upsertExpense } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useUserContext } from "@/app/context";
+import { customerRevalidateTag } from "@/app/actions";
 
 type ExpenseModalProps = {
   isOpen: boolean;
@@ -22,6 +23,7 @@ type ExpenseModalProps = {
     message: string,
     type: "success" | "error" | "warning" | "info"
   ) => void;
+  onSuccess?: () => void;
 };
 
 const expenseCategories = [
@@ -43,6 +45,7 @@ export function ExpenseModal({
   expense,
   mode,
   onShowToast,
+  onSuccess,
 }: ExpenseModalProps) {
   const [formData, setFormData] = useState({
     title: "",
@@ -156,7 +159,6 @@ export function ExpenseModal({
         );
 
         const results = await Promise.all(promises);
-        console.log(results);
 
         // Check if any failed
         const failed = results.filter((result) => result.error);
@@ -174,6 +176,7 @@ export function ExpenseModal({
             "success"
           );
         }
+        onSuccess?.();
         onClose();
       } else {
         // Single expense (either edit mode or specific branch selected)
@@ -196,6 +199,7 @@ export function ExpenseModal({
             `Expense ${mode === "create" ? "created" : "updated"} successfully`,
             "success"
           );
+          onSuccess?.();
           onClose();
         }
       }
