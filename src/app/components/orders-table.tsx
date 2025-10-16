@@ -59,14 +59,8 @@ export const OrdersTable = ({
 
   const { branch_id } = useUserContext();
 
-  const orderStatuses = [
-    "Pending",
-    "Ongoing",
-    "Ready for Pickup",
-    "Picked up",
-    "Cancelled",
-  ];
-  const paymentStatuses = ["Unpaid", "Paid", "Refunded"];
+  const orderStatuses = ["Pending", "Ready for Pickup", "Picked up"];
+  const paymentStatuses = ["Unpaid", "Paid"];
 
   const fetchData = async (page: number, limit: number) => {
     setLoading(true);
@@ -93,7 +87,7 @@ export const OrdersTable = ({
   // Only fetch new data when pagination/search changes (not on initial load)
   useEffect(() => {
     fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter, initialData]);
+  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -126,14 +120,10 @@ export const OrdersTable = ({
     switch (safeStatus) {
       case "Pending":
         return "bg-blue-100 text-blue-800 border-blue-200";
-      case "Ongoing":
-        return "bg-pink-100 text-pink-800 border-pink-200";
       case "Ready for Pickup":
         return "bg-yellow-100 text-yellow-800 border-yellow-200";
       case "Picked up":
         return "bg-green-100 text-green-800 border-green-200";
-      case "Cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
       default:
         return "bg-gray-100 text-gray-800 border-gray-200";
     }
@@ -354,10 +344,8 @@ export const OrdersTable = ({
         >
           <option value="">All Status</option>
           <option value="Pending">Pending</option>
-          <option value="Ongoing">Ongoing</option>
           <option value="Ready for Pickup">Ready for Pickup</option>
           <option value="Picked up">Picked up</option>
-          <option value="Cancelled">Cancelled</option>
         </select>
       </div>
 
