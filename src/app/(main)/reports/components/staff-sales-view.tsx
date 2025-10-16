@@ -120,12 +120,10 @@ export function StaffSalesView() {
         "Sales Summary, ",
         `Total Sales, ${formatCurrency(dailySalesData.totalSales)}`,
         `Services Amount, ${formatCurrency(dailySalesData.servicesAmount)}`,
-        `Items Amount, ${formatCurrency(dailySalesData.itemsAmount)}`,
         ", ",
         "Order Details, ",
         `Total Orders, ${formatNumber(dailySalesData.ordersCount)}`,
         `Services Count, ${formatNumber(dailySalesData.servicesCount)}`,
-        `Items Count, ${formatNumber(dailySalesData.itemsCount)}`,
         ", ",
         "Top Services, ",
         "Service, Count, Total Amount",
@@ -134,15 +132,6 @@ export function StaffSalesView() {
             `"${service.name}", ${formatNumber(
               service.count
             )}, ${formatCurrency(service.totalAmount)}`
-        ),
-        ", ",
-        "Top Items, ",
-        "Item, Count, Total Amount",
-        ...dailySalesData.topItems.map(
-          (item) =>
-            `"${item.name}", ${formatNumber(item.count)}, ${formatCurrency(
-              item.totalAmount
-            )}`
         ),
       ].join("\n");
 
@@ -178,14 +167,6 @@ export function StaffSalesView() {
       icon: ClipboardDocumentListIcon,
       color: "from-blue-100 to-blue-50",
       iconColor: "bg-blue-500",
-    },
-    {
-      title: "Items",
-      value: formatCurrency(dailySalesData?.itemsAmount || 0),
-      subtitle: `${dailySalesData?.itemsCount || 0} items`,
-      icon: ShoppingBagIcon,
-      color: "from-purple-100 to-purple-50",
-      iconColor: "bg-purple-500",
     },
   ];
 
@@ -252,7 +233,7 @@ export function StaffSalesView() {
       ) : (
         <>
           {/* Summary Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
             {summaryCards.map((card, index) => {
               const Icon = card.icon;
               return (
@@ -308,14 +289,6 @@ export function StaffSalesView() {
                 </div>
               </div>
               <div className="space-y-3">
-                <div className="flex justify-between items-center p-3 bg-purple-50 rounded-lg">
-                  <span className="text-sm font-medium text-gray-600">
-                    Items Revenue
-                  </span>
-                  <span className="text-lg font-bold text-purple-600">
-                    {formatCurrency(dailySalesData?.itemsAmount || 0)}
-                  </span>
-                </div>
                 <div className="flex justify-between items-center p-3 bg-green-50 rounded-lg">
                   <span className="text-sm font-medium text-gray-600">
                     Total Daily Revenue
@@ -333,62 +306,33 @@ export function StaffSalesView() {
             <h3 className="text-lg font-semibold text-gray-900 mb-4">
               Performance Insights
             </h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="text-sm font-medium text-gray-600 mb-3">
-                  Top Services Today
-                </h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {dailySalesData?.topServices &&
-                  dailySalesData.topServices.length > 0 ? (
-                    dailySalesData.topServices
-                      .slice(0, 5)
-                      .map((service, index) => (
-                        <div
-                          key={index}
-                          className="flex justify-between items-center"
-                        >
-                          <span className="text-sm text-gray-600">
-                            {service.name}
-                          </span>
-                          <span className="font-medium text-blue-600">
-                            {service.count}
-                          </span>
-                        </div>
-                      ))
-                  ) : (
-                    <div className="text-sm text-gray-500 italic">
-                      No services found
-                    </div>
-                  )}
-                </div>
-              </div>
-              <div>
-                <h4 className="text-sm font-medium text-gray-600 mb-3">
-                  Top Items Today
-                </h4>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {dailySalesData?.topItems &&
-                  dailySalesData.topItems.length > 0 ? (
-                    dailySalesData.topItems.slice(0, 5).map((item, index) => (
+            <div>
+              <h4 className="text-sm font-medium text-gray-600 mb-3">
+                Top Services Today
+              </h4>
+              <div className="space-y-2 max-h-40 overflow-y-auto">
+                {dailySalesData?.topServices &&
+                dailySalesData.topServices.length > 0 ? (
+                  dailySalesData.topServices
+                    .slice(0, 5)
+                    .map((service, index) => (
                       <div
                         key={index}
                         className="flex justify-between items-center"
                       >
                         <span className="text-sm text-gray-600">
-                          {item.name}
+                          {service.name}
                         </span>
-                        <span className="font-medium text-purple-600">
-                          {item.count}
+                        <span className="font-medium text-blue-600">
+                          {service.count}
                         </span>
                       </div>
                     ))
-                  ) : (
-                    <div className="text-sm text-gray-500 italic">
-                      No items found
-                    </div>
-                  )}
-                </div>
+                ) : (
+                  <div className="text-sm text-gray-500 italic">
+                    No services found
+                  </div>
+                )}
               </div>
             </div>
           </div>
