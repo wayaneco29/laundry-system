@@ -21,7 +21,7 @@ interface StaffPairingModalProps {
   onShiftStarted: (shiftData: any) => void;
 }
 
-export default function StaffPairingModal({
+export function StaffPairingModal({
   isOpen,
   onClose,
   currentStaffId,

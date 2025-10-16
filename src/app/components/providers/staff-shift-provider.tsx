@@ -3,7 +3,7 @@
 import { PropsWithChildren } from "react";
 import { useUserContext } from "@/app/context/UserContext";
 import { useStaffShift } from "@/app/hooks/use-staff-shift";
-import StaffPairingModal from "@/app/components/staff/staff-pairing-modal";
+import { StaffPairingModal } from "@/app/components/staff/staff-pairing-modal";
 import { ROLE_ADMIN } from "@/app/types";
 
 export default function StaffShiftProvider({ children }: PropsWithChildren) {
