@@ -32,6 +32,8 @@ import { getAllCustomers } from "@/app/actions/customer";
 import { getAllExpenses } from "@/app/actions/expense";
 import { SalesSectionSkeleton } from "./skeleton";
 import { Button } from "@/app/components/common";
+import { StaffSalesView } from "./staff-sales-view";
+import { useUserContext } from "@/app/context";
 
 type MainReportsPageProps = {
   monthlySalesData: MonthlySalesData | null;
@@ -46,6 +48,12 @@ export function MainReportsPage({
   monthlyCustomersCount,
   todayCustomersCount,
 }: MainReportsPageProps) {
+  const { is_admin } = useUserContext();
+
+  // If user is not admin (i.e., staff), show staff-specific view
+  if (!is_admin) {
+    return <StaffSalesView />;
+  }
   const [initialMonthlySalesData, setInitialMonthlySalesData] =
     useState<MonthlySalesData | null>(monthlySalesData);
   const [initialChartData, setInitialChartData] =
