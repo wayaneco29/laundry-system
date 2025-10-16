@@ -200,7 +200,6 @@ export async function updateShiftPartner(
   shiftId: string,
   newPartnerId?: string
 ) {
-  console.log({ shiftId, newPartnerId });
   try {
     const supabase = await createClient();
     const { error } = await supabase
@@ -247,7 +246,6 @@ export async function addShiftPartner(shiftId: string, partnerId: string) {
 export async function checkStaffShiftStatus(staffId: string) {
   try {
     const activeShift = await getActiveStaffShift(staffId);
-    console.log(activeShift);
     return {
       hasActiveShift: !!activeShift,
       needsPairing: !activeShift,

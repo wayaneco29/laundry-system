@@ -151,11 +151,9 @@ export function SimpleShiftStatus() {
     );
   }
 
-  console.log(activeShift);
-
   const hasPartner = activeShift.partner_staff_id && activeShift.partner_name;
   const currentPartner = activeShift?.partner_staff_id;
-  console.log({ hasPartner, currentPartner });
+
   return (
     <>
       <button

@@ -21,8 +21,6 @@ type AddOrderPayload = {
 export const addOrder = async (payload: AddOrderPayload) => {
   const supabase = await createClient();
   try {
-    console.log("Adding order with payload:", JSON.stringify(payload, null, 2));
-
     // Validate required fields
     if (!payload.p_customer_id) {
       throw new Error("Customer ID is required");
@@ -47,7 +45,6 @@ export const addOrder = async (payload: AddOrderPayload) => {
       throw new Error(error.message || "Failed to create order");
     }
 
-    console.log("Order created successfully:", data);
     revalidateTag("getOrders");
 
     return {

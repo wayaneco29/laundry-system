@@ -66,7 +66,7 @@ export function PartnerManagementModal({
       );
     }
   }, [searchQuery, availableStaff]);
-  console.log(currentShift);
+
   const loadAvailableStaff = async () => {
     if (!currentShift?.branch_id) return;
 

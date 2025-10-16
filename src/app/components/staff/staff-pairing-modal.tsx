@@ -76,11 +76,6 @@ export function StaffPairingModal({
     try {
       setIsStartingShift(true);
 
-      console.log({
-        p_primary_staff_id: currentStaffId,
-        p_branch_id: branchId,
-        p_partner_staff_id: selectedPartnerId || undefined,
-      });
       const shiftData = await startStaffShift({
         p_primary_staff_id: currentStaffId,
         p_branch_id: branchId,

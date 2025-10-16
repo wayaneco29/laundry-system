@@ -205,12 +205,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
     if (!orderData) return;
 
     try {
-      console.log("Submitting order with payload:", orderData);
-
-      const { data, error } = await addOrder(orderData);
+      const { error } = await addOrder(orderData);
 
       if (error) {
-        console.error("Order submission error:", error);
         throw new Error(
           typeof error === "string" ? error : "Failed to create order"
         );

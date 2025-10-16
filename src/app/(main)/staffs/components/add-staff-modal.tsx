@@ -333,7 +333,7 @@ export const AddStaffModal = ({
                   p_branch_id: newData?.branch_id,
                   p_role_id: newData?.role_id,
                 });
-                console.log(error);
+
                 if (error) throw error;
 
                 handleModalClose();

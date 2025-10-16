@@ -142,8 +142,8 @@ export function Datepicker({
 
   const formatDateForInput = (date: Date): string => {
     const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const day = String(date.getDate()).padStart(2, "0");
     return `${year}-${month}-${day}`;
   };
 
@@ -213,7 +213,6 @@ export function Datepicker({
   };
 
   const handleDateSelect = (date: Date) => {
-    console.log(date);
     if (isDateDisabled(date) || !isDateInCurrentMonth(date)) return;
 
     setSelectedDate(date);
@@ -223,16 +222,18 @@ export function Datepicker({
 
   const handleInputClick = () => {
     if (disabled) return;
-    
+
     if (!isOpen) {
       // Reset to selected date's month when opening
       if (selectedDate) {
-        setCurrentMonth(new Date(selectedDate.getFullYear(), selectedDate.getMonth()));
+        setCurrentMonth(
+          new Date(selectedDate.getFullYear(), selectedDate.getMonth())
+        );
       } else {
         setCurrentMonth(new Date());
       }
     }
-    
+
     setIsOpen(!isOpen);
   };
 

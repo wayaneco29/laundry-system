@@ -178,7 +178,6 @@ export function MainReportsPage({
         getTodayCustomers(undefined),
       ]);
 
-      console.log(xMonthlySalesData?.data);
       setInitialMonthlySalesData(xMonthlySalesData?.data);
       setInitialChartData(xChartData?.data);
       setInitialMonthlyCustomerCount(xMonthlyCustomersCount?.count);

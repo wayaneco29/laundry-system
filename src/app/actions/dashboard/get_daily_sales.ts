@@ -47,7 +47,6 @@ export async function getDailySales(
         .add("day", 1)
         .toISOString()
         .split("T")[0] + "T00:00:00.000Z";
-    console.log({ dayStart, dayEnd });
     // const dayStartISO = dayStart.toISOString();
     // const dayEndISO = dayEnd.toISOString();
 
@@ -74,8 +73,12 @@ export async function getDailySales(
     let itemsCount = 0;
 
     // Track services and items for top lists
-    const serviceTracker: Record<string, { count: number; totalAmount: number }> = {};
-    const itemTracker: Record<string, { count: number; totalAmount: number }> = {};
+    const serviceTracker: Record<
+      string,
+      { count: number; totalAmount: number }
+    > = {};
+    const itemTracker: Record<string, { count: number; totalAmount: number }> =
+      {};
 
     orders?.forEach((order) => {
       totalSales += Number(order.total_price || 0);
@@ -83,19 +86,33 @@ export async function getDailySales(
       // Process items if they exist
       if (Array.isArray(order.items)) {
         order.items.forEach((item: any) => {
-          const itemTotal = item.total || (item.quantity || 0) * (item.price || 0);
-          const itemName = item.name || 'Unknown';
+          const itemTotal =
+            item.total || (item.quantity || 0) * (item.price || 0);
+          const itemName = item.name || "Unknown";
 
           // Distinguish between services and inventory items
           // Services: Wash, Dry, Iron, Press, etc.
           // Items: Detergent, Soap, Fabric Softener, etc.
-          const serviceKeywords = ['wash', 'dry', 'iron', 'press', 'fold', 'clean'];
-          const itemKeywords = ['detergent', 'soap', 'softener', 'bleach', 'starch'];
+          const serviceKeywords = [
+            "wash",
+            "dry",
+            "iron",
+            "press",
+            "fold",
+            "clean",
+          ];
+          const itemKeywords = [
+            "detergent",
+            "soap",
+            "softener",
+            "bleach",
+            "starch",
+          ];
 
-          const isService = serviceKeywords.some(keyword => 
+          const isService = serviceKeywords.some((keyword) =>
             itemName.toLowerCase().includes(keyword)
           );
-          const isInventoryItem = itemKeywords.some(keyword => 
+          const isInventoryItem = itemKeywords.some((keyword) =>
             itemName.toLowerCase().includes(keyword)
           );
 
