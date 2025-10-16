@@ -9,6 +9,7 @@ export const getUserInfo = async () => {
     const {
       data: { user },
     } = await supabase.auth.getUser();
+
     const { data } = await supabase
       .from("view_app_users")
       .select()

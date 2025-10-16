@@ -26,6 +26,7 @@ import {
 import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
 import "./loading-spinner.css";
 import { useToast } from "../hooks";
+import { useUserContext } from "../context";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
@@ -56,6 +57,8 @@ export const OrdersTable = ({
     new Set()
   );
 
+  const { branch_id } = useUserContext();
+
   const orderStatuses = [
     "Pending",
     "Ongoing",
@@ -71,6 +74,7 @@ export const OrdersTable = ({
       const result = await getOrders({
         page,
         limit,
+        branchId: branch_id || undefined,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
       });
