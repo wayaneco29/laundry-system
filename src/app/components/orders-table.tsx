@@ -323,23 +323,23 @@ export const OrdersTable = ({
 
     return (
       <div
-        className={`inline-flex items-center gap-1 px-2 py-1 text-xs sm:gap-2 sm:px-3 sm:py-2 sm:text-sm rounded-lg border font-medium transition-all duration-200 ${
+        className={`inline-flex items-center gap-1 px-3 py-2 text-xs sm:gap-2 sm:px-3 sm:py-2 sm:text-sm rounded-lg border font-medium transition-all duration-200 min-h-[36px] ${
           type === "order"
             ? getOrderStatusColor(safeStatus)
             : getPaymentStatusColor(safeStatus)
         } ${
           isDisabled
             ? "opacity-75 cursor-not-allowed"
-            : "cursor-pointer hover:shadow-md"
+            : "cursor-pointer hover:shadow-md active:scale-95"
         }`}
         onClick={isDisabled ? undefined : onClick}
       >
         <span className="uppercase truncate">{safeStatus}</span>
         {isLoading ? (
-          <Loader2 className="w-2 h-2 sm:w-3 sm:h-3 animate-spin flex-shrink-0" />
+          <Loader2 className="w-3 h-3 sm:w-3 sm:h-3 animate-spin flex-shrink-0" />
         ) : (
           !isDisabled && (
-            <Edit3 className="w-2 h-2 sm:w-3 sm:h-3 opacity-60 flex-shrink-0" />
+            <Edit3 className="w-3 h-3 sm:w-3 sm:h-3 opacity-60 flex-shrink-0" />
           )
         )}
       </div>
@@ -350,21 +350,21 @@ export const OrdersTable = ({
     <div className="space-y-4">
       {/* Search and filters */}
       {!isDashboardView && (
-        <div className="flex flex-col items-center sm:flex-row gap-4 mb-6">
-          <div className="relative w-full md:w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
+          <div className="relative flex-1 sm:max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
             <input
               type="text"
               placeholder="Search by order ID or customer name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-10 h-10 text-sm pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+              className="w-full pl-11 h-12 text-base pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilterChange(e.target.value)}
-            className="px-3 py-2 h-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+            className="px-4 py-3 h-12 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[150px]"
             disabled={loading}
           >
             <option value="">All Status</option>
@@ -375,7 +375,7 @@ export const OrdersTable = ({
         </div>
       )}
 
-      {/* Table */}
+      {/* Table - Desktop View */}
       <div className="bg-white shadow rounded-lg overflow-hidden relative">
         {loading && !isDashboardView && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
@@ -389,7 +389,120 @@ export const OrdersTable = ({
           </div>
         ) : (
           <>
-            <div className="overflow-x-auto">
+            {/* Mobile Card View */}
+            <div className="md:hidden">
+              {!data || data.length === 0 ? (
+                <div className="p-8 text-center">
+                  <Hash className="mx-auto h-12 w-12 text-gray-400" />
+                  <h3 className="mt-2 text-sm font-medium text-gray-900">
+                    No orders
+                  </h3>
+                  <p className="mt-1 text-sm text-gray-500">
+                    Get started by creating your first order.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-200">
+                  {data.map((order, index) => (
+                    <div
+                      key={order?.order_id || index}
+                      className={`p-4 hover:bg-gray-50 transition-colors ${
+                        loading ? "opacity-75" : ""
+                      }`}
+                    >
+                      {/* Order Header */}
+                      <div className="flex items-start justify-between mb-3">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center text-base font-semibold text-gray-900 mb-1">
+                            <Hash className="h-4 w-4 text-gray-400 mr-1 flex-shrink-0" />
+                            <span className="truncate">{order?.order_id || "N/A"}</span>
+                          </div>
+                          <div className="flex items-center text-xs text-gray-500">
+                            <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
+                            {order?.created_at
+                              ? moment(order.created_at).isValid()
+                                ? moment(order.created_at).format("MMM DD, YYYY")
+                                : "Invalid Date"
+                              : "N/A"}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() =>
+                            router.push(`/orders/${order?.order_id || ""}`)
+                          }
+                          className="ml-3 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center gap-2 flex-shrink-0 min-h-[44px]"
+                        >
+                          <Eye className="h-4 w-4" />
+                          View
+                        </button>
+                      </div>
+
+                      {/* Customer Info */}
+                      <div className="mb-3">
+                        <div className="flex items-center text-sm font-medium text-gray-900 mb-1">
+                          <User className="h-4 w-4 text-gray-400 mr-2 flex-shrink-0" />
+                          {order?.customer_name || "N/A"}
+                        </div>
+                        {order?.phone && (
+                          <div className="flex items-center text-xs text-gray-600 ml-6">
+                            <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
+                            {order?.phone}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Status Badges */}
+                      <div className="flex flex-wrap gap-2 mb-3">
+                        <StatusBadge
+                          status={order?.order_status || "Pending"}
+                          type="order"
+                          orderId={order?.order_id || ""}
+                          onClick={() =>
+                            handleOrderStatusClick(order?.order_id || "")
+                          }
+                          isLoading={loadingOrderStatus.has(
+                            order?.order_id || ""
+                          )}
+                        />
+                        <StatusBadge
+                          status={order?.payment_status || "Unpaid"}
+                          type="payment"
+                          orderId={order?.order_id || ""}
+                          onClick={() =>
+                            handlePaymentStatusClick(
+                              order?.order_id || "",
+                              order?.payment_status || "Unpaid"
+                            )
+                          }
+                          isLoading={loadingPaymentStatus.has(
+                            order?.order_id || ""
+                          )}
+                        />
+                      </div>
+
+                      {/* Total */}
+                      <div className="flex items-center justify-between pt-3 border-t border-gray-200">
+                        <span className="text-sm text-gray-600 font-medium">Total</span>
+                        <span className="text-lg font-bold text-gray-900">
+                          ₱{order?.total_price || "0"}
+                        </span>
+                      </div>
+
+                      {/* Branch - Show for Admin */}
+                      {role_name === "ADMIN" && order?.branch_name && (
+                        <div className="flex items-center text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
+                          <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
+                          {order?.branch_name}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Desktop Table View */}
+            <div className="hidden md:block overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
                 <thead className="bg-gray-50">
                   <tr>
