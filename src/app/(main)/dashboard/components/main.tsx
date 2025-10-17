@@ -696,21 +696,6 @@ export function MainDashboardPage({
                   </div>
                 </div>
               </div>
-              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-red-100 to-white">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-gray-700 text-sm font-medium">
-                      This Month Unpaid Sales
-                    </div>
-                    <div className="text-gray-700 text-xl font-bold mt-2">
-                      ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-full bg-red-400 h-fit">
-                    <CurrencyDollarIcon height={25} />
-                  </div>
-                </div>
-              </div>
               <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-blue-100 to-white">
                 <div className="flex justify-between">
                   <div>
@@ -819,6 +804,7 @@ export function MainDashboardPage({
                     total_price: order.total_amount.toLocaleString(),
                   }))}
                   totalCount={recentOrders.length}
+                  isDashboardView={true}
                 />
               </div>
             </div>

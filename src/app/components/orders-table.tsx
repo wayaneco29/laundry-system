@@ -28,11 +28,13 @@ import { useUserContext } from "../context";
 type OrdersTableProps = {
   initialData?: Array<any>;
   totalCount?: number;
+  isDashboardView?: boolean;
 };
 
 export const OrdersTable = ({
   initialData = [],
   totalCount = 0,
+  isDashboardView = false,
 }: OrdersTableProps) => {
   const toast = useToast();
   const router = useRouter();
@@ -83,8 +85,16 @@ export const OrdersTable = ({
 
   // Only fetch new data when pagination/search changes (not on initial load)
   useEffect(() => {
-    fetchData(currentPage, itemsPerPage);
-  }, [currentPage, itemsPerPage, debouncedSearch, statusFilter]);
+    if (!isDashboardView) {
+      fetchData(currentPage, itemsPerPage);
+    }
+  }, [
+    currentPage,
+    itemsPerPage,
+    debouncedSearch,
+    statusFilter,
+    isDashboardView,
+  ]);
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -224,6 +234,14 @@ export const OrdersTable = ({
     onUpdate: (orderId: string, newStatus: string) => void;
     isLoading?: boolean;
   }) => {
+    // Disable "Pending" when current status is "Ready for Pickup"
+    const isOptionDisabled = (option: string) => {
+      if (field === "order_status" && currentStatus === "Ready for Pickup") {
+        return option === "Pending";
+      }
+      return false;
+    };
+
     return (
       <div className="relative">
         <select
@@ -239,7 +257,7 @@ export const OrdersTable = ({
           disabled={isLoading}
         >
           {options.map((option) => (
-            <option key={option} value={option}>
+            <option key={option} value={option} disabled={isOptionDisabled(option)}>
               {option}
             </option>
           ))}
@@ -270,8 +288,9 @@ export const OrdersTable = ({
     const safeStatus = status || (type === "order" ? "Pending" : "Unpaid");
 
     const isEditing =
+      !isDashboardView &&
       editingCell ===
-      `${orderId}-${type === "order" ? "order_status" : "payment_status"}`;
+        `${orderId}-${type === "order" ? "order_status" : "payment_status"}`;
 
     if (isEditing) {
       return (
@@ -296,6 +315,8 @@ export const OrdersTable = ({
       (type === "payment" && safeStatus === "Paid") ||
       (type === "order" && safeStatus === "Picked up");
 
+    const isDisabled = isDashboardView || isPaidStatus;
+
     return (
       <div
         className={`inline-flex items-center gap-1 px-2 py-1 text-xs sm:gap-2 sm:px-3 sm:py-2 sm:text-sm rounded-lg border font-medium transition-all duration-200 ${
@@ -303,17 +324,17 @@ export const OrdersTable = ({
             ? getOrderStatusColor(safeStatus)
             : getPaymentStatusColor(safeStatus)
         } ${
-          isPaidStatus
+          isDisabled
             ? "opacity-75 cursor-not-allowed"
             : "cursor-pointer hover:shadow-md"
         }`}
-        onClick={isPaidStatus ? undefined : onClick}
+        onClick={isDisabled ? undefined : onClick}
       >
         <span className="uppercase truncate">{safeStatus}</span>
         {isLoading ? (
           <Loader2 className="w-2 h-2 sm:w-3 sm:h-3 animate-spin flex-shrink-0" />
         ) : (
-          !isPaidStatus && (
+          !isDisabled && (
             <Edit3 className="w-2 h-2 sm:w-3 sm:h-3 opacity-60 flex-shrink-0" />
           )
         )}
@@ -324,38 +345,40 @@ export const OrdersTable = ({
   return (
     <div className="space-y-4">
       {/* Search and filters */}
-      <div className="flex flex-col items-center sm:flex-row gap-4 mb-6">
-        <div className="relative w-full md:w-96">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-          <input
-            type="text"
-            placeholder="Search by order ID or customer name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="w-full pl-10 h-10 text-sm pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
-          />
+      {!isDashboardView && (
+        <div className="flex flex-col items-center sm:flex-row gap-4 mb-6">
+          <div className="relative w-full md:w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by order ID or customer name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 h-10 text-sm pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={(e) => handleStatusFilterChange(e.target.value)}
+            className="px-3 py-2 h-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+            disabled={loading}
+          >
+            <option value="">All Status</option>
+            <option value="Pending">Pending</option>
+            <option value="Ready for Pickup">Ready for Pickup</option>
+            <option value="Picked up">Picked up</option>
+          </select>
         </div>
-        <select
-          value={statusFilter}
-          onChange={(e) => handleStatusFilterChange(e.target.value)}
-          className="px-3 py-2 h-10 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
-          disabled={loading}
-        >
-          <option value="">All Status</option>
-          <option value="Pending">Pending</option>
-          <option value="Ready for Pickup">Ready for Pickup</option>
-          <option value="Picked up">Picked up</option>
-        </select>
-      </div>
+      )}
 
       {/* Table */}
       <div className="bg-white shadow rounded-lg overflow-hidden relative">
-        {loading && (
+        {loading && !isDashboardView && (
           <div className="absolute inset-0 bg-white bg-opacity-75 flex justify-center items-center z-10">
             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
           </div>
         )}
-        {loading && (!data || data.length === 0) ? (
+        {loading && !isDashboardView && (!data || data.length === 0) ? (
           <div className="p-8 text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mx-auto"></div>
             <p className="mt-2 text-gray-600">Loading orders...</p>
@@ -520,7 +543,7 @@ export const OrdersTable = ({
             </div>
 
             {/* Pagination */}
-            {data && data.length > 0 && (
+            {!isDashboardView && data && data.length > 0 && (
               <div className="px-6 py-4 border-t border-gray-200">
                 <Pagination
                   currentPage={currentPage}
