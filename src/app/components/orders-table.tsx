@@ -45,7 +45,7 @@ export const OrdersTable = ({
   const [data, setData] = useState(initialData);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(10);
+  const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalItems, setTotalItems] = useState(totalCount);
   const [statusFilter, setStatusFilter] = useState("");
   const [editingCell, setEditingCell] = useState<string | null>(null);
@@ -257,7 +257,11 @@ export const OrdersTable = ({
           disabled={isLoading}
         >
           {options.map((option) => (
-            <option key={option} value={option} disabled={isOptionDisabled(option)}>
+            <option
+              key={option}
+              value={option}
+              disabled={isOptionDisabled(option)}
+            >
               {option}
             </option>
           ))}

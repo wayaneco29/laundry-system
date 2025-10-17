@@ -6,6 +6,7 @@ export default async function ExpensesPage({}) {
   const {
     data: { branch_id },
   } = await getUserInfo();
+
   // Fetch initial data on server side
   const initialExpenses = await getAllExpenses({
     branchId: branch_id,

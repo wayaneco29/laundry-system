@@ -33,7 +33,7 @@ export const PromoTable = ({
   );
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(count || 0);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;

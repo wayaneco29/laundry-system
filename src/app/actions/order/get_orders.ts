@@ -17,7 +17,7 @@ export const getOrders = async (options?: {
     const fetchOrders = unstable_cache(
       async () => {
         const page = options?.page || 1;
-        const limit = options?.limit || 25;
+        const limit = options?.limit || 20;
         const offset = (page - 1) * limit;
         let query = supabase
           .from("view_orders")

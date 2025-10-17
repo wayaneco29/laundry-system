@@ -24,6 +24,13 @@ export const getAllBranchStocks = async (params: {
       query = query.ilike("stock_name", `%${params?.search}%`);
     }
 
+    // Apply pagination
+    if (params?.page && params?.limit) {
+      const from = (params.page - 1) * params.limit;
+      const to = params.page * params.limit - 1;
+      query = query.range(from, to);
+    }
+
     const { data, error, count } = await query;
 
     if (error) throw error;

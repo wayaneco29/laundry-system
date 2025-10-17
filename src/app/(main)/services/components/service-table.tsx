@@ -11,6 +11,7 @@ import {
 import { useState, useEffect } from "react";
 import { Pagination } from "@/app/components/common/pagination";
 import { getAllServices } from "@/app/actions";
+import { useUserContext } from "@/app/context";
 
 type ServiceTableProps = {
   initialData: Array<Record<string, string>>;
@@ -30,6 +31,8 @@ export const ServiceTable = ({
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(15);
   const [totalItems, setTotalItems] = useState(0);
+
+  const { role_name } = useUserContext();
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;
 
@@ -83,13 +86,18 @@ export const ServiceTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Service Name
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              {role_name === "ADMIN" && (
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  Branch
+                </th>
+              )}
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                 Price
               </th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider w-40">
                 Status
               </th>
-              <th className="sticky right-0 w-28 text-center bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th className="sticky right-0 w-28 bg-gray-50 px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Actions
               </th>
             </tr>
@@ -126,6 +134,15 @@ export const ServiceTable = ({
                       </div>
                     </div>
                   </td>
+                  {role_name === "ADMIN" && (
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex items-center">
+                        <div className="text-sm text-gray-900">
+                          ₱ {service.branch_name}
+                        </div>
+                      </div>
+                    </td>
+                  )}
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
                       <div className="text-sm text-gray-900">

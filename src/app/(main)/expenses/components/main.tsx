@@ -279,7 +279,6 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
           </div>
         </div>
       )}
-
       {/* Expenses Table */}
       <div className="bg-white rounded-lg shadow">
         <ExpenseTable

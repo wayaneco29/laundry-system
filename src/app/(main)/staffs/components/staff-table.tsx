@@ -30,7 +30,7 @@ export const StaffTable = ({
   const [data, setData] = useState(initialData || []);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState(15);
+  const [itemsPerPage, setItemsPerPage] = useState(10);
   const [totalItems, setTotalItems] = useState(totalCount);
 
   const totalPages = Math.ceil(totalItems / itemsPerPage) || 1;

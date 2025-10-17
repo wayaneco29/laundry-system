@@ -11,7 +11,7 @@ export const getAllStaffs = async (options?: {
 }) => {
   const supabase = await createClient();
   const page = options?.page || 1;
-  const limit = options?.limit || 15;
+  const limit = options?.limit || 10;
   const offset = (page - 1) * limit;
 
   const fetchStaffs = unstable_cache(
