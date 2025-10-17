@@ -58,8 +58,6 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const [customers, setCustomers] = useState<Array<any>>([]);
   const [loadingCustomers, setLoadingCustomers] = useState<boolean>(true);
   const [availableInventory, setAvailableInventory] = useState<Array<any>>([]);
-  const [showInventorySection, setShowInventorySection] =
-    useState<boolean>(false);
   const [orderData, setOrderData] = useState<any>(null);
 
   const { control, handleSubmit, setValue, watch, reset, formState } = useForm({
@@ -67,7 +65,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
       customerId: "",
       branchId: branch_id || "",
       services: [],
-      modeOfPayment: "",
+      modeOfPayment: "Cash",
       inventoryUsage: [],
     },
     mode: "onChange",
@@ -276,6 +274,17 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
     }
   };
 
+  const toggleInventory = (inventoryItem: any) => {
+    const currentUsage = watch("inventoryUsage", []) as Array<any>;
+    const existingItem = currentUsage.find((item: any) => item.id === inventoryItem.id);
+
+    if (existingItem) {
+      removeInventoryUsage(inventoryItem.id);
+    } else {
+      addInventoryUsage(inventoryItem);
+    }
+  };
+
   const branchOptions = [
     ...branches.map((branch: any) => ({
       label: branch.name,
@@ -345,7 +354,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
             </div>
             <div className="mt-4 sm:mt-0 text-sm text-gray-500">
               {services?.length} service
-              {services?.length !== 1 ? "s" : ""} selected
+              {services?.length !== 1 ? "s" : ""}
+              {inventoryUsage?.length > 0 && ` + ${inventoryUsage.length} inventory item${inventoryUsage.length !== 1 ? "s" : ""}`} selected
             </div>
           </div>
         </div>
@@ -393,9 +403,12 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                   </div>
                 )}
 
-                {/* Services Grid */}
+                {/* Services Section */}
                 <div className="p-6 pt-0">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                    Services
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-4 mb-6">
                     {servicesList?.map((service) => {
                       const isSelected = services.some(
                         (x) => x.id === service.id
@@ -416,8 +429,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                             }
                             ${
                               isSelected
-                                ? "bg-green-100 shadow-md"
-                                : "bg-white shadow-sm hover:shadow-md"
+                                ? "bg-green-100 shadow-md border-2 border-green-500"
+                                : "bg-white shadow-sm hover:shadow-md border-2 border-transparent"
                             }
                           `}
                         >
@@ -447,6 +460,72 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                       <Package className="w-12 h-12 text-gray-300 mx-auto mb-4" />
                       <p className="text-gray-500">No services found</p>
                     </div>
+                  )}
+
+                  {/* Inventory Section */}
+                  {selectedBranchId && (
+                    <>
+                      <div className="border-t border-gray-200 mt-6 pt-6">
+                        <h3 className="text-sm font-semibold text-gray-700 mb-3 uppercase tracking-wide">
+                          Inventory
+                        </h3>
+                        {availableInventory.length === 0 ? (
+                          <div className="text-center py-8">
+                            <Package className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                            <p className="text-sm text-gray-500">
+                              No inventory items available for this branch
+                            </p>
+                          </div>
+                        ) : (
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-2 2xl:grid-cols-3 gap-4">
+                            {availableInventory.map((item) => {
+                              const isSelected = inventoryUsage.some(
+                                (x: any) => x.id === item.id
+                              );
+
+                              return (
+                                <div
+                                  key={item.id}
+                                  onClick={() =>
+                                    !formState?.isSubmitting && toggleInventory(item)
+                                  }
+                                  className={`
+                                    relative p-4 rounded-lg cursor-pointer transition-all duration-200
+                                    ${
+                                      formState?.isSubmitting
+                                        ? "opacity-50 cursor-not-allowed"
+                                        : "hover:shadow-lg hover:scale-[1.02] active:scale-[0.98]"
+                                    }
+                                    ${
+                                      isSelected
+                                        ? "bg-blue-100 shadow-md border-2 border-blue-500"
+                                        : "bg-white shadow-sm hover:shadow-md border-2 border-transparent"
+                                    }
+                                  `}
+                                >
+                                  <div className="flex items-center justify-between">
+                                    <div className="flex-1 min-w-0">
+                                      <h3 className="font-medium text-gray-900 truncate">
+                                        {item.name}
+                                      </h3>
+                                      <p className="text-xs text-gray-500 mt-1">
+                                        {item.availableQuantity} available
+                                      </p>
+                                    </div>
+
+                                    {isSelected && (
+                                      <div className="ml-2 p-1 bg-blue-500 rounded-full">
+                                        <Check className="w-3 h-3 text-white" />
+                                      </div>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        )}
+                      </div>
+                    </>
                   )}
                 </div>
               </div>
@@ -571,159 +650,18 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                   )}
                 />
 
-                {/* Inventory Usage Section (Optional) */}
-                <div className="p-6 pt-0 bg-gray-50 border-t">
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center space-x-2">
-                      <Package className="w-4 h-4 text-gray-600" />
-                      <span className="text-sm font-medium text-gray-700">
-                        Inventory Usage (Optional)
-                      </span>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() =>
-                        setShowInventorySection(!showInventorySection)
-                      }
-                      disabled={formState?.isSubmitting || !selectedBranchId}
-                      className="text-blue-600 hover:text-blue-700"
-                    >
-                      {showInventorySection ? "Hide" : "Add Items"}
-                    </Button>
-                  </div>
-
-                  {/* Available Inventory Items */}
-                  {showInventorySection && (
-                    <div className="space-y-3 max-h-40 overflow-y-auto mb-3">
-                      {availableInventory.length === 0 ? (
-                        <p className="text-sm text-gray-500 text-center py-4">
-                          No inventory items available for this branch
-                        </p>
-                      ) : (
-                        <div className="grid grid-cols-1 gap-2">
-                          {availableInventory
-                            .filter(
-                              (item) =>
-                                !inventoryUsage.find(
-                                  (usage: any) => usage.id === item.id
-                                )
-                            )
-                            .map((item) => (
-                              <button
-                                key={item.id}
-                                type="button"
-                                onClick={() =>
-                                  !formState?.isSubmitting &&
-                                  addInventoryUsage(item)
-                                }
-                                disabled={formState?.isSubmitting}
-                                className="p-2 text-left bg-white border rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                              >
-                                <div className="flex justify-between items-center">
-                                  <span className="text-sm font-medium text-gray-900">
-                                    {item.name}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {item.availableQuantity} available
-                                  </span>
-                                </div>
-                              </button>
-                            ))}
-                        </div>
-                      )}
-                    </div>
-                  )}
-
-                  {/* Selected Inventory Items */}
-                  {inventoryUsage.length > 0 && (
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium text-gray-700">
-                        Items to Deduct:
-                      </h4>
-                      {inventoryUsage.map((item: any) => (
-                        <div
-                          key={item.id}
-                          className="bg-white rounded-lg p-3 border"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex-1 min-w-0">
-                              <span className="text-sm font-medium text-gray-900 truncate block">
-                                {item.name}
-                              </span>
-                              <span className="text-xs text-gray-500">
-                                {item.availableQuantity} available
-                              </span>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                !formState?.isSubmitting &&
-                                removeInventoryUsage(item.id)
-                              }
-                              disabled={formState?.isSubmitting}
-                              className="ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <X className="w-4 h-4" />
-                            </button>
-                          </div>
-
-                          <div className="flex items-center space-x-2">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                !formState?.isSubmitting &&
-                                updateInventoryQuantity(
-                                  item.id,
-                                  item.quantity - 1
-                                )
-                              }
-                              disabled={
-                                formState?.isSubmitting || item.quantity <= 1
-                              }
-                              className="p-1 text-gray-600 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <Minus className="w-4 h-4" />
-                            </button>
-                            <span className="w-8 text-center text-sm font-medium text-gray-700">
-                              {item.quantity}
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() =>
-                                !formState?.isSubmitting &&
-                                updateInventoryQuantity(
-                                  item.id,
-                                  item.quantity + 1
-                                )
-                              }
-                              disabled={
-                                formState?.isSubmitting ||
-                                item.quantity >= item.availableQuantity
-                              }
-                              className="p-1 text-gray-600 hover:bg-gray-200 rounded-full transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                            >
-                              <Plus className="w-4 h-4" />
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                {/* Selected Services */}
+                {/* Selected Items */}
                 <div className="p-6 pt-0">
-                  {services.length === 0 ? (
+                  {services.length === 0 && inventoryUsage.length === 0 ? (
                     <div className="text-center py-8">
                       <ShoppingCart className="w-8 h-8 text-gray-300 mx-auto mb-3" />
                       <p className="text-gray-500 text-sm">
-                        No services selected
+                        No items selected
                       </p>
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-80 overflow-y-auto">
+                      {/* Services */}
                       {services.map((service, index) => (
                         <div
                           key={index}
@@ -796,12 +734,85 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                           </div>
                         </div>
                       ))}
+
+                      {/* Inventory Items */}
+                      {inventoryUsage.map((item: any, index: number) => (
+                        <div
+                          key={`inventory-${index}`}
+                          className={`bg-blue-50 rounded-lg p-4 border-2 border-blue-200 ${
+                            formState?.isSubmitting ? "opacity-50" : ""
+                          }`}
+                        >
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-medium text-gray-900 text-sm truncate flex items-center">
+                                <Package className="w-3 h-3 mr-1 text-blue-600" />
+                                {item.name}
+                              </h4>
+                              <p className="text-xs text-gray-500">
+                                {item.availableQuantity} available
+                              </p>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                !formState?.isSubmitting && removeInventoryUsage(item.id)
+                              }
+                              disabled={formState?.isSubmitting}
+                              className="cursor-pointer ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <X className="w-4 h-4" />
+                            </button>
+                          </div>
+
+                          {/* Quantity Controls */}
+                          <div className="flex items-center space-x-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                !formState?.isSubmitting &&
+                                updateInventoryQuantity(
+                                  item.id,
+                                  item.quantity - 1
+                                )
+                              }
+                              disabled={
+                                formState?.isSubmitting ||
+                                item.quantity <= 1
+                              }
+                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Minus className="w-4 h-4" />
+                            </button>
+                            <span className="w-8 text-center text-sm font-medium text-gray-700">
+                              {item.quantity}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                !formState?.isSubmitting &&
+                                updateInventoryQuantity(
+                                  item.id,
+                                  item.quantity + 1
+                                )
+                              }
+                              disabled={
+                                formState?.isSubmitting ||
+                                item.quantity >= item.availableQuantity
+                              }
+                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                              <Plus className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
                     </div>
                   )}
                 </div>
 
                 {/* Total and Actions */}
-                {services.length > 0 && (
+                {(services.length > 0 || inventoryUsage.length > 0) && (
                   <div className="p-6 pt-0">
                     <div className="bg-gray-50 rounded-lg p-4 mb-4">
                       <div className="flex items-center justify-between">
