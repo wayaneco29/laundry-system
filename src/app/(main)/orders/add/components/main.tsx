@@ -383,10 +383,10 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                     placeholder="Search services..."
                     value={searchServices}
                     onChange={(event) => setSearchServices(event.target.value)}
-                    className="pl-10 w-full bg-white rounded-md"
+                    className="pl-11 h-12 text-base w-full bg-white rounded-md"
                     disabled={formState?.isSubmitting}
                   />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 </div>
               </div>
 
@@ -684,7 +684,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 !formState?.isSubmitting && removeService(index)
                               }
                               disabled={formState?.isSubmitting}
-                              className="cursor-pointer ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              className="cursor-pointer ml-2 p-2 min-h-[36px] min-w-[36px] text-red-500 hover:bg-red-50 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -706,11 +706,11 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                   formState?.isSubmitting ||
                                   service.quantity === 1
                                 }
-                                className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                                className="p-2 min-h-[40px] min-w-[40px] text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                               >
-                                <Minus className="w-4 h-4" />
+                                <Minus className="w-5 h-5" />
                               </button>
-                              <span className="w-8 text-center text-sm font-medium text-gray-700">
+                              <span className="w-10 text-center text-base font-medium text-gray-700">
                                 {service.quantity || 1}
                               </span>
                               <button
@@ -723,9 +723,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                   )
                                 }
                                 disabled={formState?.isSubmitting}
-                                className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                                className="p-2 min-h-[40px] min-w-[40px] text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                               >
-                                <Plus className="w-4 h-4" />
+                                <Plus className="w-5 h-5" />
                               </button>
                             </div>
                             <div className="text-sm font-semibold text-gray-900">
@@ -759,7 +759,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 !formState?.isSubmitting && removeInventoryUsage(item.id)
                               }
                               disabled={formState?.isSubmitting}
-                              className="cursor-pointer ml-2 p-1 text-red-500 hover:bg-red-50 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              className="cursor-pointer ml-2 p-2 min-h-[36px] min-w-[36px] text-red-500 hover:bg-red-50 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                             >
                               <X className="w-4 h-4" />
                             </button>
@@ -780,11 +780,11 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 formState?.isSubmitting ||
                                 item.quantity <= 1
                               }
-                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              className="p-2 min-h-[40px] min-w-[40px] text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                             >
-                              <Minus className="w-4 h-4" />
+                              <Minus className="w-5 h-5" />
                             </button>
-                            <span className="w-8 text-center text-sm font-medium text-gray-700">
+                            <span className="w-10 text-center text-base font-medium text-gray-700">
                               {item.quantity}
                             </span>
                             <button
@@ -800,9 +800,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 formState?.isSubmitting ||
                                 item.quantity >= item.availableQuantity
                               }
-                              className="p-1 text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+                              className="p-2 min-h-[40px] min-w-[40px] text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                             >
-                              <Plus className="w-4 h-4" />
+                              <Plus className="w-5 h-5" />
                             </button>
                           </div>
                         </div>
@@ -838,23 +838,23 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                           }
                         }}
                         disabled={formState?.isSubmitting}
-                        className="flex-1 bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 min-h-[48px] text-base bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-5 h-5" />
                         <span>Clear All</span>
                       </Button>
                       <Button
                         type="submit"
-                        className="flex-1 bg-green-500 hover:bg-green-600 text-white py-2.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 min-h-[48px] text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {formState?.isSubmitting ? (
                           <>
-                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <Loader2 className="w-5 h-5 animate-spin" />
                             <span>Processing Payment...</span>
                           </>
                         ) : (
                           <>
-                            <CreditCard className="w-4 h-4" />
+                            <CreditCard className="w-5 h-5" />
                             <span>Pay & Confirm Order</span>
                           </>
                         )}
@@ -893,9 +893,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                     setShowConfirmationModal(false);
                     setOrderData(null);
                   }}
-                  className="text-white hover:bg-blue-600 rounded-full p-1 transition-colors"
+                  className="text-white hover:bg-blue-600 rounded-full p-2 min-h-[44px] min-w-[44px] transition-all active:scale-95 flex items-center justify-center"
                 >
-                  <X className="w-5 h-5" />
+                  <X className="w-6 h-6" />
                 </button>
               </div>
             </div>
@@ -1044,23 +1044,23 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                     setShowConfirmationModal(false);
                     setOrderData(null);
                   }}
-                  className="flex-1 bg-gray-500 hover:bg-gray-600 text-white"
+                  className="flex-1 min-h-[48px] text-base bg-gray-500 hover:bg-gray-600 text-white active:scale-95 transition-transform"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleConfirmOrder}
                   disabled={formState?.isSubmitting}
-                  className="flex-1 bg-green-500 hover:bg-green-600 text-white"
+                  className="flex-1 min-h-[48px] text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50"
                 >
                   {formState?.isSubmitting ? (
                     <>
-                      <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                      <Loader2 className="w-5 h-5 animate-spin mr-2" />
                       Creating Order...
                     </>
                   ) : (
                     <>
-                      <Check className="w-4 h-4 mr-2" />
+                      <Check className="w-5 h-5 mr-2" />
                       Confirm Order
                     </>
                   )}

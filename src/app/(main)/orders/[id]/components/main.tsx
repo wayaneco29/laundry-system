@@ -219,7 +219,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
           value={currentStatus}
           onChange={(e) => onUpdate(e.target.value)}
           onBlur={() => setEditingField(null)}
-          className={`appearance-none pr-8 pl-3 py-2 text-sm rounded-lg border font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+          className={`appearance-none pr-10 pl-3 md:pl-4 py-3 text-sm md:text-base min-h-[44px] rounded-lg border font-medium focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all ${
             field === "order_status"
               ? getOrderStatusColor(currentStatus)
               : getPaymentStatusColor(currentStatus)
@@ -234,9 +234,9 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
           ))}
         </select>
         {isLoading ? (
-          <Loader2 className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 animate-spin" />
+          <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 animate-spin" />
         ) : (
-          <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 w-4 h-4 pointer-events-none" />
+          <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 w-5 h-5 pointer-events-none" />
         )}
       </div>
     );
@@ -275,14 +275,14 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
 
     return (
       <div
-        className={`inline-flex items-center gap-2 px-3 py-2 text-sm rounded-lg border font-medium transition-all duration-200 ${
+        className={`inline-flex items-center gap-2 px-4 py-3 text-sm md:text-base min-h-[44px] rounded-lg border font-medium transition-all duration-200 ${
           type === "order"
             ? getOrderStatusColor(status)
             : getPaymentStatusColor(status)
         } ${
           isPaidStatus || isPickupStatus
             ? "opacity-75 cursor-not-allowed"
-            : "cursor-pointer hover:shadow-md"
+            : "cursor-pointer hover:shadow-md active:scale-95"
         }`}
         onClick={isPaidStatus || isPickupStatus ? undefined : onClick}
       >
@@ -291,7 +291,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
           ? editingField === type && (
               <Loader2
                 className={twMerge(
-                  "w-3 h-3 animate-spin flex-shrink-0",
+                  "w-4 h-4 animate-spin flex-shrink-0",
                   type === "order"
                     ? getOrderStatusColor(status)
                     : getPaymentStatusColor(status)
@@ -300,7 +300,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
             )
           : !isPaidStatus &&
             !isPickupStatus && (
-              <Edit3 className="w-3 h-3 opacity-60 flex-shrink-0" />
+              <Edit3 className="w-4 h-4 opacity-60 flex-shrink-0" />
             )}
       </div>
     );
@@ -332,24 +332,21 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
 
         <div className="mx-auto p-4 lg:p-8">
           {/* Header */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-            <div className="flex w-full items-center justify-between gap-4">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900">
-                  Order Details
-                </h1>
-                <p className="text-slate-600 mt-1">
-                  View and manage order information
-                </p>
-              </div>
-              <Button
-                leftIcon={<ArrowLeft className="size-4" />}
-                variant="outline"
-                onClick={() => router.replace("/orders")}
-                className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Back to Orders
-              </Button>
+          <div className="flex flex-col gap-4 mb-6 md:mb-8">
+            <button
+              onClick={() => router.replace("/orders")}
+              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-base min-h-[44px] w-fit active:scale-95 transition-transform"
+            >
+              <ArrowLeft className="w-5 h-5" />
+              <span>Back to Orders</span>
+            </button>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+                Order Details
+              </h1>
+              <p className="text-slate-600 mt-1 text-sm md:text-base">
+                View and manage order information
+              </p>
             </div>
           </div>
 
@@ -402,18 +399,67 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                 </div>
               </div>
 
-              {/* Items Table */}
+              {/* Items Table/Cards */}
               <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
-                <div className="px-6 py-4 border-b border-slate-200 bg-slate-50">
-                  <h3 className="text-lg font-semibold text-gray-900">
+                <div className="px-4 md:px-6 py-4 border-b border-slate-200 bg-slate-50">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900">
                     Order Items
                   </h3>
-                  <p className="text-sm text-slate-600 mt-1">
+                  <p className="text-xs md:text-sm text-slate-600 mt-1">
                     Services included in this order
                   </p>
                 </div>
 
-                <div className="overflow-x-auto">
+                {/* Mobile Card View */}
+                <div className="md:hidden">
+                  {data?.items?.length ? (
+                    <div className="divide-y divide-slate-200">
+                      {data.items.map((item: any, index: number) => (
+                        <div key={index} className="p-4 hover:bg-slate-50 transition-colors">
+                          <div className="flex items-start justify-between mb-3">
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center gap-2 mb-1">
+                                <span className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center text-xs font-semibold">
+                                  {index + 1}
+                                </span>
+                                <h4 className="text-sm font-semibold text-slate-900 truncate">
+                                  {item.name}
+                                </h4>
+                              </div>
+                              <div className="flex items-center gap-2 text-xs text-slate-600 mt-2">
+                                <span className="bg-slate-100 px-2 py-1 rounded">
+                                  ₱{item.price}/kg
+                                </span>
+                                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
+                                  {item.quantity} kg
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="flex items-center justify-between pt-3 border-t border-slate-100">
+                            <span className="text-xs font-medium text-slate-600">Item Total</span>
+                            <span className="text-base font-bold text-slate-900">
+                              ₱{item.total || 0}
+                            </span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="p-8 text-center">
+                      <div className="text-slate-400">
+                        <FileText className="w-12 h-12 mx-auto mb-4" />
+                        <p className="text-sm font-medium">No services added</p>
+                        <p className="text-xs mt-1">
+                          Services will appear here when added to the order
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Desktop Table View */}
+                <div className="hidden md:block overflow-x-auto">
                   <table className="w-full">
                     <thead className="bg-slate-50 border-b border-slate-200">
                       <tr>
@@ -436,7 +482,6 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                     </thead>
                     <tbody className="divide-y divide-slate-200">
                       {data?.items?.length ? (
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
                         data.items.map((item: any, index: number) => (
                           <tr
                             key={index}
@@ -524,8 +569,8 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                   </h3>
                   <div className="space-y-3">
                     <Button
-                      leftIcon={<Printer className="size-4" />}
-                      className="w-full bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2"
+                      leftIcon={<Printer className="size-5" />}
+                      className="w-full min-h-[48px] md:min-h-[44px] text-base bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform"
                       onClick={() => window.print()}
                     >
                       Print Receipt
