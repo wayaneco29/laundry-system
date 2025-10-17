@@ -14,7 +14,22 @@
       "Bash(yarn install:*)",
       "Bash(yarn add lightningcss)",
       "Bash(npx:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(nvm which:*)",
+      "Bash(source:*)",
+      "Bash(nvm use:*)",
+      "Bash(find:*)",
+      "mcp__chrome-devtools__new_page",
+      "Bash(ls:*)",
+      "Bash(apt list:*)",
+      "Bash(snap list:*)",
+      "mcp__chrome-devtools__list_pages",
+      "WebFetch(domain:developers.chrome.com)",
+      "WebFetch(domain:developer.chrome.com)",
+      "Bash(curl:*)",
+      "Bash(time curl:*)",
+      "Bash(pkill:*)",
+      "Bash(npm install:*)"
     ],
     "deny": []
   },

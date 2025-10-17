@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { createClient } from "@/app/utils/supabase/client";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { endStaffShift, updateShiftPartner } from "@/app/actions/staff/shift_actions";
+import { useToast } from "@/app/hooks";
 
 interface LogoutButtonProps {
   children?: React.ReactNode;
@@ -13,9 +14,11 @@ interface LogoutButtonProps {
 
 export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [isRedirecting, setIsRedirecting] = useState(false);
   const router = useRouter();
   const supabase = createClient();
   const { userId } = useCurrentUser();
+  const toast = useToast();
 
   const handleLogout = async () => {
     setIsLoading(true);
@@ -60,25 +63,30 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
 
       if (error) {
         console.error("Logout error:", error);
+        toast.error("Failed to logout. Please try again.");
         return;
       }
 
+      setIsLoading(false);
+      setIsRedirecting(true);
+      toast.success("Logout successful! Redirecting...");
       router.push("/");
       router.refresh();
     } catch (error) {
       console.error("Logout error:", error);
-    } finally {
+      toast.error("An error occurred during logout.");
       setIsLoading(false);
+      setIsRedirecting(false);
     }
   };
 
   return (
     <button
       onClick={handleLogout}
-      disabled={isLoading}
+      disabled={isLoading || isRedirecting}
       className={`${className} w-full cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed`}
     >
-      {isLoading ? (
+      {isLoading || isRedirecting ? (
         <div className="flex items-center">
           <svg
             className="animate-spin -ml-1 mr-2 h-4 w-4"
@@ -99,7 +107,7 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
               d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
             />
           </svg>
-          {children || "Logging out..."}
+          {isRedirecting ? (children || "Redirecting...") : (children || "Logging out...")}
         </div>
       ) : (
         children || "Logout"

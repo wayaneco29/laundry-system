@@ -8,6 +8,7 @@ import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { loginUser } from "./actions/auth";
 import { useToast } from "./hooks";
+import { useState } from "react";
 
 interface LoginFormData {
   email: string;
@@ -17,6 +18,8 @@ interface LoginFormData {
 export function LoginForm() {
   const router = useRouter();
   const toast = useToast();
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
 
   const { handleSubmit, control, formState } = useForm({
     defaultValues: {
@@ -34,13 +37,16 @@ export function LoginForm() {
   const onSubmit = handleSubmit(
     async (data: { username: string; password: string }) => {
       try {
-        const response = await loginUser(data);
+        const response = await loginUser({ ...data, rememberMe });
 
         if (response?.error) throw response?.error;
 
+        setIsRedirecting(true);
+        toast.success("Login successful! Redirecting...");
         router?.replace(response?.data!);
       } catch (error) {
         toast.error(typeof error !== "string" ? "Something went wrong" : error);
+        setIsRedirecting(false);
       }
     }
   );
@@ -55,7 +61,7 @@ export function LoginForm() {
           <div>
             <Input
               label="Username"
-              disabled={formState?.isSubmitting}
+              disabled={formState?.isSubmitting || isRedirecting}
               placeholder="Enter your username"
               error={!!error}
               icon={<User />}
@@ -71,7 +77,7 @@ export function LoginForm() {
           <div>
             <Input
               type="password"
-              disabled={formState?.isSubmitting}
+              disabled={formState?.isSubmitting || isRedirecting}
               label="Password"
               placeholder="Enter your password"
               autoComplete="current-password"
@@ -83,31 +89,27 @@ export function LoginForm() {
         )}
       />
 
-      {/* Remember Me & Forgot Password */}
-      <div className="flex items-center justify-between">
-        <label className="flex items-center">
+      {/* Remember Me */}
+      <div className="flex items-center">
+        <label className="flex items-center cursor-pointer">
           <input
             type="checkbox"
-            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+            checked={rememberMe}
+            onChange={(e) => setRememberMe(e.target.checked)}
+            disabled={formState?.isSubmitting || isRedirecting}
+            className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           />
           <span className="ml-2 text-sm text-gray-600">Remember me</span>
         </label>
-
-        <a
-          href="#"
-          className="text-sm font-medium text-blue-600 hover:text-blue-500 transition-colors"
-        >
-          Forgot password?
-        </a>
       </div>
 
       {/* Submit Button */}
       <Button
         type="submit"
-        disabled={formState?.isSubmitting}
+        disabled={formState?.isSubmitting || isRedirecting}
         className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 px-4 rounded-lg transition-all duration-200 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
       >
-        {formState?.isSubmitting ? (
+        {formState?.isSubmitting || isRedirecting ? (
           <div className="flex items-center justify-center">
             <svg
               className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
@@ -128,7 +130,7 @@ export function LoginForm() {
                 d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
               />
             </svg>
-            Signing in...
+            {isRedirecting ? "Redirecting..." : "Signing in..."}
           </div>
         ) : (
           "Sign In"

@@ -7,9 +7,11 @@ import { redirect } from "next/navigation";
 export async function loginUser({
   username,
   password,
+  rememberMe = true,
 }: {
   username: string;
   password: string;
+  rememberMe?: boolean;
 }) {
   try {
     const supabase = await createClient();
@@ -23,6 +25,9 @@ export async function loginUser({
     if (!data?.email)
       throw `Unable to find username ${username} in the auth users.`;
 
+    // Note: Supabase handles session persistence automatically.
+    // By default, sessions are stored in localStorage and persist across browser restarts.
+    // The rememberMe flag is available for future custom session handling if needed.
     const { error } = await supabase.auth.signInWithPassword({
       email: data?.email,
       password,
