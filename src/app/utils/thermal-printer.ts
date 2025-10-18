@@ -1,3 +1,5 @@
+"use client";
+
 /**
  * Thermal Printer Utility for ESC/POS Bluetooth Printers
  * Compatible with GooJPRT and similar thermal printers
@@ -11,6 +13,14 @@ export class ThermalPrinter {
   private device: BluetoothDevice | null = null;
   private characteristic: BluetoothRemoteGATTCharacteristic | null = null;
   private encoder = new TextEncoder();
+  private deviceName: string | null = null;
+
+  /**
+   * Get connected device name
+   */
+  getDeviceName(): string | null {
+    return this.deviceName;
+  }
 
   /**
    * Connect to bluetooth thermal printer
@@ -54,6 +64,9 @@ export class ThermalPrinter {
       if (!this.characteristic) {
         throw new Error("No writable characteristic found");
       }
+
+      // Store device name for future reference
+      this.deviceName = this.device.name || "Unknown Printer";
     } catch (error) {
       console.error("Failed to connect to printer:", error);
       throw error;
@@ -69,6 +82,7 @@ export class ThermalPrinter {
     }
     this.device = null;
     this.characteristic = null;
+    this.deviceName = null;
   }
 
   /**
@@ -222,7 +236,9 @@ export class ThermalPrinter {
       await this.printSeparator();
 
       // Totals
-      await this.printLine(`Subtotal:              P${receiptData.total_price}`);
+      await this.printLine(
+        `Subtotal:              P${receiptData.total_price}`
+      );
       await this.printLine(`Tax:                   P0.00`);
 
       await this.printSeparator();
@@ -244,6 +260,57 @@ export class ThermalPrinter {
       await this.cut();
     } catch (error) {
       console.error("Failed to print receipt:", error);
+      throw error;
+    }
+  }
+
+  /**
+   * Print test message to confirm connection
+   */
+  async printTestMessage(): Promise<void> {
+    try {
+      await this.init();
+
+      // Center align
+      await this.setAlign("center");
+
+      // Print logo/header
+      await this.setTextSize(2);
+      await this.setBold(true);
+      await this.printLine("Laundry Shop Inc.");
+
+      await this.setTextSize(1);
+      await this.setBold(false);
+      await this.feed(1);
+
+      await this.printSeparator();
+
+      // Success message
+      await this.setTextSize(2);
+      await this.setBold(true);
+      await this.printLine("PRINTER CONNECTED");
+
+      await this.setTextSize(1);
+      await this.setBold(false);
+      await this.feed(1);
+
+      await this.printSeparator();
+
+      // Info
+      await this.printLine("Connection successful!");
+      await this.printLine(`Device: ${this.deviceName || "Unknown"}`);
+      await this.printLine(`Time: ${new Date().toLocaleString()}`);
+
+      await this.feed(1);
+      await this.printSeparator();
+
+      await this.printLine("Ready to print receipts");
+      await this.feed(3);
+
+      // Cut paper
+      await this.cut();
+    } catch (error) {
+      console.error("Failed to print test message:", error);
       throw error;
     }
   }

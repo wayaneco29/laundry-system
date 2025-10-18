@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/app/utils/supabase/server";
 import { SidebarContextProvider, UserContextProvided } from "@/app/context";
 import StaffShiftProvider from "@/app/components/providers/staff-shift-provider";
+import { PrinterProvider } from "@/app/context/PrinterContext";
 
 export default async function MainLayout(props: PropsWithChildren) {
   const supabase = await createClient();
@@ -23,11 +24,11 @@ export default async function MainLayout(props: PropsWithChildren) {
 
   return (
     <UserContextProvided user={logged_in_user as any}>
-      <SidebarContextProvider>
-        <StaffShiftProvider>
-          {props?.children}
-        </StaffShiftProvider>
-      </SidebarContextProvider>
+      <PrinterProvider>
+        <SidebarContextProvider>
+          <StaffShiftProvider>{props?.children}</StaffShiftProvider>
+        </SidebarContextProvider>
+      </PrinterProvider>
     </UserContextProvided>
   );
 }

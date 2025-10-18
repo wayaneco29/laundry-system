@@ -25,8 +25,6 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronLeft,
-  ChevronRight,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { LogoutButton } from "@/app/components/auth/logout-button";
@@ -34,6 +32,7 @@ import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { ROLE_ADMIN, ROLE_STAFF } from "@/app/types";
 import { useUserContext } from "../UserContext";
 import { SimpleShiftStatus } from "@/app/components/staff/simple-shift-status";
+import { PrinterStatusIndicator } from "@/app/components/printer/printer-status-indicator";
 
 type SidebarContextType = Record<string, never>;
 
@@ -279,6 +278,9 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
             <div className="flex items-center gap-3">
               {/* Co-worker Status Indicator for Staff */}
               {role_name === ROLE_STAFF && <SimpleShiftStatus />}
+
+              {/* Printer Status Indicator */}
+              <PrinterStatusIndicator />
 
               <div className="hidden sm:block text-right">
                 <div className="text-sm font-semibold text-slate-900">

@@ -25,9 +25,11 @@ import {
 import { useRouter, useSearchParams } from "next/navigation";
 import { updatePaymentStatus, updateOrderStatus } from "@/app/actions";
 import { twMerge } from "tailwind-merge";
-import { useToast, useThermalPrinter } from "@/app/hooks";
+import { useToast } from "@/app/hooks";
+import { usePrinterContext } from "@/app/context/PrinterContext";
 
 import "./receipt.css";
+import { useUserContext } from "@/app/context";
 
 type MainOrderIdPageProps = {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -111,7 +113,8 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
   const { userId } = useCurrentUser();
   const toast = useToast();
   const { isConnected, isConnecting, isPrinting, printReceipt, connect } =
-    useThermalPrinter();
+    usePrinterContext();
+  const { username } = useUserContext();
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -134,7 +137,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
       order_id: data.order_id,
       order_date: moment(data.order_date).format("MM/DD/YYYY, h:mm A"),
       branch_name: data.branch_name,
-      staff_name: data.staff_name,
+      staff_name: username,
       items: data.items || [],
       total_price: data.total_price,
     };
@@ -448,7 +451,10 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                   {data?.items?.length ? (
                     <div className="divide-y divide-slate-200">
                       {data.items.map((item: any, index: number) => (
-                        <div key={index} className="p-4 hover:bg-slate-50 transition-colors">
+                        <div
+                          key={index}
+                          className="p-4 hover:bg-slate-50 transition-colors"
+                        >
                           <div className="flex items-start justify-between mb-3">
                             <div className="flex-1 min-w-0">
                               <div className="flex items-center gap-2 mb-1">
@@ -470,7 +476,9 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                             </div>
                           </div>
                           <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                            <span className="text-xs font-medium text-slate-600">Item Total</span>
+                            <span className="text-xs font-medium text-slate-600">
+                              Item Total
+                            </span>
                             <span className="text-base font-bold text-slate-900">
                               ₱{item.total || 0}
                             </span>
