@@ -99,6 +99,10 @@ export const Select = ({
                 height: "42px",
                 display: "flex",
                 alignItems: "center",
+                "& > div:first-child": {
+                  maxWidth: "98%",
+                  marginLeft: "0px",
+                },
               };
             },
             indicatorSeparator() {
