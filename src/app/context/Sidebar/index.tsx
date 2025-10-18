@@ -208,50 +208,37 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
               )}
 
               {/* Logout Button */}
-              <LogoutButton
-                className={twMerge(
-                  "group relative flex items-center rounded-xl font-medium transition-all duration-200 hover:bg-slate-700/50 text-slate-300 hover:text-white",
-                  minimize
-                    ? "lg:justify-center lg:px-3 lg:py-3"
-                    : "gap-3 px-3 py-3"
-                )}
-              >
-                <LogOut className="w-5 h-5 flex-shrink-0" />
-                <span
-                  className={twMerge(
-                    "transition-all duration-200 whitespace-nowrap",
-                    minimize ? "lg:hidden" : "opacity-100"
-                  )}
-                >
-                  Logout
-                </span>
-
-                {/* Tooltip for minimized state */}
-                {minimize && (
-                  <div className="hidden lg:block absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
-                    Logout
-                    <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-900 rotate-45 border-l border-b border-slate-700"></div>
-                  </div>
-                )}
-              </LogoutButton>
             </div>
           </div>
 
           {/* Collapse Button */}
           <div className="p-4 border-t border-slate-700">
-            <button
-              onClick={() => setMinimized(!minimize)}
-              className="hidden lg:flex w-full items-center justify-center gap-2 px-3 py-2 text-slate-300 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors duration-200"
-            >
-              {minimize ? (
-                <ChevronRight className="w-4 h-4" />
-              ) : (
-                <>
-                  <ChevronLeft className="w-4 h-4" />
-                  <span className="text-sm">Collapse</span>
-                </>
+            <LogoutButton
+              className={twMerge(
+                "group relative flex items-center rounded-xl font-medium transition-all duration-200 hover:bg-slate-700/50 text-slate-300 hover:text-white",
+                minimize
+                  ? "lg:justify-center lg:px-3 lg:py-3"
+                  : "gap-3 px-3 py-3"
               )}
-            </button>
+            >
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              <span
+                className={twMerge(
+                  "transition-all duration-200 whitespace-nowrap",
+                  minimize ? "lg:hidden" : "opacity-100"
+                )}
+              >
+                Logout
+              </span>
+
+              {/* Tooltip for minimized state */}
+              {minimize && (
+                <div className="hidden lg:block absolute left-full ml-2 px-3 py-2 bg-slate-900 text-white text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap z-50 shadow-xl border border-slate-700">
+                  Logout
+                  <div className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-1 w-2 h-2 bg-slate-900 rotate-45 border-l border-b border-slate-700"></div>
+                </div>
+              )}
+            </LogoutButton>
           </div>
         </div>
       </div>
