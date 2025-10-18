@@ -64,6 +64,46 @@ export const UpsertCustomerModal = ({
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
       size="xl"
+      footer={
+        <div className="flex justify-end items-center gap-x-2">
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            leftIcon={<X />}
+            onClick={handleModalClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={isSubmitting || !isDirty}
+            loading={isSubmitting}
+            leftIcon={<Save />}
+            onClick={handleSubmit(async (newData) => {
+              try {
+                const { error } = await upsertCustomer({
+                  p_customer_id: newData?.customer_id || null,
+                  p_first_name: newData?.first_name,
+                  p_middle_name: newData?.middle_name,
+                  p_last_name: newData?.last_name,
+                  p_phone: newData?.phone,
+                  p_email: newData?.email || "",
+                  p_address: newData?.address,
+                  p_staff_id: userId!, // Use authenticated user ID
+                });
+
+                if (error) throw error;
+
+                handleModalClose();
+              } catch (_error) {
+                console.error(_error);
+              }
+            })}
+          >
+            Save
+          </Button>
+        </div>
+      }
     >
       <Controller
         control={control}
@@ -173,46 +213,6 @@ export const UpsertCustomerModal = ({
               />
             )}
           />
-        </div>
-      </div>
-      <div className="mt-8">
-        <div className="flex justify-end items-center gap-x-2">
-          <Button
-            variant="outline"
-            disabled={isSubmitting}
-            leftIcon={<X />}
-            onClick={handleModalClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={isSubmitting || !isDirty}
-            loading={isSubmitting}
-            leftIcon={<Save />}
-            onClick={handleSubmit(async (newData) => {
-              try {
-                const { error } = await upsertCustomer({
-                  p_customer_id: newData?.customer_id || null,
-                  p_first_name: newData?.first_name,
-                  p_middle_name: newData?.middle_name,
-                  p_last_name: newData?.last_name,
-                  p_phone: newData?.phone,
-                  p_email: newData?.email || "",
-                  p_address: newData?.address,
-                  p_staff_id: userId!, // Use authenticated user ID
-                });
-
-                if (error) throw error;
-
-                handleModalClose();
-              } catch (_error) {
-                console.error(_error);
-              }
-            })}
-          >
-            Save
-          </Button>
         </div>
       </div>
     </Modal>

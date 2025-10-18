@@ -16,6 +16,8 @@ type ModalProps = {
   className?: string;
   headerClassName?: string;
   bodyClassName?: string;
+  footerClassName?: string;
+  footer?: ReactNode;
   onClose: () => void;
 } & PropsWithChildren;
 
@@ -39,6 +41,8 @@ export const Modal = ({
   className,
   headerClassName,
   bodyClassName,
+  footerClassName,
+  footer,
   onClose,
   children,
 }: ModalProps) => {
@@ -99,6 +103,7 @@ export const Modal = ({
         className={twMerge(
           "relative w-full bg-white shadow-xl rounded-lg pointer-events-auto",
           "animate-in zoom-in-95 duration-200",
+          "flex flex-col max-h-[90vh]",
           sizeClasses[size],
           className
         )}
@@ -107,7 +112,7 @@ export const Modal = ({
         {/* Header */}
         <div
           className={twMerge(
-            "flex justify-between items-center px-6 py-4 bg-blue-600 rounded-t-lg",
+            "flex justify-between items-center px-6 py-4 bg-blue-600 rounded-t-lg flex-shrink-0",
             headerClassName
           )}
         >
@@ -137,13 +142,25 @@ export const Modal = ({
         {/* Body */}
         <div
           className={twMerge(
-            "p-6 overflow-y-auto max-h-[calc(100vh-200px)]",
+            "p-6 overflow-y-auto flex-1 min-h-0",
             "text-gray-900",
             bodyClassName
           )}
         >
           {children}
         </div>
+
+        {/* Footer */}
+        {footer && (
+          <div
+            className={twMerge(
+              "px-6 py-4 border-t border-gray-200 rounded-b-lg flex-shrink-0",
+              footerClassName
+            )}
+          >
+            {footer}
+          </div>
+        )}
 
         {/* Loading overlay */}
         {isSubmitting && (

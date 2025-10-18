@@ -79,6 +79,44 @@ export const ServiceModal = ({
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
       size="lg"
+      footer={
+        <div className="flex justify-end items-center gap-x-2">
+          <Button
+            disabled={isSubmitting}
+            leftIcon={<X />}
+            className="bg-transparent text-blue-600 border border-blue-400 hover:!bg-white hover:text-blue-600 focus:text-blue-600 focus:bg-white focus:!ring-0 active:scale-95"
+            onClick={handleModalClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={isSubmitting || !isDirty}
+            loading={isSubmitting}
+            leftIcon={<Save />}
+            onClick={handleSubmit(async (newData) => {
+              try {
+                const { error } = await upsertService({
+                  p_service_id: newData?.id as string,
+                  p_branch_id: newData?.branchId || branch_id,
+                  p_name: newData?.name,
+                  p_price: newData?.price,
+                  p_status: newData?.status,
+                  p_staff_id: userId!, // Use authenticated user ID
+                });
+
+                if (error) throw error;
+
+                handleModalClose();
+              } catch (_error) {
+                console.error(_error);
+              }
+            })}
+          >
+            Save
+          </Button>
+        </div>
+      }
     >
       <Controller
         control={control}
@@ -167,44 +205,6 @@ export const ServiceModal = ({
             />
           </div>
         )}
-      </div>
-      <div className="mt-8">
-        <div className="flex justify-end items-center gap-x-2">
-          <Button
-            disabled={isSubmitting}
-            leftIcon={<X />}
-            className="bg-transparent text-blue-600 border border-blue-400 hover:!bg-white hover:text-blue-600 focus:text-blue-600 focus:bg-white focus:!ring-0 active:scale-95"
-            onClick={handleModalClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={isSubmitting || !isDirty}
-            loading={isSubmitting}
-            leftIcon={<Save />}
-            onClick={handleSubmit(async (newData) => {
-              try {
-                const { error } = await upsertService({
-                  p_service_id: newData?.id as string,
-                  p_branch_id: newData?.branchId || branch_id,
-                  p_name: newData?.name,
-                  p_price: newData?.price,
-                  p_status: newData?.status,
-                  p_staff_id: userId!, // Use authenticated user ID
-                });
-
-                if (error) throw error;
-
-                handleModalClose();
-              } catch (_error) {
-                console.error(_error);
-              }
-            })}
-          >
-            Save
-          </Button>
-        </div>
       </div>
     </Modal>
   );

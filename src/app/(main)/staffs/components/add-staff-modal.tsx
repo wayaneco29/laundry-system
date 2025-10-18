@@ -95,6 +95,50 @@ export const AddStaffModal = ({
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
       size="xl"
+      footer={
+        <div className="flex justify-end items-center gap-x-2">
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            leftIcon={<X />}
+            onClick={handleModalClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={isSubmitting || !isDirty}
+            loading={isSubmitting}
+            leftIcon={<Save />}
+            onClick={handleSubmit(async (newData) => {
+              try {
+                const { error } = await addNewStaff({
+                  p_first_name: newData?.first_name,
+                  p_middle_name: newData?.middle_name,
+                  p_last_name: newData?.last_name,
+                  p_phone: newData?.phone,
+                  p_email: newData?.email || `${newData?.first_name}@gmail.com`,
+                  p_address: newData?.address,
+                  p_employment_date: newData?.employment_date,
+                  p_created_by: userId!,
+                  p_username: newData?.username,
+                  p_password: newData?.password!,
+                  p_branch_id: newData?.branch_id,
+                  p_role_id: newData?.role_id,
+                });
+
+                if (error) throw error;
+
+                handleModalClose();
+              } catch (_error) {
+                console.error(_error);
+              }
+            })}
+          >
+            Save
+          </Button>
+        </div>
+      }
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
         <div className="col-span-1 mb-4 sm:mb-0">
@@ -300,50 +344,6 @@ export const AddStaffModal = ({
               </div>
             )}
           />
-        </div>
-      </div>
-      <div className="mt-8">
-        <div className="flex justify-end items-center gap-x-2">
-          <Button
-            variant="outline"
-            disabled={isSubmitting}
-            leftIcon={<X />}
-            onClick={handleModalClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={isSubmitting || !isDirty}
-            loading={isSubmitting}
-            leftIcon={<Save />}
-            onClick={handleSubmit(async (newData) => {
-              try {
-                const { error } = await addNewStaff({
-                  p_first_name: newData?.first_name,
-                  p_middle_name: newData?.middle_name,
-                  p_last_name: newData?.last_name,
-                  p_phone: newData?.phone,
-                  p_email: newData?.email || `${newData?.first_name}@gmail.com`,
-                  p_address: newData?.address,
-                  p_employment_date: newData?.employment_date,
-                  p_created_by: userId!,
-                  p_username: newData?.username,
-                  p_password: newData?.password!,
-                  p_branch_id: newData?.branch_id,
-                  p_role_id: newData?.role_id,
-                });
-
-                if (error) throw error;
-
-                handleModalClose();
-              } catch (_error) {
-                console.error(_error);
-              }
-            })}
-          >
-            Save
-          </Button>
         </div>
       </div>
     </Modal>

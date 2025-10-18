@@ -82,6 +82,22 @@ export function InventoryModal({
       show={showModal}
       onClose={onClose}
       isSubmitting={isSubmitting}
+      footer={
+        <div className="flex justify-end space-x-3">
+          <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            variant="primary"
+            disabled={isSubmitting}
+            leftIcon={<Save className="h-4 w-4" />}
+            onClick={handleSubmit(onSubmit)}
+          >
+            {isSubmitting ? "Saving..." : initialValue.id ? "Update" : "Add"}
+          </Button>
+        </div>
+      }
     >
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <Controller
@@ -174,23 +190,6 @@ export function InventoryModal({
             </div>
           )}
         />
-
-        <div className="flex justify-end pt-4">
-          {/* Cancel and Save buttons */}
-          <div className="flex space-x-3">
-            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              variant="primary"
-              disabled={isSubmitting}
-              leftIcon={<Save className="h-4 w-4" />}
-            >
-              {isSubmitting ? "Saving..." : initialValue.id ? "Update" : "Add"}
-            </Button>
-          </div>
-        </div>
       </form>
     </Modal>
   );

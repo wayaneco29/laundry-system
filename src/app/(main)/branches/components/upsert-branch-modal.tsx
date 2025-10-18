@@ -69,6 +69,43 @@ export const UpsertBranchModal = ({
       isSubmitting={isSubmitting}
       onClose={handleModalClose}
       size="lg"
+      footer={
+        <div className="flex justify-end items-center gap-x-2">
+          <Button
+            variant="outline"
+            disabled={isSubmitting}
+            leftIcon={<X />}
+            onClick={handleModalClose}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            disabled={isSubmitting || !isDirty}
+            loading={isSubmitting}
+            leftIcon={<Save />}
+            onClick={handleSubmit(async (newData) => {
+              try {
+                const { error } = await upsertBranch({
+                  p_branch_id: newData?.id || null,
+                  p_name: newData?.name,
+                  p_description: newData?.description,
+                  p_address: newData?.address,
+                  p_staff_id: userId!, // Use authenticated user ID
+                });
+
+                if (error) throw error;
+
+                handleModalClose();
+              } catch (_error) {
+                console.error(_error);
+              }
+            })}
+          >
+            Save
+          </Button>
+        </div>
+      }
     >
       <Controller
         control={control}
@@ -127,43 +164,6 @@ export const UpsertBranchModal = ({
               />
             )}
           />
-        </div>
-      </div>
-      <div className="mt-8">
-        <div className="flex justify-end items-center gap-x-2">
-          <Button
-            variant="outline"
-            disabled={isSubmitting}
-            leftIcon={<X />}
-            onClick={handleModalClose}
-          >
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            disabled={isSubmitting || !isDirty}
-            loading={isSubmitting}
-            leftIcon={<Save />}
-            onClick={handleSubmit(async (newData) => {
-              try {
-                const { error } = await upsertBranch({
-                  p_branch_id: newData?.id || null,
-                  p_name: newData?.name,
-                  p_description: newData?.description,
-                  p_address: newData?.address,
-                  p_staff_id: userId!, // Use authenticated user ID
-                });
-
-                if (error) throw error;
-
-                handleModalClose();
-              } catch (_error) {
-                console.error(_error);
-              }
-            })}
-          >
-            Save
-          </Button>
         </div>
       </div>
     </Modal>

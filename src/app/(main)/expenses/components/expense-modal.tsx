@@ -252,7 +252,33 @@ export function ExpenseModal({
       show={isOpen}
       onClose={onClose}
       title={getModalTitle()}
-      bodyClassName="!overflow-y-visible"
+      footer={
+        mode !== "view" ? (
+          <div className="flex justify-end space-x-3">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onClose}
+              disabled={loading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" variant="primary" disabled={loading} onClick={handleSubmit}>
+              {loading
+                ? "Saving..."
+                : mode === "create"
+                ? "Create Expense"
+                : "Update Expense"}
+            </Button>
+          </div>
+        ) : (
+          <div className="flex justify-end">
+            <Button type="button" variant="outline" onClick={onClose}>
+              Close
+            </Button>
+          </div>
+        )
+      }
     >
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -336,34 +362,6 @@ export function ExpenseModal({
             </div>
           )}
         </div>
-
-        {mode !== "view" && (
-          <div className="flex justify-end space-x-3 pt-6">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onClose}
-              disabled={loading}
-            >
-              Cancel
-            </Button>
-            <Button type="submit" variant="primary" disabled={loading}>
-              {loading
-                ? "Saving..."
-                : mode === "create"
-                ? "Create Expense"
-                : "Update Expense"}
-            </Button>
-          </div>
-        )}
-
-        {mode === "view" && (
-          <div className="flex justify-end pt-6">
-            <Button type="button" variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        )}
       </form>
     </Modal>
   );

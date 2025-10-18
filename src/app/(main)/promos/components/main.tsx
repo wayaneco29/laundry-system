@@ -188,9 +188,45 @@ export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
             {isUpdate ? "Update Promo" : "Add Promo"}
           </div>
         }
-        bodyClassName="!overflow-y-visible"
         isSubmitting={isSubmitting}
         onClose={handleModalClose}
+        footer={
+          <div className="flex justify-end items-center gap-x-2">
+            <Button
+              leftIcon={<X />}
+              disabled={isSubmitting}
+              className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
+              onClick={handleModalClose}
+            >
+              Cancel
+            </Button>
+            <Button
+              leftIcon={<Save />}
+              disabled={isSubmitting || !isDirty}
+              className="inline-flex items-center gap-2"
+              onClick={handleSubmit(async (newData) => {
+                try {
+                  const { error } = await upsertPromo({
+                    p_promo_id: newData?.id as string,
+                    p_name: newData?.name,
+                    p_code: newData?.code,
+                    p_description: newData?.description,
+                    p_valid_until: newData?.valid_until,
+                    p_status: newData?.status,
+                    p_staff_id: userId!, // Use authenticated user ID
+                  });
+                  if (error) throw error;
+
+                  handleModalClose();
+                } catch (_error) {
+                  console.error(_error);
+                }
+              })}
+            >
+              Save
+            </Button>
+          </div>
+        }
       >
         <Controller
           control={control}
@@ -327,43 +363,6 @@ export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
             />
           </div>
         </div> */}
-        <div className="mt-8">
-          <div className="flex justify-end items-center gap-x-2">
-            <Button
-              leftIcon={<X />}
-              disabled={isSubmitting}
-              className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white inline-flex items-center gap-2"
-              onClick={handleModalClose}
-            >
-              Cancel
-            </Button>
-            <Button
-              leftIcon={<Save />}
-              disabled={isSubmitting || !isDirty}
-              className="inline-flex items-center gap-2"
-              onClick={handleSubmit(async (newData) => {
-                try {
-                  const { error } = await upsertPromo({
-                    p_promo_id: newData?.id as string,
-                    p_name: newData?.name,
-                    p_code: newData?.code,
-                    p_description: newData?.description,
-                    p_valid_until: newData?.valid_until,
-                    p_status: newData?.status,
-                    p_staff_id: userId!, // Use authenticated user ID
-                  });
-                  if (error) throw error;
-
-                  handleModalClose();
-                } catch (_error) {
-                  console.error(_error);
-                }
-              })}
-            >
-              Save
-            </Button>
-          </div>
-        </div>
       </Modal>
     </div>
   );

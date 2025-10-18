@@ -30,7 +30,8 @@
       "Bash(time curl:*)",
       "Bash(pkill:*)",
       "Bash(npm install:*)",
-      "mcp__supabase__query"
+      "mcp__supabase__query",
+      "Read(//mnt/c/Users/wayan/Downloads/**)"
     ],
     "deny": []
   },
