@@ -29,7 +29,8 @@
       "Bash(curl:*)",
       "Bash(time curl:*)",
       "Bash(pkill:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "mcp__supabase__query"
     ],
     "deny": []
   },

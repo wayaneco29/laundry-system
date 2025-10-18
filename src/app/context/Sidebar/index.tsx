@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 
 import {
@@ -135,15 +136,28 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
           {/* Logo Section */}
           <div className="h-20 flex justify-center items-center border-b border-slate-700 bg-slate-900/50">
             {minimize ? (
-              <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">L</span>
+              <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
+                <Image
+                  src="/logo.webp"
+                  alt="Laundry Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
               </div>
             ) : (
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-blue-600 rounded-lg flex items-center justify-center">
-                  <span className="text-white font-bold text-lg">L</span>
+              <div className="">
+                <div className="">
+                  <Image
+                    src="/logo.webp"
+                    alt="Laundry Logo"
+                    width={80}
+                    height={80}
+                  />
                 </div>
-                <span className="text-white text-xl font-bold">Laundry</span>
+                {/* <span className="text-[#11A4D2] text-xl font-bold">
+                  Laundry
+                </span> */}
               </div>
             )}
           </div>
@@ -277,10 +291,8 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
             {/* Co-worker Status and User Profile */}
             <div className="flex items-center gap-3">
               {/* Co-worker Status Indicator for Staff */}
-              {role_name === ROLE_STAFF && (
-                <SimpleShiftStatus />
-              )}
-              
+              {role_name === ROLE_STAFF && <SimpleShiftStatus />}
+
               <div className="hidden sm:block text-right">
                 <div className="text-sm font-semibold text-slate-900">
                   {userLoading

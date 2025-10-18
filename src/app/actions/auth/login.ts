@@ -32,6 +32,7 @@ export async function loginUser({
       email: data?.email,
       password,
     });
+    console.log(error);
 
     if (error) throw error?.message;
 
