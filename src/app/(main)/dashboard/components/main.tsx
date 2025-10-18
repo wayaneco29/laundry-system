@@ -630,6 +630,7 @@ export function MainDashboardPage({
         <div className="w-64">
           <Select
             label="Filter by Branch"
+            isSearchable={false}
             options={branchOptions}
             value={selectedBranch}
             onChange={handleBranchChange}

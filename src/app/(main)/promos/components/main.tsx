@@ -148,6 +148,7 @@ export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
                 value: "Expired",
               },
             ]}
+            isSearchable={false}
             value={status}
             onChange={(value: any) => {
               setStatus(value?.value);
@@ -283,6 +284,7 @@ export function MainPromoPage({ initialData, count }: MainPromoPageProps) {
                   <Select
                     icon={<CheckCircle />}
                     label="Status"
+                    isSearchable={false}
                     placeholder="Select status"
                     isDisabled={!isUpdate}
                     options={PROMO_STATUS_DROPDOWN}

@@ -267,6 +267,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
             <Select
               label="Filter by Branch"
               options={branchOptions}
+              isSearchable={false}
               value={filters.branch_id}
               onChange={(value: any) => {
                 setFilters({

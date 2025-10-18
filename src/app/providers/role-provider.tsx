@@ -31,6 +31,7 @@ export function RoleProvider({ placeholder = "Select Role", ...props }) {
     <Select
       icon={<User />}
       options={roleList}
+      isSearchable={false}
       placeholder={placeholder}
       {...props}
     />

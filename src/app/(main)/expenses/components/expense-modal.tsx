@@ -295,6 +295,7 @@ export function ExpenseModal({
           <div>
             <Select
               label="Category *"
+              isSearchable={false}
               options={expenseCategories}
               value={formData.category}
               onChange={(value) => handleInputChange("category", value)}
@@ -325,6 +326,7 @@ export function ExpenseModal({
             <div>
               <Select
                 label="Branch"
+                isSearchable={false}
                 options={branchOptions}
                 value={formData.branch_id}
                 onChange={(value) => handleInputChange("branch_id", value)}

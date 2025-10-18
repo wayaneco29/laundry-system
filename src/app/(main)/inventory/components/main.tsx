@@ -176,6 +176,7 @@ export function MainInventoryPage({
           <Select
             containerClassName="w-full md:w-64"
             value={selectedBranch}
+            isSearchable={false}
             onChange={(newValue) =>
               setSelectedBranch((newValue as { value: string })?.value)
             }

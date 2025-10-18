@@ -40,6 +40,7 @@ export function BranchProvider({ placeholder, ...props }: BranchProviderProps) {
     <Select
       icon={<Building />}
       options={branchList}
+      isSearchable={false}
       placeholder={placeholder}
       {...props}
     />

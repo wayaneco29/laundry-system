@@ -45,6 +45,7 @@ export const OrderModal = ({ showModal, onClose }: OrderModalProps) => {
         <div className="col-span-1">
           <Select
             label="Customer"
+            isSearchable={false}
             placeholder="Select customer"
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             getOptionLabel={(option: any) => option?.full_name}
@@ -56,7 +57,12 @@ export const OrderModal = ({ showModal, onClose }: OrderModalProps) => {
       </div>
       <div className="grid grid-cols-1 mb-4">
         <div className="col-span-1">
-          <Select label="Services" placeholder="Select services" isMulti />
+          <Select
+            label="Services"
+            isSearchable={false}
+            placeholder="Select services"
+            isMulti
+          />
         </div>
       </div>
       <div className="grid grid-cols-1">

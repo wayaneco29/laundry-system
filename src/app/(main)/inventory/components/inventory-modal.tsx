@@ -135,6 +135,7 @@ export function InventoryModal({
                 <Select
                   {...field}
                   label="Branch"
+                  isSearchable={false}
                   placeholder="Select a branch"
                   isDisabled={!!initialValue.id} // Disable branch selection when editing
                   options={branches.map((branch) => ({

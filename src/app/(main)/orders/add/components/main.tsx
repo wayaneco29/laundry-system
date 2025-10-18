@@ -54,7 +54,6 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const { activeShift } = useStaffShift();
   const { isConnected: isPrinterConnected } = usePrinterContext();
 
-  const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmationModal, setShowConfirmationModal] =
     useState<boolean>(false);
   const [searchServices, setSearchServices] = useState("");
@@ -281,7 +280,9 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
   const toggleInventory = (inventoryItem: any) => {
     const currentUsage = watch("inventoryUsage", []) as Array<any>;
-    const existingItem = currentUsage.find((item: any) => item.id === inventoryItem.id);
+    const existingItem = currentUsage.find(
+      (item: any) => item.id === inventoryItem.id
+    );
 
     if (existingItem) {
       removeInventoryUsage(inventoryItem.id);
@@ -360,7 +361,11 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
             <div className="mt-4 sm:mt-0 text-sm text-gray-500">
               {services?.length} service
               {services?.length !== 1 ? "s" : ""}
-              {inventoryUsage?.length > 0 && ` + ${inventoryUsage.length} inventory item${inventoryUsage.length !== 1 ? "s" : ""}`} selected
+              {inventoryUsage?.length > 0 &&
+                ` + ${inventoryUsage.length} inventory item${
+                  inventoryUsage.length !== 1 ? "s" : ""
+                }`}{" "}
+              selected
             </div>
           </div>
         </div>
@@ -377,7 +382,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                   Printer Not Connected
                 </h3>
                 <p className="text-sm text-amber-700 mt-1">
-                  Receipt will not print automatically. You can still create the order and print manually later.
+                  Receipt will not print automatically. You can still create the
+                  order and print manually later.
                 </p>
               </div>
             </div>
@@ -525,7 +531,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 <div
                                   key={item.id}
                                   onClick={() =>
-                                    !formState?.isSubmitting && toggleInventory(item)
+                                    !formState?.isSubmitting &&
+                                    toggleInventory(item)
                                   }
                                   className={`
                                     relative p-4 rounded-lg cursor-pointer transition-all duration-200
@@ -637,6 +644,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                             <Select
                               disabled={formState?.isSubmitting}
                               options={branchOptions}
+                              isSearchable={false}
                               placeholder="Select branch..."
                               {...field}
                               onChange={(data: any) => {
@@ -674,6 +682,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                         options={paymentModeOptions}
                         isDisabled={formState?.isSubmitting}
                         containerClassName="w-full"
+                        isSearchable={false}
                         {...field}
                         onChange={(data: any) => {
                           field?.onChange(data?.value);
@@ -693,9 +702,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                   {services.length === 0 && inventoryUsage.length === 0 ? (
                     <div className="text-center py-8">
                       <ShoppingCart className="w-8 h-8 text-gray-300 mx-auto mb-3" />
-                      <p className="text-gray-500 text-sm">
-                        No items selected
-                      </p>
+                      <p className="text-gray-500 text-sm">No items selected</p>
                     </div>
                   ) : (
                     <div className="space-y-3 max-h-80 overflow-y-auto">
@@ -794,7 +801,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                             <button
                               type="button"
                               onClick={() =>
-                                !formState?.isSubmitting && removeInventoryUsage(item.id)
+                                !formState?.isSubmitting &&
+                                removeInventoryUsage(item.id)
                               }
                               disabled={formState?.isSubmitting}
                               className="cursor-pointer ml-2 p-2 min-h-[36px] min-w-[36px] text-red-500 hover:bg-red-50 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
@@ -815,8 +823,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 )
                               }
                               disabled={
-                                formState?.isSubmitting ||
-                                item.quantity <= 1
+                                formState?.isSubmitting || item.quantity <= 1
                               }
                               className="p-2 min-h-[40px] min-w-[40px] text-gray-600 cursor-pointer hover:bg-gray-200 rounded-full transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 flex items-center justify-center"
                             >
@@ -906,17 +913,10 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         </div>
       </div>
 
-      <PaymentModal
-        show={showModal}
-        grossTotal={grossTotal}
-        onClose={() => setShowModal(false)}
-        onSubmit={() => setShowModal(false)}
-      />
-
       {/* Confirmation Modal */}
       {showConfirmationModal && orderData && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4 sm:p-6">
-          <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-md h-[95vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
+          <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-md max-h-[75vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
             {/* Header - Fixed */}
             <div className="bg-blue-500 px-6 py-4 rounded-t-xl sm:rounded-t-xl flex-shrink-0">
               <div className="flex items-center justify-between">
@@ -1081,7 +1081,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                             Printer Not Connected
                           </h4>
                           <p className="text-xs text-amber-700 mt-1">
-                            Receipt will not print automatically. You can print manually after creating the order.
+                            Receipt will not print automatically. You can print
+                            manually after creating the order.
                           </p>
                         </div>
                       </div>
@@ -1093,20 +1094,20 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
             {/* Actions - Fixed at bottom */}
             <div className="flex-shrink-0 p-6 border-t bg-gray-50 rounded-b-xl sm:rounded-b-xl">
-              <div className="flex space-x-3">
+              <div className="flex flex-col md:flex-row gap-3">
                 <Button
                   onClick={() => {
                     setShowConfirmationModal(false);
                     setOrderData(null);
                   }}
-                  className="flex-1 min-h-[48px] text-base bg-gray-500 hover:bg-gray-600 text-white active:scale-95 transition-transform"
+                  className="w-full sm:flex-1 min-h-[48px] text-base bg-gray-500 hover:bg-gray-600 text-white active:scale-95 transition-transform"
                 >
                   Cancel
                 </Button>
                 <Button
                   onClick={handleConfirmOrder}
                   disabled={formState?.isSubmitting}
-                  className="flex-1 min-h-[48px] text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50"
+                  className="w-full sm:flex-1 min-h-[48px] text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50"
                 >
                   {formState?.isSubmitting ? (
                     <>

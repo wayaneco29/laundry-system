@@ -154,6 +154,7 @@ export const ServiceModal = ({
                 <Select
                   icon={<CheckCircle />}
                   label="Status"
+                  isSearchable={false}
                   placeholder="Select status"
                   options={SERVICE_STATUS_DROPDOWN}
                   {...field}
