@@ -203,7 +203,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
     if (!orderData) return;
 
     try {
-      const { error } = await addOrder(orderData);
+      const { data: orderId, error } = await addOrder(orderData);
 
       if (error) {
         throw new Error(
@@ -224,11 +224,13 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
       setShowConfirmationModal(false);
       setOrderData(null);
 
-      // Add a small delay for better UX (optional)
-      setTimeout(() => {
-        // Redirect to orders page
+      // Redirect to order detail page with auto-print parameter
+      if (orderId) {
+        router.push(`/orders/${orderId}?print=true`);
+      } else {
+        // Fallback to orders page if no order ID
         router.push("/orders");
-      }, 500);
+      }
     } catch (_error) {
       console.error("Form submission error:", _error);
       const errorMessage =

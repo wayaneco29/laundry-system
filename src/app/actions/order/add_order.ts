@@ -38,7 +38,7 @@ export const addOrder = async (payload: AddOrderPayload) => {
       throw new Error("Payment mode is required");
     }
 
-    const { data, error } = await supabase.rpc("add_customer_order", payload);
+    const { data: orderId, error } = await supabase.rpc("add_customer_order", payload);
 
     if (error) {
       console.error("Database error:", error);
@@ -48,7 +48,7 @@ export const addOrder = async (payload: AddOrderPayload) => {
     revalidateTag("getOrders");
 
     return {
-      data,
+      data: orderId as string,
       error: null,
     };
   } catch (_error) {

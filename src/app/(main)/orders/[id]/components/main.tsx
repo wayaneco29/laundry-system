@@ -3,7 +3,7 @@
 import moment from "moment";
 import { Button } from "@/app/components/common";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   ArrowLeft,
   Printer,
@@ -19,11 +19,13 @@ import {
   AlertCircle,
   Check,
   X,
+  Bluetooth,
+  BluetoothConnected,
 } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { updatePaymentStatus, updateOrderStatus } from "@/app/actions";
 import { twMerge } from "tailwind-merge";
-import { useToast } from "@/app/hooks";
+import { useToast, useThermalPrinter } from "@/app/hooks";
 
 import "./receipt.css";
 
@@ -105,8 +107,11 @@ const Receipt = ({ data }: MainOrderIdPageProps) => {
 
 export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { userId } = useCurrentUser();
   const toast = useToast();
+  const { isConnected, isConnecting, isPrinting, printReceipt, connect } =
+    useThermalPrinter();
 
   const [editingField, setEditingField] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -120,6 +125,34 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
     "Cancelled",
   ];
   const paymentStatuses = ["Unpaid", "Paid", "Refunded"];
+
+  // Handle thermal printing
+  const handlePrint = useCallback(async () => {
+    if (!data) return;
+
+    const receiptData = {
+      order_id: data.order_id,
+      order_date: moment(data.order_date).format("MM/DD/YYYY, h:mm A"),
+      branch_name: data.branch_name,
+      staff_name: data.staff_name,
+      items: data.items || [],
+      total_price: data.total_price,
+    };
+
+    await printReceipt(receiptData);
+  }, [data, printReceipt]);
+
+  // Auto-trigger print when redirected from order creation
+  useEffect(() => {
+    const shouldPrint = searchParams.get("print");
+    if (shouldPrint === "true" && data?.payment_status === "Paid") {
+      // Small delay to ensure page is fully loaded
+      const timer = setTimeout(() => {
+        handlePrint();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchParams, data?.payment_status, handlePrint]);
 
   const getOrderStatusColor = (status: string) => {
     switch (status) {
@@ -568,13 +601,53 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                     Actions
                   </h3>
                   <div className="space-y-3">
+                    {/* Printer Connection Status */}
+                    {isConnected && (
+                      <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-200 rounded-lg">
+                        <BluetoothConnected className="size-4 text-green-600" />
+                        <span className="text-sm text-green-700 font-medium">
+                          Printer Connected
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Print Receipt Button */}
                     <Button
-                      leftIcon={<Printer className="size-5" />}
-                      className="w-full min-h-[48px] md:min-h-[44px] text-base bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform"
-                      onClick={() => window.print()}
+                      leftIcon={
+                        isPrinting ? (
+                          <Loader2 className="size-5 animate-spin" />
+                        ) : (
+                          <Printer className="size-5" />
+                        )
+                      }
+                      className="w-full min-h-[48px] md:min-h-[44px] text-base bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={handlePrint}
+                      disabled={isPrinting || isConnecting}
                     >
-                      Print Receipt
+                      {isPrinting
+                        ? "Printing..."
+                        : isConnecting
+                        ? "Connecting..."
+                        : "Print Receipt"}
                     </Button>
+
+                    {/* Connect/Disconnect Button */}
+                    {!isConnected && (
+                      <Button
+                        leftIcon={
+                          isConnecting ? (
+                            <Loader2 className="size-5 animate-spin" />
+                          ) : (
+                            <Bluetooth className="size-5" />
+                          )
+                        }
+                        className="w-full min-h-[48px] md:min-h-[44px] text-base bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+                        onClick={connect}
+                        disabled={isConnecting}
+                      >
+                        {isConnecting ? "Connecting..." : "Connect Printer"}
+                      </Button>
+                    )}
                   </div>
                 </div>
               )}
