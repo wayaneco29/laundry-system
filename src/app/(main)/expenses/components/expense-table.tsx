@@ -27,6 +27,7 @@ type ExpenseTableProps = {
     type: "success" | "error" | "warning" | "info"
   ) => void;
   onShowError?: (message: string) => void;
+  onRefresh?: () => void;
 };
 
 export function ExpenseTable({
@@ -40,6 +41,7 @@ export function ExpenseTable({
   onEdit,
   onView,
   onShowToast,
+  onRefresh,
 }: ExpenseTableProps) {
   const [loadingStates, setLoadingStates] = useState<Record<string, boolean>>(
     {}
@@ -151,7 +153,7 @@ export function ExpenseTable({
             `Expense ${status.toLowerCase()} successfully`,
             "success"
           );
-          // Refresh will be handled by parent component
+          onRefresh?.(); // Trigger refresh
         }
       } catch (error: any) {
         onShowToast?.(
@@ -201,7 +203,7 @@ export function ExpenseTable({
           );
         } else {
           onShowToast?.("Expense marked as paid successfully", "success");
-          // Refresh will be handled by parent component
+          onRefresh?.(); // Trigger refresh
         }
       } catch (error: any) {
         onShowToast?.(
@@ -246,7 +248,7 @@ export function ExpenseTable({
           );
         } else {
           onShowToast?.("Expense deleted successfully", "success");
-          // Refresh will be handled by parent component
+          onRefresh?.(); // Trigger refresh
         }
       } catch (error: any) {
         onShowToast?.(

@@ -25,7 +25,7 @@ export const getAllExpenses = async (options?: {
       // Apply filters
       if (options?.search) {
         query = query.or(
-          `description.ilike.%${options.search}%,vendor.ilike.%${options.search}%`
+          `title.ilike.%${options.search}%,description.ilike.%${options.search}%`
         );
       }
       if (options?.startDate) {

@@ -12,7 +12,6 @@ import { upsertExpense } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useUserContext } from "@/app/context";
-import { customerRevalidateTag } from "@/app/actions";
 
 type ExpenseModalProps = {
   isOpen: boolean;

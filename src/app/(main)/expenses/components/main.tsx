@@ -1,20 +1,17 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { Button, Select } from "@/app/components/common";
+import { useState, useEffect, useRef } from "react";
+import { Button, Select, Input } from "@/app/components/common";
 import { ExpenseTable } from "./expense-table";
 import { ExpenseModal } from "./expense-modal";
 import {
   getAllExpenses,
-  getExpenseStats,
-  getExpensesByCategory,
-  getRecurringExpensesDue,
   getMonthlyExpense,
   getYearlyExpense,
 } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useToast } from "@/app/hooks/use-toast";
-import { Plus, PlusIcon, Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import {
   HeaderWithButtonSkeleton,
   StatsCardsSkeleton,
@@ -29,6 +26,8 @@ interface ExpensesMainProps {
 
 export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const toast = useToast();
+  const isInitialMount = useRef(true);
+  const searchDebounceTimer = useRef<NodeJS.Timeout | null>(null);
 
   const [branches, setBranches] = useState<any[]>([]);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
@@ -41,8 +40,6 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState(20);
 
-  // Toast notifications
-
   // Modal states
   const [modalOpen, setModalOpen] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit" | "view">(
@@ -51,9 +48,15 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
 
   // Filter states
-  const [filters, setFilters] = useState<{ branch_id: string }>({
-    branch_id: "",
-  });
+  const [filters, setFilters] = useState<{ branch_id: string; search: string }>(
+    {
+      branch_id: "",
+      search: "",
+    }
+  );
+
+  // Immediate search input value (not debounced)
+  const [searchInputValue, setSearchInputValue] = useState("");
 
   const { is_admin, branch_id } = useUserContext();
 
@@ -62,12 +65,14 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
     fetchInitialData();
   }, []);
 
-  // Fetch expenses when filters/pagination change (but not on initial mount)
+  // Fetch expenses when filters/pagination change (skip initial mount)
   useEffect(() => {
-    if (currentPage !== 1 || itemsPerPage !== 20 || filters.branch_id) {
-      fetchExpenses();
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
     }
-  }, [currentPage, itemsPerPage, filters.branch_id]);
+    fetchExpenses();
+  }, [currentPage, itemsPerPage, filters.branch_id, filters.search]);
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -91,6 +96,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
         page: currentPage,
         limit: itemsPerPage,
         branchId: branch_id || filters?.branch_id,
+        search: filters?.search || undefined,
       });
 
       if (result.data) {
@@ -136,6 +142,36 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
     setItemsPerPage(limit);
     setCurrentPage(1);
   };
+
+  const handleSearchChange = (value: string) => {
+    // Update input value immediately for responsive UI
+    setSearchInputValue(value);
+
+    // Clear existing debounce timer
+    if (searchDebounceTimer.current) {
+      clearTimeout(searchDebounceTimer.current);
+    }
+
+    // Set new debounce timer (500ms delay)
+    searchDebounceTimer.current = setTimeout(() => {
+      setFilters((prev) => ({ ...prev, search: value }));
+      setCurrentPage(1); // Reset to first page on search
+    }, 500);
+  };
+
+  const handleBranchFilterChange = (value: string) => {
+    setFilters((prev) => ({ ...prev, branch_id: value }));
+    setCurrentPage(1); // Reset to first page on filter change
+  };
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (searchDebounceTimer.current) {
+        clearTimeout(searchDebounceTimer.current);
+      }
+    };
+  }, []);
 
   const handleCreateExpense = () => {
     setSelectedExpense(null);
@@ -261,8 +297,18 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
       </div>
 
       {/* Filters */}
-      {is_admin && (
-        <div className="flex flex-col sm:flex-row gap-4 mb-6">
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="w-full sm:w-64">
+          <Input
+            label="Search"
+            type="text"
+            value={searchInputValue}
+            onChange={(e) => handleSearchChange(e.target.value)}
+            placeholder="Search expenses..."
+            icon={<Search className="w-4 h-4 text-gray-400" />}
+          />
+        </div>
+        {is_admin && (
           <div className="w-full sm:w-64">
             <Select
               label="Filter by Branch"
@@ -270,16 +316,13 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
               isSearchable={false}
               value={filters.branch_id}
               onChange={(value: any) => {
-                setFilters({
-                  ...filters,
-                  branch_id: value?.value,
-                });
+                handleBranchFilterChange(value?.value || "");
               }}
               placeholder="Select branch..."
             />
           </div>
-        </div>
-      )}
+        )}
+      </div>
       {/* Expenses Table */}
       <div className="bg-white rounded-lg shadow">
         <ExpenseTable
@@ -294,6 +337,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
           onView={handleViewExpense}
           onShowToast={(msg, type) => toast?.success(msg)}
           onShowError={(msg) => toast?.error(msg)}
+          onRefresh={handleExpenseSuccess}
         />
       </div>
 
