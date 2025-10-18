@@ -57,13 +57,18 @@ export const PrinterProvider = ({ children }: PrinterProviderProps) => {
   const toast = useToast();
   const printer = getThermalPrinter();
 
-  // Load last connected device from localStorage
+  // Load last connected device from localStorage and check connection status
   useEffect(() => {
     const savedDevice = localStorage.getItem("thermal_printer_device");
     if (savedDevice) {
       setLastConnectedDevice(savedDevice);
     }
-  }, []);
+
+    // Check if printer is already connected (on page refresh)
+    if (printer.isConnected()) {
+      setIsConnected(true);
+    }
+  }, [printer]);
 
   // Auto-connect on mount if we have a previously connected device
   useEffect(() => {

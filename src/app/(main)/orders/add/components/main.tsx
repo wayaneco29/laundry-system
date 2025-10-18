@@ -30,6 +30,8 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useToast } from "@/app/hooks";
 import { useStaffShift } from "@/app/hooks/use-staff-shift";
+import { usePrinterContext } from "@/app/context/PrinterContext";
+import { Printer, PrinterCheck } from "lucide-react";
 
 type MainAddPageProps = {
   data: Array<any>;
@@ -50,6 +52,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const { userId } = useCurrentUser();
   const toast = useToast();
   const { activeShift } = useStaffShift();
+  const { isConnected: isPrinterConnected } = usePrinterContext();
 
   const [showModal, setShowModal] = useState<boolean>(false);
   const [showConfirmationModal, setShowConfirmationModal] =
@@ -362,6 +365,39 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
           </div>
         </div>
       </div>
+
+      {/* Printer Warning Banner */}
+      {!isPrinterConnected && (
+        <div className="bg-amber-50 border-b border-amber-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-4">
+            <div className="flex items-start gap-3">
+              <Printer className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+              <div className="flex-1">
+                <h3 className="text-sm font-semibold text-amber-900">
+                  Printer Not Connected
+                </h3>
+                <p className="text-sm text-amber-700 mt-1">
+                  Receipt will not print automatically. You can still create the order and print manually later.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Printer Connected Banner */}
+      {isPrinterConnected && (
+        <div className="bg-green-50 border-b border-green-200">
+          <div className="px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-3">
+              <PrinterCheck className="w-5 h-5 text-green-600 flex-shrink-0" />
+              <p className="text-sm text-green-700 font-medium">
+                Printer connected - Receipt will print automatically
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
       <div className={"px-4 sm:px-6 lg:px-8 py-8"}>
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -1034,6 +1070,23 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                       </span>
                     </div>
                   </div>
+
+                  {/* Printer Warning */}
+                  {!isPrinterConnected && (
+                    <div className="bg-amber-50 rounded-lg p-4 border border-amber-200">
+                      <div className="flex items-start gap-3">
+                        <Printer className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                        <div>
+                          <h4 className="text-sm font-semibold text-amber-900">
+                            Printer Not Connected
+                          </h4>
+                          <p className="text-xs text-amber-700 mt-1">
+                            Receipt will not print automatically. You can print manually after creating the order.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
