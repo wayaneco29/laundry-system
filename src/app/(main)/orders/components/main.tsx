@@ -20,8 +20,9 @@ export function OrdersPage({ data, totalCount }: OrdersPageProps) {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex flex-col sm:flex-row justify-between">
-        <div>
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="text-center sm:text-start">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Order Management
           </h1>
@@ -31,18 +32,18 @@ export function OrdersPage({ data, totalCount }: OrdersPageProps) {
         </div>
         <Button
           leftIcon={<PlusIcon className="size-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white focus:!ring-0 active:scale-95 bg-blue-600 rounded-lg self-end mt-4 w-full sm:self-start sm:mt-0 sm:w-auto hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto sm:self-start"
           onClick={() => router.push("/orders/add")}
         >
           Add Order
         </Button>
       </div>
 
-      <div className="mt-4">
-        <div className="flex flex-col">
-          <OrdersTable initialData={data} totalCount={totalCount} />
-        </div>
+      {/* Orders Table */}
+      <div className="mt-2">
+        <OrdersTable initialData={data} totalCount={totalCount} />
       </div>
+
       <OrderModal showModal={showModal} onClose={() => setShowModal(false)} />
     </div>
   );

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { Plus, Search } from "lucide-react";
 
@@ -28,9 +28,11 @@ export function MainCustomerPage({
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
+  const isInitialMount = useRef(true);
 
   const router = useRouter();
 
+  // Debounce search input
   useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearch(search);
@@ -41,9 +43,16 @@ export function MainCustomerPage({
     };
   }, [search]);
 
+  // Fetch customers when pagination/search changes (skip initial mount)
   useEffect(() => {
+    // Skip the first render to avoid fetching data twice
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
     fetchCustomers(currentPage, itemsPerPage, debouncedSearch);
-  }, [currentPage, itemsPerPage, debouncedSearch, initialData]);
+  }, [currentPage, itemsPerPage, debouncedSearch]);
 
   const fetchCustomers = async (
     page: number,
@@ -73,8 +82,9 @@ export function MainCustomerPage({
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex flex-col sm:flex-row justify-between">
-        <div className="text-center sm:text-left">
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
+        <div className="text-center sm:text-start">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Customer Management
           </h1>
@@ -84,41 +94,40 @@ export function MainCustomerPage({
         </div>
         <Button
           leftIcon={<Plus className="size-4" />}
-          className="inline-flex items-start gap-x-2 mt-4 sm:mt-0 self-end sm:self-start w-full sm:w-auto active:scale-95 focus:!ring-0 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sm:w-auto sm:self-start"
           onClick={() => setShowModal(true)}
         >
           Add Customer
         </Button>
       </div>
 
-      <div className="relative mt-4 w-full md:w-96">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+      {/* Search Input */}
+      <div className="relative w-full md:w-96">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
         <input
           type="text"
           placeholder="Search by customer name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 h-10 text-sm pr-4 py-2 border bg-white border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+          className="w-full pl-11 h-12 text-base pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
         />
       </div>
 
-      <div className="mt-4">
-        <div className="flex flex-col">
-          <CustomersTable
-            data={customerList}
-            totalCount={totalCount}
-            currentPage={currentPage}
-            itemsPerPage={itemsPerPage}
-            isLoading={isLoading}
-            onPageChange={handlePageChange}
-            onItemsPerPageChange={handleItemsPerPageChange}
-            onView={(customer) => {
-              customerRevalidateTag("getCustomer");
-              router.push(`/customers/${customer?.customer_id}`);
-            }}
-          />
-        </div>
-      </div>
+      {/* Customers Table */}
+      <CustomersTable
+        data={customerList}
+        totalCount={totalCount}
+        currentPage={currentPage}
+        itemsPerPage={itemsPerPage}
+        isLoading={isLoading}
+        onPageChange={handlePageChange}
+        onItemsPerPageChange={handleItemsPerPageChange}
+        onView={(customer) => {
+          customerRevalidateTag("getCustomer");
+          router.push(`/customers/${customer?.customer_id}`);
+        }}
+      />
+
       <UpsertCustomerModal
         showModal={showModal}
         onClose={() => setShowModal(false)}

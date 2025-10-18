@@ -21,9 +21,7 @@ import {
   getYearlyExpense,
   getExpensesByCategory,
 } from "@/app/actions/expense";
-import { getAllBranches } from "@/app/actions/branch";
 import {
-  DashboardSkeleton,
   StatCardSkeleton,
   ChartSkeleton,
   TableSkeleton,
@@ -258,6 +256,11 @@ type MainDashboardPage = {
   initialTodayCustomersCount: number;
   initialMonthlySalesData: MonthlySalesData | null;
   initialChartData: MonthlySalesChartData | null;
+  initialBranches: any[];
+  initialMonthlyExpense: number;
+  initialYearlyExpense: number;
+  initialRecentOrders: RecentOrder[];
+  initialExpensesByCategory: any[];
 };
 
 export function MainDashboardPage({
@@ -265,9 +268,12 @@ export function MainDashboardPage({
   initialTodayCustomersCount,
   initialMonthlySalesData,
   initialChartData,
+  initialBranches,
+  initialMonthlyExpense,
+  initialYearlyExpense,
+  initialRecentOrders,
+  initialExpensesByCategory,
 }: MainDashboardPage) {
-  const [loading, setLoading] = useState(false);
-  const [initialLoading, setInitialLoading] = useState(true);
   const [statsLoading, setStatsLoading] = useState(false);
   const [chartsLoading, setChartsLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
@@ -282,79 +288,27 @@ export function MainDashboardPage({
     initialMonthlySalesData
   );
   const [chartData, setChartData] = useState(initialChartData);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>([]);
-  const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
-  const [yearlyExpense, setYearlyExpense] = useState<number>(0);
-  const [expensesByCategory, setExpensesByCategory] = useState<any[]>([]);
-  const [branches, setBranches] = useState<any[]>([]);
+  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>(
+    initialRecentOrders
+  );
+  const [monthlyExpense, setMonthlyExpense] = useState<number>(
+    initialMonthlyExpense
+  );
+  const [yearlyExpense, setYearlyExpense] = useState<number>(
+    initialYearlyExpense
+  );
+  const [expensesByCategory, setExpensesByCategory] = useState<any[]>(
+    initialExpensesByCategory
+  );
+  const [branches, setBranches] = useState<any[]>(initialBranches);
   const [selectedBranch, setSelectedBranch] = useState<string>("");
-  const isInitialRender = useRef(true);
+  const isInitialMount = useRef(true);
 
-  // Fetch branches and initial expense data on component mount
-  useEffect(() => {
-    const initializeData = async () => {
-      setInitialLoading(true);
-      try {
-        await Promise.all([
-          fetchBranches(),
-          fetchInitialExpenseData(),
-          fetchInitialRecentOrders(),
-        ]);
-      } catch (error) {
-        console.error("Error initializing data:", error);
-      } finally {
-        setInitialLoading(false);
-      }
-    };
-
-    initializeData();
-  }, []);
-
-  const fetchInitialRecentOrders = async () => {
-    setTableLoading(true);
-    try {
-      const result = await getRecentOrders(10);
-      if (result.data) {
-        setRecentOrders(result.data);
-      }
-    } catch (error) {
-      console.error("Error fetching recent orders:", error);
-    } finally {
-      setTableLoading(false);
-    }
-  };
-
-  const fetchInitialExpenseData = async () => {
-    setChartsLoading(true);
-    try {
-      const currentYear = new Date().getFullYear();
-      const [
-        monthlyExpenseResult,
-        yearlyExpenseResult,
-        expensesByCategoryResult,
-      ] = await Promise.all([
-        getMonthlyExpense(),
-        getYearlyExpense(),
-        getExpensesByCategory({
-          startDate: `${currentYear}-01-01`,
-          endDate: `${currentYear}-12-31`,
-        }),
-      ]);
-      setMonthlyExpense(monthlyExpenseResult.data || 0);
-      setYearlyExpense(yearlyExpenseResult.data || 0);
-      setExpensesByCategory(expensesByCategoryResult.data || []);
-    } catch (error) {
-      console.error("Error fetching initial expense data:", error);
-    } finally {
-      setChartsLoading(false);
-    }
-  };
-
-  // Fetch data when branch changes
+  // Fetch data when branch filter changes (skip initial mount)
   useEffect(() => {
     // Skip the first render to avoid fetching data twice
-    if (isInitialRender.current) {
-      isInitialRender.current = false;
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
       return;
     }
 
@@ -376,17 +330,6 @@ export function MainDashboardPage({
 
     return () => clearTimeout(timer);
   }, [chartData]);
-
-  const fetchBranches = async () => {
-    try {
-      const result = await getAllBranches();
-      if (result.data) {
-        setBranches(result.data);
-      }
-    } catch (error) {
-      console.error("Error fetching branches:", error);
-    }
-  };
 
   const fetchDashboardData = async () => {
     setStatsLoading(true);
@@ -625,9 +568,12 @@ export function MainDashboardPage({
 
   return (
     <div className="p-4 lg:p-8">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-gray-700 text-2xl font-medium">Dashboard</h1>
-        <div className="w-64">
+      {/* Header - Mobile Responsive */}
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4 mb-6">
+        <div className="text-center sm:text-start">
+          <h1 className="text-gray-700 text-2xl font-medium">Dashboard</h1>
+        </div>
+        <div className="w-full sm:w-64">
           <Select
             label="Filter by Branch"
             isSearchable={false}
@@ -639,178 +585,174 @@ export function MainDashboardPage({
         </div>
       </div>
 
-      {initialLoading ? (
-        <DashboardSkeleton />
+      {/* Stats Cards Section */}
+      {statsLoading ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <StatCardSkeleton key={i} />
+          ))}
+        </div>
       ) : (
-        <>
-          {/* Stats Cards Section */}
-          {statsLoading ? (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-              {Array.from({ length: 6 }).map((_, i) => (
-                <StatCardSkeleton key={i} />
-              ))}
-            </div>
-          ) : (
-            <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
-              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-violet-100 to-white">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-gray-700 text-sm font-medium">
-                      This Month Customers
-                    </div>
-                    <div className="text-gray-700 text-xl font-bold mt-2">
-                      {monthlyCustomersCount}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-full bg-violet-400 h-fit">
-                    <UsersIcon height={25} />
-                  </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-violet-100 to-white">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="text-gray-700 text-sm font-medium">
+                  This Month Customers
+                </div>
+                <div className="text-gray-700 text-2xl font-bold mt-2">
+                  {monthlyCustomersCount}
                 </div>
               </div>
-              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-violet-100 to-white">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-gray-700 text-sm font-medium">
-                      Todays Customers
-                    </div>
-                    <div className="text-gray-700 text-xl font-bold mt-2">
-                      {todayCustomersCount}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-full bg-violet-400 h-fit">
-                    <UsersIcon height={25} />
-                  </div>
-                </div>
-              </div>
-              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-green-100 to-white">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-gray-700 text-sm font-medium">
-                      This Month Paid Sales
-                    </div>
-                    <div className="text-gray-700 text-xl font-bold mt-2">
-                      ₱{monthlySalesData?.paidSales?.toLocaleString() || "0"}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-full bg-green-400 h-fit">
-                    <CurrencyDollarIcon height={25} />
-                  </div>
-                </div>
-              </div>
-              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-blue-100 to-white">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-gray-700 text-sm font-medium">
-                      This Month Total Sales
-                    </div>
-                    <div className="text-gray-700 text-xl font-bold mt-2">
-                      ₱{monthlySalesData?.totalSales?.toLocaleString() || "0"}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-full bg-blue-400 h-fit">
-                    <CurrencyDollarIcon height={25} />
-                  </div>
-                </div>
-              </div>
-              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-red-100 to-white">
-                <div className="flex justify-between">
-                  <div>
-                    <div className="text-gray-700 text-sm font-medium">
-                      This Month Expenses
-                    </div>
-                    <div className="text-gray-700 text-xl font-bold mt-2">
-                      ₱{monthlyExpense?.toLocaleString() || "0"}
-                    </div>
-                  </div>
-                  <div className="p-3 rounded-full bg-red-500 h-fit">
-                    <CurrencyDollarIcon height={25} />
-                  </div>
-                </div>
+              <div className="p-3 rounded-full bg-violet-400 h-fit shrink-0">
+                <UsersIcon className="h-6 w-6 text-white" />
               </div>
             </div>
-          )}
+          </div>
+          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-violet-100 to-white">
+            <div className="flex justify-between items-start">
+              <div className="flex-1">
+                <div className="text-gray-700 text-sm font-medium">
+                  Todays Customers
+                </div>
+                <div className="text-gray-700 text-2xl font-bold mt-2">
+                  {todayCustomersCount}
+                </div>
+              </div>
+              <div className="p-3 rounded-full bg-violet-400 h-fit shrink-0">
+                <UsersIcon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-green-100 to-white">
+            <div className="flex justify-between items-start">
+              <div className="flex-1 min-w-0">
+                <div className="text-gray-700 text-sm font-medium">
+                  This Month Paid Sales
+                </div>
+                <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
+                  ₱{monthlySalesData?.paidSales?.toLocaleString() || "0"}
+                </div>
+              </div>
+              <div className="p-3 rounded-full bg-green-400 h-fit shrink-0">
+                <CurrencyDollarIcon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-blue-100 to-white">
+            <div className="flex justify-between items-start">
+              <div className="flex-1 min-w-0">
+                <div className="text-gray-700 text-sm font-medium">
+                  This Month Total Sales
+                </div>
+                <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
+                  ₱{monthlySalesData?.totalSales?.toLocaleString() || "0"}
+                </div>
+              </div>
+              <div className="p-3 rounded-full bg-blue-400 h-fit shrink-0">
+                <CurrencyDollarIcon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-red-100 to-white">
+            <div className="flex justify-between items-start">
+              <div className="flex-1 min-w-0">
+                <div className="text-gray-700 text-sm font-medium">
+                  This Month Expenses
+                </div>
+                <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
+                  ₱{monthlyExpense?.toLocaleString() || "0"}
+                </div>
+              </div>
+              <div className="p-3 rounded-full bg-red-500 h-fit shrink-0">
+                <CurrencyDollarIcon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
-          {/* Charts Section */}
-          {chartsLoading ? (
-            <div className="grid grid-cols-1 xl:grid-cols-2 mt-8 gap-4">
-              <ChartSkeleton />
-              <ChartSkeleton />
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 xl:grid-cols-2 mt-8 gap-4">
-              <div className="bg-white rounded-md p-4 shadow-md">
-                <div className="flex justify-between">
-                  <div className="text-gray-700 font-medium">
-                    Sales Overview
-                  </div>
-                </div>
-                <div className="text-gray-700 font-bold text-lg">
-                  ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
-                </div>
-                <div data-apexcharts="sales-chart">
-                  <ReactApexChart
-                    key={`sales-chart-${chartKey}-${selectedBranch}`}
-                    options={dynamicChartOptions}
-                    series={[
-                      {
-                        name: "",
-                        data: chartData?.monthlyData || [
-                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                        ],
-                      },
-                    ]}
-                    type="area"
-                    height={264}
-                  />
-                </div>
-              </div>
-              <div className="bg-white rounded-md p-4 shadow-md">
-                <div className="flex justify-between">
-                  <div className="text-gray-700 font-medium">
-                    Expenses Overview
-                  </div>
-                </div>
-                <div className="text-gray-700 font-bold text-lg">
-                  ₱{yearlyExpense?.toLocaleString() || "0"}
-                </div>
-                <ReactApexChart
-                  options={dynamicDonutChartOptions}
-                  series={donutChartSeries}
-                  type="donut"
-                  height={264}
-                />
+      {/* Charts Section */}
+      {chartsLoading ? (
+        <div className="grid grid-cols-1 xl:grid-cols-2 mt-6 gap-4">
+          <ChartSkeleton />
+          <ChartSkeleton />
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 xl:grid-cols-2 mt-6 gap-4">
+          <div className="bg-white rounded-md p-4 shadow-md overflow-hidden">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-gray-700 font-medium text-base sm:text-lg">
+                Sales Overview
               </div>
             </div>
-          )}
+            <div className="text-gray-700 font-bold text-lg sm:text-xl truncate">
+              ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
+            </div>
+            <div data-apexcharts="sales-chart" className="w-full overflow-hidden">
+              <ReactApexChart
+                key={`sales-chart-${chartKey}-${selectedBranch}`}
+                options={dynamicChartOptions}
+                series={[
+                  {
+                    name: "",
+                    data: chartData?.monthlyData || [
+                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                    ],
+                  },
+                ]}
+                type="area"
+                height={264}
+              />
+            </div>
+          </div>
+          <div className="bg-white rounded-md p-4 shadow-md overflow-hidden">
+            <div className="flex justify-between items-center mb-2">
+              <div className="text-gray-700 font-medium text-base sm:text-lg">
+                Expenses Overview
+              </div>
+            </div>
+            <div className="text-gray-700 font-bold text-lg sm:text-xl truncate">
+              ₱{yearlyExpense?.toLocaleString() || "0"}
+            </div>
+            <div className="w-full overflow-hidden">
+              <ReactApexChart
+                options={dynamicDonutChartOptions}
+                series={donutChartSeries}
+                type="donut"
+                height={264}
+              />
+            </div>
+          </div>
+        </div>
+      )}
 
-          {/* Table Section */}
-          {tableLoading ? (
-            <div className="mt-8">
-              <TableSkeleton />
-            </div>
-          ) : (
-            <div className="bg-white rounded-md shadow-md p-4 mt-8">
-              <div className="text-gray-700 mb-4 font-medium">
-                Latest Transaction
-              </div>
-              <div className="flex flex-col">
-                <OrdersTable
-                  initialData={recentOrders.map((order) => ({
-                    order_id: order.id,
-                    customer_name: order.customer_name,
-                    created_at: order.created_at,
-                    branch_name: order.branch_name,
-                    order_status: order.status,
-                    payment_status: order.payment_status,
-                    total_price: order.total_amount.toLocaleString(),
-                  }))}
-                  totalCount={recentOrders.length}
-                  isDashboardView={true}
-                />
-              </div>
-            </div>
-          )}
-        </>
+      {/* Table Section */}
+      {tableLoading ? (
+        <div className="mt-6">
+          <TableSkeleton />
+        </div>
+      ) : (
+        <div className="bg-white rounded-md shadow-md p-4 mt-6 overflow-x-auto">
+          <div className="text-gray-700 mb-4 font-medium text-base sm:text-lg">
+            Latest Transaction
+          </div>
+          <div className="flex flex-col">
+            <OrdersTable
+              initialData={recentOrders.map((order) => ({
+                order_id: order.id,
+                customer_name: order.customer_name,
+                created_at: order.created_at,
+                branch_name: order.branch_name,
+                order_status: order.status,
+                payment_status: order.payment_status,
+                total_price: order.total_amount.toLocaleString(),
+              }))}
+              totalCount={recentOrders.length}
+              isDashboardView={true}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

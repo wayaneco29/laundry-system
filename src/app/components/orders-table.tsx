@@ -1,7 +1,7 @@
 "use client";
 
 import moment from "moment";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Pagination } from "./common/pagination";
@@ -55,6 +55,7 @@ export const OrdersTable = ({
   const [loadingPaymentStatus, setLoadingPaymentStatus] = useState<Set<string>>(
     new Set()
   );
+  const isInitialMount = useRef(true);
 
   const { branch_id, role_name } = useUserContext();
 
@@ -83,8 +84,15 @@ export const OrdersTable = ({
     }
   };
 
-  // Only fetch new data when pagination/search changes (not on initial load)
+  // Only fetch new data when pagination/search/filter changes (skip initial mount)
   useEffect(() => {
+    // Skip the first render to avoid fetching data twice
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
+
+    // Only fetch if not in dashboard view
     if (!isDashboardView) {
       fetchData(currentPage, itemsPerPage);
     }
