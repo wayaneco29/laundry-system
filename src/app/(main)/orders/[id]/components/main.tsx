@@ -371,7 +371,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
           <div className="flex flex-col gap-4 mb-6 md:mb-8">
             <button
               onClick={() => router.replace("/orders")}
-              className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-medium text-base min-h-[44px] w-fit active:scale-95 transition-transform"
+              className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-base min-h-[44px] w-fit active:scale-95 transition-transform"
             >
               <ArrowLeft className="w-5 h-5" />
               <span>Back to Orders</span>
@@ -401,7 +401,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                 </div>
 
                 <div className="p-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 sm1:grid-cols-2 gap-6">
                     {/* Order Status - Editable */}
                     <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-lg">
                       <FileText className="size-5 text-slate-500" />
@@ -628,7 +628,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                           <Printer className="size-5" />
                         )
                       }
-                      className="w-full min-h-[48px] md:min-h-[44px] text-base bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="w-full min-h-[48px] md:min-h-[44px] focus:!ring-0 text-base bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       onClick={handlePrint}
                       disabled={isPrinting || isConnecting}
                     >
@@ -649,7 +649,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                             <Bluetooth className="size-5" />
                           )
                         }
-                        className="w-full min-h-[48px] md:min-h-[44px] text-base bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
+                        className="w-full min-h-[48px] md:min-h-[44px] text-base bg-blue-600 focus:!ring-0 hover:bg-blue-700 text-white flex items-center justify-center gap-2 active:scale-95 transition-transform disabled:opacity-50"
                         onClick={connect}
                         disabled={isConnecting}
                       >

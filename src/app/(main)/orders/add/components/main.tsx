@@ -16,6 +16,7 @@ import {
   Loader2,
   CreditCard,
   AlertTriangle,
+  ArrowLeft,
 } from "lucide-react";
 import * as Yup from "yup";
 import { Button, Input, Select } from "@/app/components/common";
@@ -349,6 +350,13 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
       {/* Header */}
       <div className="bg-white shadow-sm">
         <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <button
+            onClick={() => router.replace("/orders")}
+            className="inline-flex items-center mb-4 gap-2 cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-base min-h-[44px] w-fit active:scale-95 transition-transform"
+          >
+            <ArrowLeft className="w-5 h-5" />
+            <span>Back to Orders</span>
+          </button>
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -883,14 +891,14 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                           }
                         }}
                         disabled={formState?.isSubmitting}
-                        className="flex-1 min-h-[48px] text-base bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 min-h-[48px] focus:!ring-0 text-base bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         <Trash2 className="w-5 h-5" />
                         <span>Clear All</span>
                       </Button>
                       <Button
                         type="submit"
-                        className="flex-1 min-h-[48px] text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="flex-1 min-h-[48px] focus:!ring-0 text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       >
                         {formState?.isSubmitting ? (
                           <>
@@ -915,8 +923,8 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
       {/* Confirmation Modal */}
       {showConfirmationModal && orderData && (
-        <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-4 sm:p-6">
-          <div className="bg-white rounded-t-xl sm:rounded-xl shadow-2xl w-full max-w-md max-h-[75vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
+        <div className="fixed inset-0 bg-black/50 flex items-center sm:items-center justify-center z-50 p-4 sm:p-6">
+          <div className="bg-white rounded-t-xl rounded-b-xl sm:rounded-xl shadow-2xl w-full max-w-md max-h-[75vh] sm:h-auto sm:max-h-[90vh] flex flex-col">
             {/* Header - Fixed */}
             <div className="bg-blue-500 px-6 py-4 rounded-t-xl sm:rounded-t-xl flex-shrink-0">
               <div className="flex items-center justify-between">
@@ -1093,7 +1101,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
             </div>
 
             {/* Actions - Fixed at bottom */}
-            <div className="flex-shrink-0 p-6 border-t bg-gray-50 rounded-b-xl sm:rounded-b-xl">
+            <div className="flex-shrink-0 p-6 border-t bg-gray-50 rounded-b-xl">
               <div className="flex flex-col md:flex-row gap-3">
                 <Button
                   onClick={() => {

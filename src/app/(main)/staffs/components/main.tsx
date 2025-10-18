@@ -42,8 +42,8 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
-        <div>
+      <div className="flex justify-between flex-col sm:flex-row">
+        <div className="text-center sm:text-left">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Staff Management
           </h1>
@@ -53,7 +53,7 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
         </div>
         <Button
           leftIcon={<Plus className="size-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-x-2 font-medium focus:!ring-0 active:scale-95 w-full self-end mt-4 sm:mt-0 sm:w-auto sm:self-start text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setShowModal(true)}
         >
           Add Staff
@@ -67,7 +67,7 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
           placeholder="Search by staff name..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 h-10 text-sm pr-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
+          className="w-full pl-10 h-10 text-sm pr-4 py-2 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 text-gray-600 focus:ring-blue-500"
         />
       </div>
 

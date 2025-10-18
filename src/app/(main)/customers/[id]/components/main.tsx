@@ -83,11 +83,15 @@ export const MainCustomerIdPage = ({
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
+      <button
+        onClick={() => router.replace("/customers")}
+        className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-base min-h-[44px] w-fit active:scale-95 transition-transform"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Customers</span>
+      </button>
+      <div className="flex justify-between items-start">
         <div className="flex items-center gap-3">
-          <div className="bg-blue-100 p-3 rounded-full">
-            <User className="w-6 h-6 text-blue-600" />
-          </div>
           <div>
             <h1 className="text-gray-700 text-2xl font-medium">
               Customer Detail
@@ -97,27 +101,20 @@ export const MainCustomerIdPage = ({
             </p>
           </div>
         </div>
-        <Button
-          leftIcon={<ArrowLeft className="w-4 h-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => router.back()}
-        >
-          Back
-        </Button>
       </div>
       <div className="mt-4 text-gray-700">
         <div className="flex flex-col 2xl:flex-row gap-y-4 md:gap-y-8 2xl:gap-x-8">
           <div className="col-span-1 2xl:w-[800px]">
-            <div className="bg-white rounded-md shadow-md p-6">
-              <div className="flex items-center justify-between mb-6">
-                <div className="flex items-center gap-2 text-blue-600 font-medium">
+            <div className="bg-white rounded-md shadow-md overflow-hidden">
+              <div className="flex items-center justify-between mb-4 p-6 bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <div className="flex items-center gap-2 text-white font-medium">
                   <User className="w-5 h-5" />
                   Personal Information
                 </div>
                 <Button
                   leftIcon={<Save className="w-4 h-4" />}
                   disabled={isSubmitting || !isDirty}
-                  className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700"
+                  className="inline-flex items-center gap-2 bg-white focus:!ring-0 active:scale-95 hover:bg-white disabled:bg-white disabled:!opacity-100 text-blue-600"
                   onClick={handleSubmit(async (data) => {
                     try {
                       const { error } = await upsertCustomer({
@@ -149,8 +146,8 @@ export const MainCustomerIdPage = ({
                   Update
                 </Button>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4">
-                <div className="col-span-1">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4 px-6">
+                <div className="col-span-1 ">
                   <Controller
                     control={control}
                     name="first_name"
@@ -205,7 +202,7 @@ export const MainCustomerIdPage = ({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-y-4 lg:gap-x-4 mb-4 px-6">
                 <div className="col-span-1">
                   <Controller
                     control={control}
@@ -243,7 +240,7 @@ export const MainCustomerIdPage = ({
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 px-6 pb-6">
                 <div className="col-span-1 lg:col-span-2">
                   <Controller
                     control={control}
@@ -327,7 +324,7 @@ export const MainCustomerIdPage = ({
                               </div>
                             </div>
                           </td>
-                          <td className="px-6 py-4">
+                          <td className="px-6 py-4 min-w-[170px]">
                             {order.items && order.items.length > 0 ? (
                               <ul className="list-disc pl-4">
                                 {order.items.map((item: any, idx: number) => (

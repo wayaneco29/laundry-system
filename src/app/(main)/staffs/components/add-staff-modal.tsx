@@ -2,17 +2,7 @@
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import {
-  User,
-  Phone,
-  Mail,
-  MapPin,
-  Calendar,
-  Save,
-  X,
-  UserCircle2,
-  KeyIcon,
-} from "lucide-react";
+import { User, Phone, Mail, MapPin, Save, X, KeyIcon } from "lucide-react";
 
 import { addNewStaff } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
@@ -98,7 +88,7 @@ export const AddStaffModal = ({
       show={showModal}
       title={
         <div className="flex items-center gap-2">
-          <UserCircle2 className="w-5 h-5" />
+          <User className="w-5 h-5" />
           {`${initialValues?.username ? "Edit" : "Add"}`} Staff
         </div>
       }
@@ -107,7 +97,7 @@ export const AddStaffModal = ({
       size="xl"
     >
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
+        <div className="col-span-1 mb-4 sm:mb-0">
           <Controller
             control={control}
             name="username"
@@ -143,19 +133,24 @@ export const AddStaffModal = ({
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
+        <div className="col-span-1 mb-4 sm:mb-0">
           <Controller
             control={control}
             name="branch_id"
             render={({ field, formState: { errors } }) => (
-              <BranchProvider
-                {...field}
-                placeholder="Select Branch"
-                onChange={({ value }: any) => {
-                  field?.onChange(value);
-                }}
-                error={!!errors?.branch_id}
-              />
+              <>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">
+                  Branch
+                </label>
+                <BranchProvider
+                  {...field}
+                  placeholder="Select Branch"
+                  onChange={({ value }: any) => {
+                    field?.onChange(value);
+                  }}
+                  error={!!errors?.branch_id}
+                />
+              </>
             )}
           />
         </div>
@@ -164,14 +159,19 @@ export const AddStaffModal = ({
             control={control}
             name="role_id"
             render={({ field, formState: { errors } }) => (
-              <RoleProvider
-                {...field}
-                placeholder="Select Role"
-                onChange={({ value }: any) => {
-                  field?.onChange(value);
-                }}
-                error={!!errors?.role_id}
-              />
+              <>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">
+                  Role
+                </label>
+                <RoleProvider
+                  {...field}
+                  placeholder="Select Role"
+                  onChange={({ value }: any) => {
+                    field?.onChange(value);
+                  }}
+                  error={!!errors?.role_id}
+                />
+              </>
             )}
           />
         </div>
@@ -196,7 +196,7 @@ export const AddStaffModal = ({
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
+        <div className="col-span-1 mb-4 sm:mb-0">
           <Controller
             control={control}
             name="middle_name"
@@ -230,7 +230,7 @@ export const AddStaffModal = ({
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
+        <div className="col-span-1 mb-4 sm:mb-0">
           <Controller
             control={control}
             name="phone"

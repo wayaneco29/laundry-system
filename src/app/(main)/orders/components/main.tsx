@@ -20,7 +20,7 @@ export function OrdersPage({ data, totalCount }: OrdersPageProps) {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col sm:flex-row justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Order Management
@@ -31,7 +31,7 @@ export function OrdersPage({ data, totalCount }: OrdersPageProps) {
         </div>
         <Button
           leftIcon={<PlusIcon className="size-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-x-2 font-medium text-white focus:!ring-0 active:scale-95 bg-blue-600 rounded-lg self-end mt-4 w-full sm:self-start sm:mt-0 sm:w-auto hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => router.push("/orders/add")}
         >
           Add Order

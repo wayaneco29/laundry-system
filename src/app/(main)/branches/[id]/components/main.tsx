@@ -11,11 +11,15 @@ import { useRouter } from "next/navigation";
 import { upsertBranch } from "@/app/actions/branch/upsert_branch";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useState } from "react";
+import { ArrowLeft } from "lucide-react";
 
 type StockType = {
-  id: string | null;
-  name: string;
-  quantity: string;
+  branch_stock_id: string;
+  stock_id: string;
+  stock_name: string;
+  branch_id: string;
+  branch_name: string;
+  quantity: number;
 };
 
 type MainBranchIDPageProps = {
@@ -24,7 +28,7 @@ type MainBranchIDPageProps = {
     name: string;
     description: string;
     address: string;
-    branch_stocks: Array<StockType>;
+    stocks: Array<StockType>;
   };
 };
 
@@ -72,6 +76,8 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
     ),
   });
 
+  const watchStockId = stockMethods?.watch("id", null);
+
   const handleModalClose = () => {
     setShowStockModal(false);
 
@@ -85,54 +91,29 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
-        <h1 className="text-gray-700 text-2xl font-medium">Branch Detail</h1>
-        <Button
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          leftIcon={<ArrowLongLeftIcon className="size-5" />}
-          onClick={() => router.back()}
-        >
-          Back
-        </Button>
+      <button
+        onClick={() => router.replace("/branches")}
+        className="inline-flex items-center gap-2 cursor-pointer text-blue-600 hover:text-blue-700 font-medium text-base min-h-[44px] w-fit active:scale-95 transition-transform"
+      >
+        <ArrowLeft className="w-5 h-5" />
+        <span>Back to Branches</span>
+      </button>
+      <div className="flex flex-col">
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
+          Branch Detail
+        </h1>
+        <p className="text-slate-600 mt-1 text-sm md:text-base">
+          View and manage branch information
+        </p>
       </div>
       <div className="mt-4 text-gray-700">
         <div className="grid grid-cols-1 2xl:grid-cols-2 gap-y-4 md:gap-y-8 2xl:gap-x-8">
           <div className="col-span-1">
-            <div className="bg-white rounded-md shadow-md p-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-blue-400 mb-4 font-medium">
-                  Branch Information
-                </div>
-                <Button
-                  disabled={isSubmitting || !isDirty}
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={handleSubmit(async (data) => {
-                    try {
-                      const { error } = await upsertBranch({
-                        p_branch_id: branch_info?.id,
-                        p_name: data?.name,
-                        p_description: data?.description,
-                        p_address: data?.address,
-                        p_staff_id: userId!, // Use authenticated user ID
-                      });
-
-                      if (error) throw error;
-
-                      reset({
-                        id: branch_info?.id,
-                        name: data?.name,
-                        description: data?.description,
-                        address: data?.address,
-                      });
-                    } catch (error) {
-                      console.error(error);
-                    }
-                  })}
-                >
-                  Update
-                </Button>
+            <div className="bg-white rounded-md shadow-md overflow-hidden">
+              <div className="flex items-center justify-between mb-4 bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <div className="text-white font-medium">Branch Information</div>
               </div>
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4 mb-4">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-y-4 lg:gap-x-4 mb-4 px-6">
                 <div className="col-span-1">
                   <Controller
                     control={control}
@@ -162,7 +143,7 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-1">
+              <div className="grid grid-cols-1 px-6 pb-6">
                 <div className="col-span-1">
                   <Controller
                     control={control}
@@ -178,18 +159,43 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                   />
                 </div>
               </div>
+
+              <div className="px-6 mb-6">
+                <Button
+                  disabled={isSubmitting || !isDirty}
+                  className="cursor-pointer active:scale-95 focus:!ring-0"
+                  onClick={handleSubmit(async (data) => {
+                    try {
+                      const { error } = await upsertBranch({
+                        p_branch_id: branch_info?.id,
+                        p_name: data?.name,
+                        p_description: data?.description,
+                        p_address: data?.address,
+                        p_staff_id: userId!, // Use authenticated user ID
+                      });
+
+                      if (error) throw error;
+
+                      reset({
+                        id: branch_info?.id,
+                        name: data?.name,
+                        description: data?.description,
+                        address: data?.address,
+                      });
+                    } catch (error) {
+                      console.error(error);
+                    }
+                  })}
+                >
+                  Update
+                </Button>
+              </div>
             </div>
           </div>
           <div className="col-span-1">
-            <div className="bg-white rounded-md shadow-md p-4 mt-5 xl:mt-0">
-              <div className="flex items-center justify-between mb-4">
-                <div className="text-blue-600 mb-4 font-medium">Inventory</div>
-                <Button
-                  className="bg-blue-600 hover:bg-blue-700"
-                  onClick={() => setShowStockModal(true)}
-                >
-                  Add Item
-                </Button>
+            <div className="bg-white rounded-md shadow-md overflow-hidden mt-5 xl:mt-0">
+              <div className="flex items-center justify-between mb-4 bg-gradient-to-r from-blue-600 to-blue-700 px-6 py-4">
+                <div className="text-white font-medium">Inventory</div>
               </div>
               <div className="grid grid-cols-1">
                 <div className="col-span-1">
@@ -198,25 +204,26 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                     <table className="w-full text-left text-sm text-gray-500">
                       <thead className="group/head text-xs uppercase text-gray-700">
                         <tr>
-                          <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                          <th className="px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-black sticky top-0 z-0 text-nowrap">
                             Stock Name
                           </th>
-                          <th className="bg-blue-600 px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-white sticky top-0 z-0 text-nowrap">
+                          <th className="px-6 py-4 group-first/head:first:rounded-tl-sm group-first/head:last:rounded-tr-sm bg-primary-500 text-black sticky top-0 z-0 text-nowrap w-20">
                             Quantity
                           </th>
+                          <th className="sr-only"></th>
                         </tr>
                       </thead>
                       <tbody className="group/body divide-y divide-gray-100">
-                        {branch_info?.branch_stocks?.length ? (
-                          branch_info?.branch_stocks?.map((stock) => (
+                        {branch_info?.stocks?.length ? (
+                          branch_info?.stocks?.map((stock) => (
                             <tr
-                              key={stock?.id}
+                              key={stock?.stock_id}
                               className="group/row bg-white hover:bg-gray-50 cursor-pointer border border-gray-200"
                               onClick={() => {
                                 stockMethods?.reset({
-                                  id: stock?.id,
-                                  name: stock?.name,
-                                  quantity: stock?.quantity,
+                                  id: stock?.stock_id,
+                                  name: stock?.stock_name,
+                                  quantity: stock?.quantity.toString(),
                                   branch_id: branch_info?.id,
                                 });
 
@@ -224,7 +231,7 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                               }}
                             >
                               <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
-                                {stock?.name}
+                                {stock?.stock_name}
                               </td>
                               <td className="text-nowrap px-6 py-4 group-first/body:group-first/row:first:rounded-tl-lg group-first/body:group-first/row:last:rounded-tr-lg group-last/body:group-last/row:first:rounded-bl-lg group-last/body:group-last/row:last:rounded-br-lg">
                                 {stock?.quantity}
@@ -243,13 +250,21 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                   </div>
                 </div>
               </div>
+              <div className="p-6">
+                <Button
+                  className="cursor-pointer active:scale-95 focus:!ring-0"
+                  onClick={() => setShowStockModal(true)}
+                >
+                  Add Item
+                </Button>
+              </div>
             </div>
           </div>
         </div>
       </div>
       <Modal
         show={showStockModal}
-        title={true ? "Update Inventory" : "Add Inventory"}
+        title={watchStockId ? "Update Inventory" : "Add Inventory"}
         isSubmitting={stockMethods?.formState?.isSubmitting}
         onClose={handleModalClose}
       >
@@ -301,7 +316,7 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
           <div className="flex justify-end items-center gap-x-2">
             <Button
               disabled={stockMethods?.formState?.isSubmitting}
-              className="bg-transparent text-blue-400 border focus:text-white focus border-blue-400 hover:bg-blue-400 hover:text-white"
+              className="bg-transparent text-blue-600 border border-blue-400 hover:!bg-white hover:text-blue-600 focus:text-blue-600 focus:bg-white focus:!ring-0 active:scale-95"
               onClick={handleModalClose}
             >
               Cancel
@@ -311,17 +326,21 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                 stockMethods?.formState?.isSubmitting ||
                 !stockMethods?.formState?.isDirty
               }
+              className="focus:!ring-0 active:scale-95 "
               onClick={stockMethods?.handleSubmit(async (newData) => {
                 try {
+                  const quantity = parseInt(newData?.quantity);
+                  if (isNaN(quantity) || quantity < 0) {
+                    alert("Please enter a valid quantity");
+                    return;
+                  }
+
                   const result = await upsertBranchStocks({
+                    stockId: newData?.id as string,
                     branchId: branch_info?.id,
-                    stocks: [
-                      {
-                        id: newData?.id || crypto.randomUUID(),
-                        name: newData?.name,
-                        quantity: Number(newData?.quantity),
-                      },
-                    ],
+                    quantity: quantity,
+                    stockName: newData?.name,
+                    staff_id: userId!,
                   });
 
                   if (!result.success) throw new Error(result.message);
@@ -332,7 +351,13 @@ export const MainBranchIDPage = ({ branch_info }: MainBranchIDPageProps) => {
                 }
               })}
             >
-              Save
+              {!watchStockId
+                ? stockMethods?.formState?.isSubmitting
+                  ? "Adding"
+                  : "Add"
+                : stockMethods?.formState?.isSubmitting
+                ? "Updating"
+                : "Update"}
             </Button>
           </div>
         </div>

@@ -73,8 +73,8 @@ export function MainCustomerPage({
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
-        <div>
+      <div className="flex flex-col sm:flex-row justify-between">
+        <div className="text-center sm:text-left">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Customer Management
           </h1>
@@ -84,7 +84,7 @@ export function MainCustomerPage({
         </div>
         <Button
           leftIcon={<Plus className="size-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-start gap-x-2 mt-4 sm:mt-0 self-end sm:self-start w-full sm:w-auto active:scale-95 focus:!ring-0 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
           onClick={() => setShowModal(true)}
         >
           Add Customer

@@ -185,8 +185,8 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   return (
     <div className="p-6 space-y-6 lg:p-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
-        <div>
+      <div className="flex justify-between flex-col sm:flex-row">
+        <div className="text-center sm:text-start">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">Expenses</h1>
           <p className="text-slate-600">
             Manage your business expenses and track spending
@@ -195,7 +195,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
         <Button
           leftIcon={<Plus />}
           onClick={handleCreateExpense}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mt-4 w-full self-end sm:mt-0 sm:w-auto sm:self-end"
         >
           Add Expense
         </Button>
@@ -263,7 +263,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
       {/* Filters */}
       {is_admin && (
         <div className="flex flex-col sm:flex-row gap-4 mb-6">
-          <div className="w-64">
+          <div className="w-full sm:w-64">
             <Select
               label="Filter by Branch"
               options={branchOptions}

@@ -358,7 +358,7 @@ export const OrdersTable = ({
               placeholder="Search by order ID or customer name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 h-12 text-base pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+              className="w-full pl-11 h-12 text-base pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
           <select
@@ -415,13 +415,17 @@ export const OrdersTable = ({
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center text-base font-semibold text-gray-900 mb-1">
                             <Hash className="h-4 w-4 text-gray-400 mr-1 flex-shrink-0" />
-                            <span className="truncate">{order?.order_id || "N/A"}</span>
+                            <span className="truncate">
+                              {order?.order_id || "N/A"}
+                            </span>
                           </div>
                           <div className="flex items-center text-xs text-gray-500">
                             <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
                             {order?.created_at
                               ? moment(order.created_at).isValid()
-                                ? moment(order.created_at).format("MMM DD, YYYY")
+                                ? moment(order.created_at).format(
+                                    "MMM DD, YYYY"
+                                  )
                                 : "Invalid Date"
                               : "N/A"}
                           </div>
@@ -430,7 +434,7 @@ export const OrdersTable = ({
                           onClick={() =>
                             router.push(`/orders/${order?.order_id || ""}`)
                           }
-                          className="ml-3 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center gap-2 flex-shrink-0 min-h-[44px]"
+                          className="ml-3 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg cursor-pointer active:scale-95 hover:bg-blue-700 active:bg-blue-800 transition-colors flex items-center gap-2 flex-shrink-0 min-h-[44px]"
                         >
                           <Eye className="h-4 w-4" />
                           View
@@ -444,7 +448,7 @@ export const OrdersTable = ({
                           {order?.customer_name || "N/A"}
                         </div>
                         {order?.phone && (
-                          <div className="flex items-center text-xs text-gray-600 ml-6">
+                          <div className="flex items-center text-xs text-gray-600 ml-1">
                             <Phone className="h-3 w-3 mr-1 flex-shrink-0" />
                             {order?.phone}
                           </div>
@@ -482,7 +486,9 @@ export const OrdersTable = ({
 
                       {/* Total */}
                       <div className="flex items-center justify-between pt-3 border-t border-gray-200">
-                        <span className="text-sm text-gray-600 font-medium">Total</span>
+                        <span className="text-sm text-gray-600 font-medium">
+                          Total
+                        </span>
                         <span className="text-lg font-bold text-gray-900">
                           ₱{order?.total_price || "0"}
                         </span>
@@ -520,7 +526,7 @@ export const OrdersTable = ({
                     <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-40">
                       Order Status
                     </th>
-                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-48">
+                    <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-48 min-w-[180px]">
                       Payment Status
                     </th>
                     <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider w-40">

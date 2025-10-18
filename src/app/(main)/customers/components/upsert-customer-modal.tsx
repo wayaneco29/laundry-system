@@ -89,7 +89,7 @@ export const UpsertCustomerModal = ({
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
+        <div className="col-span-1 mb-4 md:mb-0">
           <Controller
             control={control}
             name="middle_name"
@@ -123,7 +123,7 @@ export const UpsertCustomerModal = ({
         </div>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
-        <div className="col-span-1">
+        <div className="col-span-1 mb-4 md:mb-0">
           <Controller
             control={control}
             name="phone"

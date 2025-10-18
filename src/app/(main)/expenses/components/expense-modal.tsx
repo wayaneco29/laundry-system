@@ -306,6 +306,7 @@ export function ExpenseModal({
 
           <div className={is_admin ? "col-span-1" : "col-span-2"}>
             <Datepicker
+              disabled={mode === "view"}
               dropdownPlacement="top"
               label="Expense Date *"
               value={

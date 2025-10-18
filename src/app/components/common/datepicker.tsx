@@ -274,12 +274,14 @@ export function Datepicker({
         </label>
       )}
       <div
-        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent cursor-pointer flex items-center ${
+        className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent flex items-center ${
           error
             ? "border-red-300 bg-red-50"
             : "border-gray-300 bg-white hover:border-gray-400"
         } ${
-          disabled ? "bg-gray-50 cursor-not-allowed opacity-50" : ""
+          disabled
+            ? "bg-gray-50 cursor-not-allowed opacity-50"
+            : "cursor-pointer"
         } ${className}`}
         onClick={handleInputClick}
       >

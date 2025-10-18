@@ -44,8 +44,8 @@ export function MainServicePage({ initialData }: MainServicePageProps) {
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
-        <div>
+      <div className="flex justify-between flex-col sm:flex-row">
+        <div className="text-center sm:text-start">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Service Management
           </h1>
@@ -55,7 +55,7 @@ export function MainServicePage({ initialData }: MainServicePageProps) {
         </div>
         <Button
           leftIcon={<Plus className="size-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mt-4 self-end w-full sm:mt-0 sm:self-start sm:w-auto"
           onClick={() => setShowModal(true)}
         >
           Add Service

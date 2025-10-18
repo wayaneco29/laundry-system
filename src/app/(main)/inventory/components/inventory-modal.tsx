@@ -42,6 +42,7 @@ export function InventoryModal({
     mode: "onChange",
   });
 
+  console.log(initialValue);
   // Reset form when initialValue changes (for edit mode)
   React.useEffect(() => {
     reset(initialValue);
@@ -72,18 +73,6 @@ export function InventoryModal({
       console.error("Error saving inventory item:", error);
       alert("An error occurred while saving the inventory item");
     }
-  };
-
-  const handleDelete = async () => {
-    if (!initialValue.id || !initialValue.branchId) {
-      return;
-    }
-
-    if (!confirm("Are you sure you want to delete this inventory item?")) {
-      return;
-    }
-
-    // ... (delete logic remains the same for now)
   };
 
   return (
@@ -186,30 +175,10 @@ export function InventoryModal({
           )}
         />
 
-        <div className="flex justify-between pt-4">
-          {/* Delete button (only show in edit mode) */}
-          <div>
-            {initialValue.id && (
-              <Button
-                type="button"
-                onClick={handleDelete}
-                variant="danger"
-                disabled={isSubmitting}
-                leftIcon={<Trash2 className="h-4 w-4" />}
-              >
-                Delete
-              </Button>
-            )}
-          </div>
-
+        <div className="flex justify-end pt-4">
           {/* Cancel and Save buttons */}
           <div className="flex space-x-3">
-            <Button
-              type="button"
-              onClick={onClose}
-              variant="secondary"
-              disabled={isSubmitting}
-            >
+            <Button variant="outline" onClick={onClose} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button

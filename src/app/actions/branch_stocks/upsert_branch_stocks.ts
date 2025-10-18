@@ -2,36 +2,21 @@
 
 import { createClient } from "@/app/utils/supabase/server";
 import { revalidateTag } from "next/cache";
+import { addNewStock } from "../inventory";
 
 type UpsertBranchStocksType = {
+  stockId?: string;
   branchId: string;
-  stocks: Array<{
-    id: string;
-    name: string;
-    quantity: number;
-  }>;
+  stockName: string;
+  quantity: number;
+  staff_id: string;
 };
 
 export const upsertBranchStocks = async (payload: UpsertBranchStocksType) => {
-  const supabase = await createClient();
   try {
-    const stocksToUpsert = payload.stocks.map((stock) => ({
-      branch_id: payload.branchId,
-      id: stock.id,
-      name: stock.name,
-      quantity: stock.quantity,
-    }));
+    const { data, success } = await addNewStock(payload);
 
-    const { data, error } = await supabase
-      .from("stocks")
-      .upsert(stocksToUpsert, { onConflict: "branch_id, id" })
-      .select();
-
-    if (error) throw error;
-
-    revalidateTag("getAllBranches");
-    revalidateTag("getBranch");
-    revalidateTag("getAllBranchStocks");
+    if (!success) throw "Failed to save";
 
     return { success: true, data, message: "Inventory updated successfully" };
   } catch (error: any) {

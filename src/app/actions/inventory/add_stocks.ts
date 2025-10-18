@@ -4,6 +4,7 @@ import { createClient } from "@/app/utils/supabase/server";
 import { revalidateTag } from "next/cache";
 
 type AddStocksType = {
+  stockId?: string;
   branchId: string;
   stockName: string;
   quantity: number;
@@ -12,11 +13,12 @@ type AddStocksType = {
 // Using the simple function that returns only stock_id
 export const addNewStock = async (payload: AddStocksType) => {
   const supabase = await createClient();
-
+  console.log(payload);
   try {
     const { data: stockId, error } = await supabase.rpc(
       "add_stock_and_branch_stock",
       {
+        // p_stock_id: payload?.stockId,
         p_stock_name: payload?.stockName,
         p_branch_id: payload?.branchId,
         p_quantity: payload?.quantity,
@@ -26,6 +28,8 @@ export const addNewStock = async (payload: AddStocksType) => {
 
     if (error) throw error;
 
+    revalidateTag("getAllBranches");
+    revalidateTag("getBranch");
     revalidateTag("getAllBranchStocks");
 
     return {

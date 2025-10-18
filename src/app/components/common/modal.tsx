@@ -90,7 +90,7 @@ export const Modal = ({
         "fixed inset-0 z-50 flex items-center justify-center p-4",
         "animate-in fade-in-0 duration-200"
       )}
-      onClick={handleBackdropClick}
+      // onClick={handleBackdropClick}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -107,7 +107,7 @@ export const Modal = ({
         {/* Header */}
         <div
           className={twMerge(
-            "flex justify-between items-center px-6 py-4 bg-blue-500 rounded-t-lg",
+            "flex justify-between items-center px-6 py-4 bg-blue-600 rounded-t-lg",
             headerClassName
           )}
         >
@@ -121,8 +121,8 @@ export const Modal = ({
             <button
               type="button"
               className={twMerge(
-                "p-1 rounded-full hover:bg-blue-600 transition-colors duration-200",
-                "focus:outline-none focus:ring-2 focus:ring-white focus:ring-offset-2 focus:ring-offset-blue-500",
+                "p-1 rounded-full hover:bg-blue-600 transition-colors duration-200 cursor-pointer",
+                "focus:outline-none focus:ring-offset-2 focus:ring-offset-blue-500",
                 isSubmitting && "opacity-50 cursor-not-allowed"
               )}
               onClick={handleClose}

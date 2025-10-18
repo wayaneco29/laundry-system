@@ -171,9 +171,9 @@ export const ServiceModal = ({
       <div className="mt-8">
         <div className="flex justify-end items-center gap-x-2">
           <Button
-            variant="outline"
             disabled={isSubmitting}
             leftIcon={<X />}
+            className="bg-transparent text-blue-600 border border-blue-400 hover:!bg-white hover:text-blue-600 focus:text-blue-600 focus:bg-white focus:!ring-0 active:scale-95"
             onClick={handleModalClose}
           >
             Cancel

@@ -102,8 +102,8 @@ export function MainInventoryPage({
 
   return (
     <div className="flex flex-col gap-4 p-4 lg:p-8">
-      <div className="flex justify-between items-center">
-        <div>
+      <div className="flex justify-between flex-col sm:flex-row">
+        <div className="text-center sm:text-start">
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Inventory Management
           </h1>
@@ -113,7 +113,7 @@ export function MainInventoryPage({
         </div>
         <Button
           leftIcon={<Plus className="size-4" />}
-          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="inline-flex items-center gap-x-2 font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed mt-4 self-end w-full sm:mt-0 sm:w-auto sm:self-end"
           onClick={() => {
             setIsEditing(false);
             setShowModal(true);
@@ -124,7 +124,7 @@ export function MainInventoryPage({
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4 md:mb-6">
         <div className="bg-white rounded-lg shadow p-6">
           <div className="flex items-center">
             <Package className="h-8 w-8 text-blue-500" />
@@ -199,7 +199,7 @@ export function MainInventoryPage({
               setIsEditing(true);
               setInitialValue({
                 isUpdate: true,
-                id: item?.id,
+                id: item?.stock_id,
                 name: item?.stock_name,
                 quantity: item?.quantity?.toString() || "0",
                 branchId: item?.branch_id,
