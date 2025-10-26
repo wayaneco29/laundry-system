@@ -467,10 +467,10 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                               </div>
                               <div className="flex items-center gap-2 text-xs text-slate-600 mt-2">
                                 <span className="bg-slate-100 px-2 py-1 rounded">
-                                  ₱{item.price}/kg
+                                  ₱{item.price}
                                 </span>
                                 <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded font-medium">
-                                  {item.quantity} kg
+                                  {item.quantity}
                                 </span>
                               </div>
                             </div>
@@ -511,7 +511,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                           Service
                         </th>
                         <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
-                          Price/KG
+                          Price
                         </th>
                         <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider">
                           Quantity
@@ -541,7 +541,7 @@ export const MainOrderIdPage = ({ data }: MainOrderIdPageProps) => {
                             </td>
                             <td className="px-6 py-4 text-center">
                               <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                {item.quantity} kg
+                                {item.quantity}
                               </span>
                             </td>
                             <td className="px-6 py-4 text-center text-sm font-semibold text-slate-900">

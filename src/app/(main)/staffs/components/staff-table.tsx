@@ -86,7 +86,7 @@ export const StaffTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Address
               </th>
-              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
+              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
                 Actions
               </th>
             </tr>
@@ -167,7 +167,7 @@ export const StaffTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                  <td className="sticky right-0 bg-white inline-flex items-start px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
                     <button
                       onClick={() => onEdit(staff)}
                       className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1 cursor-pointer"

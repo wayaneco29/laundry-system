@@ -65,7 +65,7 @@ export function ExpenseTable({
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
-      currency: "USD",
+      currency: "PHP",
     }).format(amount);
   };
 
@@ -294,7 +294,7 @@ export function ExpenseTable({
                   Branch
                 </th>
               )}
-              <th className="px-6 py-3 text-right text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
+              <th className="px-6 py-3 text-right text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
                 Actions
               </th>
             </tr>

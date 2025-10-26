@@ -61,7 +61,7 @@ export function InventoryTable({
               <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Status
               </th>
-              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
+              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
                 Actions
               </th>
             </tr>
@@ -121,7 +121,7 @@ export function InventoryTable({
                       {getStockStatus(item.quantity || 0)}
                     </span>
                   </td>
-                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                  <td className="sticky right-0 bg-white hover:bg-gray-50 px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
                     <button
                       onClick={() => onEdit(item)}
                       className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"

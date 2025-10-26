@@ -97,7 +97,7 @@ export const ServiceTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
                 Status
               </th>
-              <th className="sticky right-0 w-28 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
+              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
                 Actions
               </th>
             </tr>
@@ -138,7 +138,7 @@ export const ServiceTable = ({
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="text-sm text-gray-900">
-                          ₱ {service.branch_name}
+                          {service.branch_name}
                         </div>
                       </div>
                     </td>
@@ -164,11 +164,11 @@ export const ServiceTable = ({
                       {service.status}
                     </span>
                   </td>
-                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-center text-sm font-medium shadow-sm">
+                  <td className="sticky right-0 bg-white hover:bg-gray-50 px-6 py-4 whitespace-nowrap text-start text-sm font-medium shadow-sm">
                     <button
                       type="button"
                       onClick={() => onEdit(service)}
-                      className="text-blue-600 inline-flex items-center gap-x-1 cursor-pointer"
+                      className="text-blue-600 inline-flex items-start gap-x-1 cursor-pointer"
                     >
                       <Edit2 className="h-4 w-4" />
                       Edit

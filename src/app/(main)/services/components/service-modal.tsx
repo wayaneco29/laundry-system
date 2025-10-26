@@ -147,7 +147,7 @@ export const ServiceModal = ({
             render={({ field, formState: { errors } }) => (
               <Input
                 disabled={isSubmitting}
-                label="Price per KG"
+                label="Price"
                 placeholder="Enter price"
                 error={!!errors.price}
                 icon={<PhilippinePeso />}

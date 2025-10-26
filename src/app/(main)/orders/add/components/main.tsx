@@ -492,7 +492,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 {service.name}
                               </h3>
                               <p className="text-sm text-gray-500 mt-1">
-                                ₱{service.price}/kg
+                                ₱{service.price}
                               </p>
                             </div>
 
@@ -728,7 +728,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                                 {service.name}
                               </h4>
                               <p className="text-xs text-gray-500">
-                                ₱{service.price}/kg
+                                ₱{service.price}
                               </p>
                             </div>
                             <button
