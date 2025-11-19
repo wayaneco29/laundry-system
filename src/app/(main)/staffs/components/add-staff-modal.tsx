@@ -4,14 +4,17 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
 import { User, Phone, Mail, MapPin, Save, X, KeyIcon } from "lucide-react";
 
-import { addNewStaff } from "@/app/actions";
+import { addNewStaff, updateStaff } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input, Datepicker } from "@/app/components/common";
 import { useForm, Controller } from "react-hook-form";
 import { BranchProvider, RoleProvider } from "@/app/providers";
+import { useEffect } from "react";
+import { getRoleStaffID } from "@/app/actions/staff/get_staff_id_role";
 
 type AddStaffModalProps = {
   initialValues?: {
+    staff_id?: string;
     first_name: string;
     middle_name: string;
     last_name: string;
@@ -22,23 +25,26 @@ type AddStaffModalProps = {
     created_by: string;
     username: string;
     password: string;
-    branch_id: string;
+    branch_ids: string[];
     role_id: string;
   };
   showModal: boolean;
   onClose: () => void;
+  isUpdate?: boolean;
 };
 
 export const AddStaffModal = ({
   initialValues,
   showModal,
   onClose,
+  isUpdate = false,
 }: AddStaffModalProps) => {
   const { userId } = useCurrentUser();
   const {
     reset,
     control,
     handleSubmit,
+    setValue,
     formState: { isSubmitting, isDirty },
   } = useForm({
     values: initialValues,
@@ -50,16 +56,31 @@ export const AddStaffModal = ({
         phone: Yup.string().required("Phone Number is required"),
         email: Yup.string().email("Email is invalid").notRequired(),
         address: Yup.string().required("Address is required"),
-        employment_date: Yup.string().required("Employment Date is required"),
+        employment_date: Yup.string().when([], {
+          is: () => !isUpdate,
+          then: (schema) => schema.required("Employment Date is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
         created_by: Yup.string(),
-        username: Yup.string().required("Username is required"),
-        password: Yup.string().when("isUpdate", {
-          is: false,
+        username: Yup.string().when([], {
+          is: () => !isUpdate,
+          then: (schema) => schema.required("Username is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
+        password: Yup.string().when([], {
+          is: () => !isUpdate,
           then: (schema) => schema.required("Password is required"),
           otherwise: (schema) => schema.notRequired(),
         }),
-        branch_id: Yup.string().required("Branch ID is required"),
-        role_id: Yup.string().required("Role is required"),
+        branch_ids: Yup.array()
+          .of(Yup.string())
+          .min(1, "At least one branch is required")
+          .required("Branch is required"),
+        role_id: Yup.string().when([], {
+          is: () => !isUpdate,
+          then: (schema) => schema.required("Role is required"),
+          otherwise: (schema) => schema.notRequired(),
+        }),
       })
     ),
   });
@@ -76,12 +97,23 @@ export const AddStaffModal = ({
       created_by: "",
       username: "",
       password: "",
-      branch_id: "",
+      branch_ids: [],
       role_id: "",
     });
 
     onClose();
   };
+  useEffect(() => {
+    const getInitialRoleID = async () => {
+      const { data } = await getRoleStaffID();
+
+      if (data) {
+        setValue("role_id", data);
+      }
+    };
+
+    getInitialRoleID();
+  }, [showModal]);
 
   return (
     <Modal
@@ -89,7 +121,7 @@ export const AddStaffModal = ({
       title={
         <div className="flex items-center gap-2">
           <User className="w-5 h-5" />
-          {`${initialValues?.username ? "Edit" : "Add"}`} Staff
+          {isUpdate ? "Edit" : "Add"} Staff
         </div>
       }
       isSubmitting={isSubmitting}
@@ -112,22 +144,39 @@ export const AddStaffModal = ({
             leftIcon={<Save />}
             onClick={handleSubmit(async (newData) => {
               try {
-                const { error } = await addNewStaff({
-                  p_first_name: newData?.first_name,
-                  p_middle_name: newData?.middle_name,
-                  p_last_name: newData?.last_name,
-                  p_phone: newData?.phone,
-                  p_email: newData?.email || `${newData?.first_name}@gmail.com`,
-                  p_address: newData?.address,
-                  p_employment_date: newData?.employment_date,
-                  p_created_by: userId!,
-                  p_username: newData?.username,
-                  p_password: newData?.password!,
-                  p_branch_id: newData?.branch_id,
-                  p_role_id: newData?.role_id,
-                });
+                if (isUpdate) {
+                  const { error } = await updateStaff({
+                    p_staff_id: newData?.staff_id!,
+                    p_first_name: newData?.first_name,
+                    p_middle_name: newData?.middle_name,
+                    p_last_name: newData?.last_name,
+                    p_phone: newData?.phone,
+                    p_address: newData?.address,
+                    p_branch_ids: newData?.branch_ids,
+                    p_updated_by: userId!,
+                  });
 
-                if (error) throw error;
+                  if (error) throw error;
+                } else {
+                  const { error } = await addNewStaff({
+                    p_first_name: newData?.first_name,
+                    p_middle_name: newData?.middle_name,
+                    p_last_name: newData?.last_name,
+                    p_phone: newData?.phone,
+                    p_email:
+                      newData?.email ||
+                      `${newData?.first_name.toLowerCase()}@gmail.com`,
+                    p_address: newData?.address,
+                    p_employment_date: newData?.employment_date,
+                    p_created_by: userId!,
+                    p_username: newData?.username,
+                    p_password: newData?.password!,
+                    p_branch_ids: newData?.branch_ids,
+                    p_role_id: newData?.role_id,
+                  });
+
+                  if (error) throw error;
+                }
 
                 handleModalClose();
               } catch (_error) {
@@ -147,7 +196,7 @@ export const AddStaffModal = ({
             name="username"
             render={({ field, formState: { errors } }) => (
               <Input
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUpdate}
                 label="Username"
                 placeholder="Enter username"
                 error={!!errors.username}
@@ -164,7 +213,7 @@ export const AddStaffModal = ({
             render={({ field, formState: { errors } }) => (
               <Input
                 type="password"
-                disabled={isSubmitting}
+                disabled={isSubmitting || isUpdate}
                 label="Password"
                 placeholder="Enter password"
                 error={!!errors.password}
@@ -176,47 +225,36 @@ export const AddStaffModal = ({
           />
         </div>
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 mb-4">
+      <div className="grid grid-cols-1 mb-4">
         <div className="col-span-1 mb-4 sm:mb-0">
           <Controller
             control={control}
-            name="branch_id"
-            render={({ field, formState: { errors } }) => (
-              <>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">
-                  Branch
-                </label>
-                <BranchProvider
-                  {...field}
-                  placeholder="Select Branch"
-                  onChange={({ value }: any) => {
-                    field?.onChange(value);
-                  }}
-                  error={!!errors?.branch_id}
-                />
-              </>
-            )}
-          />
-        </div>
-        <div className="col-span-1">
-          <Controller
-            control={control}
-            name="role_id"
-            render={({ field, formState: { errors } }) => (
-              <>
-                <label className="block text-sm font-semibold mb-2 text-gray-700">
-                  Role
-                </label>
-                <RoleProvider
-                  {...field}
-                  placeholder="Select Role"
-                  onChange={({ value }: any) => {
-                    field?.onChange(value);
-                  }}
-                  error={!!errors?.role_id}
-                />
-              </>
-            )}
+            name="branch_ids"
+            render={({ field, formState: { errors } }) => {
+              return (
+                <>
+                  <label className="block text-sm font-semibold mb-2 text-gray-700">
+                    Branches
+                  </label>
+                  <BranchProvider
+                    name={field.name}
+                    multiple
+                    placeholder="Select Branches"
+                    onChange={(selectedOptions: any) => {
+                      const values = Array.isArray(selectedOptions)
+                        ? selectedOptions.map((option) => option.value)
+                        : selectedOptions === null
+                        ? []
+                        : [];
+                      field?.onChange(values);
+                    }}
+                    onBlur={field.onBlur}
+                    value={field.value || []}
+                    error={!!errors?.branch_ids}
+                  />
+                </>
+              );
+            }}
           />
         </div>
       </div>
@@ -334,7 +372,7 @@ export const AddStaffModal = ({
             render={({ field, formState: { errors } }) => (
               <div className="relative">
                 <Datepicker
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || isUpdate}
                   label="Date of Employment"
                   placeholder="Select employment date"
                   error={!!errors?.employment_date}

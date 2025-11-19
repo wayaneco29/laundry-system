@@ -13,9 +13,11 @@ type MainStaffPageProps = {
 
 export function MainStaffPage({ initialData }: MainStaffPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [initialValues, setInitialValues] = useState({
+    staff_id: "",
     first_name: "",
     middle_name: "",
     last_name: "",
@@ -26,7 +28,7 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
     created_by: "",
     username: "",
     password: "",
-    branch_id: "",
+    branch_ids: [] as string[],
     role_id: "",
   });
 
@@ -54,7 +56,10 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
         <Button
           leftIcon={<Plus className="size-4" />}
           className="inline-flex items-center gap-x-2 font-medium focus:!ring-0 active:scale-95 w-full self-end mt-4 sm:mt-0 sm:w-auto sm:self-start text-white bg-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setIsUpdate(false);
+            setShowModal(true);
+          }}
         >
           Add Staff
         </Button>
@@ -78,6 +83,7 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
             search={debouncedSearch}
             onEdit={(staff) => {
               setInitialValues({
+                staff_id: staff?.user_id || staff?.staff_id,
                 first_name: staff?.first_name,
                 middle_name: staff?.middle_name,
                 last_name: staff?.last_name,
@@ -86,11 +92,12 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
                 address: staff?.address,
                 employment_date: staff?.employment_date,
                 created_by: staff?.created_by,
-                branch_id: staff?.branch_id,
+                branch_ids: Array.isArray(staff?.branch_ids) ? staff.branch_ids : [],
                 password: staff?.password,
                 role_id: staff?.role_id,
                 username: staff?.username,
               });
+              setIsUpdate(true);
               setShowModal(true);
             }}
           />
@@ -99,8 +106,10 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
       <AddStaffModal
         initialValues={initialValues}
         showModal={showModal}
+        isUpdate={isUpdate}
         onClose={() => {
           setInitialValues({
+            staff_id: "",
             first_name: "",
             middle_name: "",
             last_name: "",
@@ -111,9 +120,10 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
             created_by: "",
             username: "",
             password: "",
-            branch_id: "",
+            branch_ids: [],
             role_id: "",
           });
+          setIsUpdate(false);
           setShowModal(false);
         }}
       />

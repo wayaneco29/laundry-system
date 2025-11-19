@@ -256,7 +256,12 @@ export interface ServiceView extends Service {
 // VIEW_STAFFS
 export interface StaffView extends Staff {
   full_name: string; // Computed field
-  branch_name?: string; // From joined branch
+  username: string; // From app_users
+  password: string; // From app_users
+  default_branch_id?: UUID; // Default branch from app_users
+  role_id: UUID; // From app_users
+  branch_ids: UUID[]; // Array of all assigned branches from staff_branches
+  branch_names: string[]; // Array of branch names
 }
 
 // VIEW_BRANCHES (same as Branch)

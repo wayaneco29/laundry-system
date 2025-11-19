@@ -24,8 +24,8 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
           onClose={() => setShowPairingModal(false)}
           currentStaffId={user.user_id}
           currentStaffName={`${user.first_name} ${user.last_name}`}
-          branchId={user.branch_id}
-          branchName={user.branch_name}
+          branchIds={user.branch_ids || []}
+          branchNames={user.branch_names || []}
           onShiftStarted={onShiftStarted}
         />
       )}

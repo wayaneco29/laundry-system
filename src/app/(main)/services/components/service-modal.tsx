@@ -31,7 +31,7 @@ export const ServiceModal = ({
   initialValue,
 }: ServiceModalProps) => {
   const { userId } = useCurrentUser();
-  const { is_admin, branch_id } = useUserContext();
+  const { is_admin } = useUserContext();
   const {
     reset,
     control,
@@ -46,7 +46,6 @@ export const ServiceModal = ({
         isUpdate: Yup.boolean(),
         name: Yup.string().required(),
         price: Yup.string().required(),
-        branchId: is_admin ? Yup.string().required() : Yup.string(),
         status: Yup.string().required(),
       })
     ),
@@ -60,7 +59,6 @@ export const ServiceModal = ({
       isUpdate: false,
       name: "",
       price: "",
-      branchId: is_admin ? "" : branch_id,
       status: "Active",
     });
 
@@ -98,7 +96,6 @@ export const ServiceModal = ({
               try {
                 const { error } = await upsertService({
                   p_service_id: newData?.id as string,
-                  p_branch_id: newData?.branchId || branch_id,
                   p_name: newData?.name,
                   p_price: newData?.price,
                   p_status: newData?.status,
@@ -158,31 +155,6 @@ export const ServiceModal = ({
         </div>
       </div>
       <div className={`grid grid-cols-1 gap-y-4 mb-4`}>
-        {is_admin && (
-          <div className="col-span-1">
-            <Controller
-              control={control}
-              name="branchId"
-              render={({
-                field: { value = [], onChange, ...field },
-                formState: { errors },
-              }) => (
-                <BranchProvider
-                  disabled={isSubmitting}
-                  label="Branch"
-                  placeholder="Select branch"
-                  error={!!errors?.branchId}
-                  value={value}
-                  {...field}
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  onChange={(newValue: any) => {
-                    onChange(newValue?.value);
-                  }}
-                />
-              )}
-            />
-          </div>
-        )}
         {isUpdate && (
           <div className="col-span-1">
             <Controller

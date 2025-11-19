@@ -15,8 +15,8 @@ export type UserType = {
   employment_date: string;
   role_id: string;
   role_name: string;
-  branch_id: string;
-  branch_name: string;
+  branch_ids: string[]; // Array of all assigned branches
+  branch_names: string[]; // Array of branch names
   is_admin: boolean;
 };
 

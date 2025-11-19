@@ -16,6 +16,16 @@ export const getUserInfo = async () => {
       .eq("user_id", user?.id)
       .single();
 
+    // Transform branches array to branch_ids and branch_names arrays
+    if (data && data.branches) {
+      const branches = Array.isArray(data.branches) ? data.branches : [];
+      data.branch_ids = branches.map((branch: any) => branch.id);
+      data.branch_names = branches.map((branch: any) => branch.name);
+    } else {
+      data.branch_ids = [];
+      data.branch_names = [];
+    }
+
     return { data, error: null };
   } catch (_error) {
     return {

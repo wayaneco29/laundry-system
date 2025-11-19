@@ -91,11 +91,10 @@ export async function getActiveStaffShift(
 export async function getStaffByBranch(branchId: string): Promise<StaffView[]> {
   try {
     const supabase = await createClient();
-
     const { data, error } = await supabase
       .from("view_staffs")
       .select("*")
-      .eq("branch_id", branchId)
+      .contains("branch_ids", [branchId])
       .order("full_name");
 
     if (error) {

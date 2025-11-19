@@ -49,7 +49,6 @@ export function PartnerManagementModal({
       loadAvailableStaff();
     }
   }, [isOpen, currentShift?.branch_id]);
-
   // Filter staff based on search query
   useEffect(() => {
     if (!searchQuery.trim()) {

@@ -18,7 +18,7 @@ type BranchProviderProps = Props & {
   placeholder?: string;
 };
 
-export function BranchProvider({ placeholder, ...props }: BranchProviderProps) {
+export function BranchProvider({ placeholder, value, multiple, ...props }: BranchProviderProps) {
   const [branchList, setBranchList] = useState<
     Array<{ value: string; label: string }>
   >([]);
@@ -42,6 +42,8 @@ export function BranchProvider({ placeholder, ...props }: BranchProviderProps) {
       options={branchList}
       isSearchable={false}
       placeholder={placeholder}
+      value={value}
+      isMulti={multiple}
       {...props}
     />
   );

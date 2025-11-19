@@ -16,8 +16,8 @@ interface StaffPairingModalProps {
   onClose: () => void;
   currentStaffId: string;
   currentStaffName: string;
-  branchId: string;
-  branchName: string;
+  branchIds: string[];
+  branchNames: string[];
   onShiftStarted: (shiftData: any) => void;
 }
 
@@ -26,30 +26,41 @@ export function StaffPairingModal({
   onClose,
   currentStaffId,
   currentStaffName,
-  branchId,
-  branchName,
+  branchIds,
+  branchNames,
   onShiftStarted,
 }: StaffPairingModalProps) {
   const [availableStaff, setAvailableStaff] = useState<StaffView[]>([]);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(
     null
   );
+  const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [isStartingShift, setIsStartingShift] = useState(false);
 
+  // Auto-select branch if there's only one
   useEffect(() => {
-    if (isOpen) {
+    if (branchIds.length === 1) {
+      setSelectedBranchId(branchIds[0]);
+    }
+  }, [branchIds]);
+
+  useEffect(() => {
+    if (isOpen && selectedBranchId) {
       loadAvailableStaff();
       checkExistingShift();
     }
-  }, [isOpen, branchId]);
+  }, [isOpen, selectedBranchId]);
 
   const loadAvailableStaff = async () => {
+    if (!selectedBranchId) return;
+
     try {
       setLoading(true);
-      const staff = await getStaffByBranch(branchId);
+      const staff = await getStaffByBranch(selectedBranchId);
       // Filter out current staff member
       const otherStaff = staff.filter((s) => s.user_id !== currentStaffId);
+
       setAvailableStaff(otherStaff);
     } catch (error) {
       console.error("Error loading staff:", error);
@@ -71,20 +82,26 @@ export function StaffPairingModal({
       // No active shift found, continue with modal
     }
   };
-
   const handleStartShift = async () => {
+    if (!selectedBranchId) {
+      toast.error("Please select a branch");
+      return;
+    }
+
     try {
       setIsStartingShift(true);
 
       const shiftData = await startStaffShift({
         p_primary_staff_id: currentStaffId,
-        p_branch_id: branchId,
+        p_branch_id: selectedBranchId,
         p_partner_staff_id: selectedPartnerId || undefined,
       });
 
       const partnerName = selectedPartnerId
         ? availableStaff.find((s) => s.user_id === selectedPartnerId)?.full_name
         : null;
+
+      const selectedBranchName = branchNames[branchIds.indexOf(selectedBranchId)];
 
       toast.success(
         selectedPartnerId
@@ -96,8 +113,8 @@ export function StaffPairingModal({
         shift_id: shiftData.shift_id,
         partner_staff_id: selectedPartnerId,
         partner_name: partnerName,
-        branch_id: branchId,
-        branch_name: branchName,
+        branch_id: selectedBranchId,
+        branch_name: selectedBranchName,
         start_time: new Date().toISOString(),
       });
 
@@ -108,11 +125,6 @@ export function StaffPairingModal({
     } finally {
       setIsStartingShift(false);
     }
-  };
-
-  const handleWorkSolo = () => {
-    setSelectedPartnerId(null);
-    handleStartShift();
   };
 
   if (!isOpen) return null;
@@ -150,7 +162,7 @@ export function StaffPairingModal({
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {branchName} •{" "}
+                {selectedBranchId && branchNames[branchIds.indexOf(selectedBranchId)]} •{" "}
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -165,7 +177,50 @@ export function StaffPairingModal({
             </p>
           </div>
 
-          {loading ? (
+          {/* Branch Selection */}
+          {branchIds.length > 0 && (
+            <div className="space-y-3 mb-6">
+              <h3 className="font-medium text-gray-900">Select Branch</h3>
+              <div className="relative">
+                <select
+                  value={selectedBranchId}
+                  onChange={(e) => {
+                    setSelectedBranchId(e.target.value);
+                    setSelectedPartnerId(null); // Reset partner selection when branch changes
+                  }}
+                  disabled={branchIds.length === 1}
+                  className={`w-full p-3 border rounded-lg text-gray-900 bg-white ${
+                    branchIds.length === 1
+                      ? "cursor-not-allowed opacity-75 bg-gray-50"
+                      : "cursor-pointer hover:border-gray-300"
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                >
+                  {!selectedBranchId && (
+                    <option value="" disabled>
+                      Choose a branch...
+                    </option>
+                  )}
+                  {branchIds.map((branchId, index) => (
+                    <option key={branchId} value={branchId}>
+                      {branchNames[index]}
+                    </option>
+                  ))}
+                </select>
+                {branchIds.length === 1 && (
+                  <div className="mt-1 text-xs text-gray-500">
+                    Auto-selected (only assigned branch)
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {!selectedBranchId ? (
+            <div className="text-center py-8 text-gray-500">
+              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
+              <p>Please select a branch to continue</p>
+            </div>
+          ) : loading ? (
             <div className="flex items-center justify-center py-8">
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
@@ -173,74 +228,44 @@ export function StaffPairingModal({
             <>
               {/* Partner Selection */}
               <div className="space-y-3 mb-6">
-                <h3 className="font-medium text-gray-900">
-                  Choose Your Partner
-                </h3>
-
-                {availableStaff.length === 0 ? (
-                  <div className="text-center py-6 text-gray-500">
-                    <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                    <p>No other staff available at this branch</p>
-                  </div>
-                ) : (
-                  <div className="grid gap-2">
+                <h3 className="font-medium text-gray-900">Choose Your Co-Worker</h3>
+                <div className="relative">
+                  <select
+                    value={selectedPartnerId || "solo"}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      setSelectedPartnerId(value === "solo" ? null : value);
+                    }}
+                    className="w-full p-3 border rounded-lg text-gray-900 bg-white cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  >
+                    <option value="solo">Work Solo (No Partner)</option>
                     {availableStaff.map((staff) => (
-                      <button
-                        key={staff.user_id}
-                        onClick={() => setSelectedPartnerId(staff.user_id)}
-                        className={`p-3 border rounded-lg text-left transition-colors ${
-                          selectedPartnerId === staff.user_id
-                            ? "border-blue-500 bg-blue-50"
-                            : "border-gray-200 hover:border-gray-300"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="font-medium text-gray-900">
-                              {staff.full_name}
-                            </p>
-                            <p className="text-sm text-gray-500">
-                              {staff.phone}
-                            </p>
-                          </div>
-                          {selectedPartnerId === staff.user_id && (
-                            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-                          )}
-                        </div>
-                      </button>
+                      <option key={staff.user_id} value={staff.user_id}>
+                        {staff.full_name} - {staff.phone}
+                      </option>
                     ))}
-                  </div>
-                )}
+                  </select>
+                </div>
               </div>
 
-              {/* Action Buttons */}
+              {/* Action Button */}
               <div className="flex flex-col gap-3">
-                {selectedPartnerId && (
-                  <Button
-                    onClick={handleStartShift}
-                    disabled={isStartingShift}
-                    loading={isStartingShift}
-                    fullWidth
-                    leftIcon={
-                      !isStartingShift ? (
-                        <Users className="h-4 w-4" />
-                      ) : undefined
-                    }
-                  >
-                    {isStartingShift
-                      ? "Starting Shift..."
-                      : "Start Shift with Partner"}
-                  </Button>
-                )}
-
                 <Button
-                  onClick={handleWorkSolo}
+                  onClick={handleStartShift}
                   disabled={isStartingShift}
                   loading={isStartingShift}
-                  variant={selectedPartnerId ? "outline" : "primary"}
                   fullWidth
+                  leftIcon={
+                    !isStartingShift ? (
+                      <Users className="h-4 w-4" />
+                    ) : undefined
+                  }
                 >
-                  {isStartingShift ? "Starting Shift..." : "Work Solo Today"}
+                  {isStartingShift
+                    ? "Starting Shift..."
+                    : selectedPartnerId
+                    ? "Start Shift with Partner"
+                    : "Start Solo Shift"}
                 </Button>
               </div>
             </>

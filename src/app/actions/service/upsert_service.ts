@@ -8,7 +8,6 @@ type UpsertServiceType = {
   p_name: string;
   p_price: string;
   p_status: string;
-  p_branch_id: string;
   p_staff_id: string;
 };
 
