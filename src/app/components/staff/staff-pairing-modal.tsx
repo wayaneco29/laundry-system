@@ -18,6 +18,7 @@ interface StaffPairingModalProps {
   currentStaffName: string;
   branches: { id: string; name: string }[];
   onShiftStarted: (shiftData: any) => void;
+  refreshShiftStatus?: () => Promise<void>;
 }
 
 export function StaffPairingModal({
@@ -27,6 +28,7 @@ export function StaffPairingModal({
   currentStaffName,
   branches,
   onShiftStarted,
+  refreshShiftStatus,
 }: StaffPairingModalProps) {
   const [availableStaff, setAvailableStaff] = useState<StaffView[]>([]);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(
@@ -80,6 +82,7 @@ export function StaffPairingModal({
       // No active shift found, continue with modal
     }
   };
+
   const handleStartShift = async () => {
     if (!selectedBranchId) {
       toast.error("Please select a branch");
@@ -89,41 +92,31 @@ export function StaffPairingModal({
     try {
       setIsStartingShift(true);
 
-      const shiftData = await startStaffShift({
+      // Start the shift in the database
+      await startStaffShift({
         p_primary_staff_id: currentStaffId,
         p_branch_id: selectedBranchId,
         p_partner_staff_id: selectedPartnerId || undefined,
       });
 
-      const partnerName = selectedPartnerId
-        ? availableStaff.find((s) => s.user_id === selectedPartnerId)?.full_name
-        : null;
+      // Get the actual shift data from the database
+      const actualShiftData = await getActiveStaffShift(currentStaffId);
 
-      const selectedBranchName = branches?.find(
-        (branch) => branch?.id === selectedBranchId
-      )?.name;
+      if (actualShiftData) {
+        // Update the shift status with actual database data
+        onShiftStarted(actualShiftData);
 
-      toast.success(
-        selectedPartnerId
-          ? `Shift started with ${partnerName}`
-          : "Solo shift started successfully"
-      );
-      console.log({
-        shift_id: shiftData.shift_id,
-        partner_staff_id: selectedPartnerId,
-        partner_name: partnerName,
-        branch_id: selectedBranchId,
-        branch_name: selectedBranchName,
-        start_time: new Date().toISOString(),
-      });
-      onShiftStarted({
-        shift_id: shiftData.shift_id,
-        partner_staff_id: selectedPartnerId,
-        partner_name: partnerName,
-        branch_id: selectedBranchId,
-        branch_name: selectedBranchName,
-        start_time: new Date().toISOString(),
-      });
+        const partnerName = selectedPartnerId
+          ? availableStaff.find((s) => s.user_id === selectedPartnerId)
+              ?.full_name
+          : null;
+
+        toast.success(
+          selectedPartnerId
+            ? `Shift started with ${partnerName}`
+            : "Solo shift started successfully"
+        );
+      }
 
       onClose();
     } catch (error) {
@@ -137,51 +130,52 @@ export function StaffPairingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="w-full max-w-lg bg-white rounded-lg shadow-lg">
-        {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b">
-          <div className="flex items-center gap-3">
-            <div className="p-2 bg-blue-100 rounded-lg">
-              <Users className="h-5 w-5 text-blue-600" />
+    <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+      <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-200">
+        {/* Header with Gradient */}
+        <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl p-6 text-white">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-white/20 backdrop-blur-sm rounded-xl">
+                <Users className="h-6 w-6" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-bold">Start Your Shift</h2>
+                <p className="text-blue-100 text-sm mt-1">
+                  Welcome back, {currentStaffName}
+                </p>
+              </div>
             </div>
-            <div>
-              <h2 className="text-xl font-semibold text-gray-900">
-                Start Your Shift
-              </h2>
-              <p className="text-sm text-gray-500">
-                Welcome back, {currentStaffName}
-              </p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-2 hover:bg-white/20 rounded-full transition-colors"
+            >
+              <X className="h-5 w-5" />
+            </button>
           </div>
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600"
-            leftIcon={<X className="h-4 w-4" />}
-          />
+
+          {/* Date Info */}
+          <div className="mt-4 flex items-center gap-2 text-blue-100 text-sm">
+            <Clock className="h-4 w-4" />
+            <span>
+              {selectedBranchId &&
+                branches?.find((branch) => branch?.id === selectedBranchId)
+                  ?.name}
+              {selectedBranchId && " • "}
+              {new Date().toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "short",
+                day: "numeric",
+              })}
+            </span>
+          </div>
         </div>
 
         {/* Content */}
-        <div className="p-6">
-          <div className="mb-6">
-            <div className="flex items-center gap-2 mb-2">
-              <Clock className="h-4 w-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
-                {selectedBranchId &&
-                  branches?.find((branch) => branch?.id === selectedBranchId)
-                    ?.name}{" "}
-                •{" "}
-                {new Date().toLocaleDateString("en-US", {
-                  weekday: "long",
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </span>
-            </div>
-            <p className="text-sm text-gray-600">
+        <div className="p-6 space-y-6">
+          {/* Description */}
+          <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border border-blue-100">
+            <p className="text-sm text-gray-700 leading-relaxed">
               Select a partner to work with today, or work solo. Your sales and
               commission will be tracked for the day.
             </p>
@@ -189,21 +183,24 @@ export function StaffPairingModal({
 
           {/* Branch Selection */}
           {branches?.length > 0 && (
-            <div className="space-y-3 mb-6">
-              <h3 className="font-medium text-gray-900">Select Branch</h3>
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                Select Branch
+              </label>
               <div className="relative">
                 <select
                   value={selectedBranchId}
                   onChange={(e) => {
                     setSelectedBranchId(e.target.value);
-                    setSelectedPartnerId(null); // Reset partner selection when branch changes
+                    setSelectedPartnerId(null);
                   }}
                   disabled={branches?.length === 1}
-                  className={`w-full p-3 border rounded-lg text-gray-900 bg-white ${
+                  className={`w-full p-4 border-2 rounded-xl text-gray-900 bg-white shadow-sm transition-all ${
                     branches?.length === 1
                       ? "cursor-not-allowed opacity-75 bg-gray-50"
-                      : "cursor-pointer hover:border-gray-300"
-                  } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
+                      : "cursor-pointer hover:border-blue-300 hover:shadow-md"
+                  } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500`}
                 >
                   {!selectedBranchId && (
                     <option value="" disabled>
@@ -217,7 +214,8 @@ export function StaffPairingModal({
                   ))}
                 </select>
                 {branches.length === 1 && (
-                  <div className="mt-1 text-xs text-gray-500">
+                  <div className="mt-2 text-xs text-blue-600 flex items-center gap-1">
+                    <div className="w-1 h-1 bg-blue-600 rounded-full"></div>
                     Auto-selected (only assigned branch)
                   </div>
                 )}
@@ -226,21 +224,27 @@ export function StaffPairingModal({
           )}
 
           {!selectedBranchId ? (
-            <div className="text-center py-8 text-gray-500">
-              <Users className="h-8 w-8 mx-auto mb-2 opacity-50" />
-              <p>Please select a branch to continue</p>
+            <div className="text-center py-12 bg-gray-50 rounded-xl">
+              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
+              <p className="text-gray-500 font-medium">
+                Please select a branch to continue
+              </p>
             </div>
           ) : loading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+            <div className="flex flex-col items-center justify-center py-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
+              <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
+              <p className="mt-4 text-sm text-blue-600 font-medium">
+                Loading staff...
+              </p>
             </div>
           ) : (
             <>
               {/* Partner Selection */}
-              <div className="space-y-3 mb-6">
-                <h3 className="font-medium text-gray-900">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
+                  <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   Choose Your Co-Worker
-                </h3>
+                </label>
                 <div className="relative">
                   <select
                     value={selectedPartnerId || "solo"}
@@ -248,12 +252,12 @@ export function StaffPairingModal({
                       const value = e.target.value;
                       setSelectedPartnerId(value === "solo" ? null : value);
                     }}
-                    className="w-full p-3 border rounded-lg text-gray-900 bg-white cursor-pointer hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="w-full p-4 border-2 rounded-xl text-gray-900 bg-white shadow-sm cursor-pointer hover:border-green-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                   >
-                    <option value="solo">Work Solo (No Partner)</option>
+                    <option value="solo">🎯 Work Solo (No Partner)</option>
                     {availableStaff.map((staff) => (
                       <option key={staff.user_id} value={staff.user_id}>
-                        {staff.full_name} - {staff.phone}
+                        👥 {staff.full_name} - {staff.phone}
                       </option>
                     ))}
                   </select>
@@ -261,32 +265,42 @@ export function StaffPairingModal({
               </div>
 
               {/* Action Button */}
-              <div className="flex flex-col gap-3">
-                <Button
-                  onClick={handleStartShift}
-                  disabled={isStartingShift}
-                  loading={isStartingShift}
-                  fullWidth
-                  leftIcon={
-                    !isStartingShift ? <Users className="h-4 w-4" /> : undefined
-                  }
-                >
-                  {isStartingShift
-                    ? "Starting Shift..."
-                    : selectedPartnerId
-                    ? "Start Shift with Partner"
-                    : "Start Solo Shift"}
-                </Button>
-              </div>
+              <Button
+                onClick={handleStartShift}
+                disabled={isStartingShift}
+                loading={isStartingShift}
+                fullWidth
+                className="!py-4 !text-base font-semibold bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 shadow-lg hover:shadow-xl transform hover:scale-[1.02] transition-all"
+                leftIcon={
+                  !isStartingShift ? <Users className="h-5 w-5" /> : undefined
+                }
+              >
+                {isStartingShift
+                  ? "Starting Shift..."
+                  : selectedPartnerId
+                  ? "Start Shift with Partner"
+                  : "Start Solo Shift"}
+              </Button>
             </>
           )}
 
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-            <p className="text-xs text-yellow-800">
-              <strong>Note:</strong> Commission will be calculated based on your
-              sales for this shift. You can end your shift anytime from the
-              dashboard.
-            </p>
+          {/* Info Box */}
+          <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl p-4">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-200/20 rounded-full -mr-10 -mt-10"></div>
+            <div className="relative flex gap-3">
+              <div className="flex-shrink-0 mt-0.5">
+                <div className="w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">ℹ</span>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-amber-900 leading-relaxed">
+                  <span className="font-semibold">Note:</span> Commission will
+                  be calculated based on your sales for this shift. You can end
+                  your shift anytime from the dashboard.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </div>

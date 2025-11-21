@@ -24,11 +24,11 @@ export default async function MainLayout(props: PropsWithChildren) {
   }
   return (
     <UserContextProvided user={logged_in_user as any}>
-      <PrinterProvider>
-        <SidebarContextProvider>
-          <StaffShiftProvider>{props?.children}</StaffShiftProvider>
-        </SidebarContextProvider>
-      </PrinterProvider>
+      <StaffShiftProvider>
+        <PrinterProvider>
+          <SidebarContextProvider>{props?.children}</SidebarContextProvider>
+        </PrinterProvider>
+      </StaffShiftProvider>
     </UserContextProvided>
   );
 }

@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { Users, Clock, UserCheck, UserX } from 'lucide-react';
-import { useStaffShift } from '@/app/hooks/use-staff-shift';
-import { PartnerManagementModal } from './partner-management-modal';
+import { useState, useEffect } from "react";
+import { Users, Clock, UserCheck, UserX } from "lucide-react";
+import { useStaffShift } from "@/app/hooks/use-staff-shift";
+import { PartnerManagementModal } from "./partner-management-modal";
 
 export function NavbarShiftStatus() {
   const { activeShift, isLoading } = useStaffShift();
@@ -48,15 +48,15 @@ export function NavbarShiftStatus() {
   }
 
   const hasPartner = activeShift.partner_staff_id && activeShift.partner_name;
-
+  console.log(activeShift);
   return (
     <>
       <button
         onClick={() => setShowPartnerModal(true)}
         className={`flex items-center gap-2 px-3 py-1 rounded-full transition-colors duration-200 text-xs font-medium ${
           hasPartner
-            ? 'bg-blue-100 hover:bg-blue-200 text-blue-700'
-            : 'bg-green-100 hover:bg-green-200 text-green-700'
+            ? "bg-blue-100 hover:bg-blue-200 text-blue-700"
+            : "bg-green-100 hover:bg-green-200 text-green-700"
         }`}
       >
         {hasPartner ? (
