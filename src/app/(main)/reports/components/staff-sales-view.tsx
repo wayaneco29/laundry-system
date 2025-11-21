@@ -26,7 +26,7 @@ export function StaffSalesView() {
   );
   const [loading, setLoading] = useState(true);
 
-  const { first_name, last_name, email, username, branch_name } =
+  const { first_name, last_name, email, username } =
     useUserContext();
 
   const { activeShift } = useStaffShift();
@@ -91,7 +91,7 @@ export function StaffSalesView() {
         username ||
         "Unknown Staff";
       const staffEmail = email || "N/A";
-      const staffBranch = branch_name || "N/A";
+      const staffBranch = activeShift?.branch_name || "N/A";
 
       // Get co-worker information from active shift
       const coWorkerName = activeShift?.partner_name || "No Partner";
