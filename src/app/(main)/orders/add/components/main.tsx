@@ -49,7 +49,7 @@ const schema = Yup.object().shape({
 
 export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const router = useRouter();
-  const { is_admin, branch_id } = useUserContext();
+  const { is_admin } = useUserContext();
   const { userId } = useCurrentUser();
   const toast = useToast();
   const { activeShift } = useStaffShift();
@@ -66,7 +66,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const { control, handleSubmit, setValue, watch, reset, formState } = useForm({
     defaultValues: {
       customerId: "",
-      branchId: branch_id || "",
+      branchId: activeShift?.branch_id || "",
       services: [],
       modeOfPayment: "Cash",
       inventoryUsage: [],
@@ -147,7 +147,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         return;
       }
 
-      if (!payload.branchId && !branch_id) {
+      if (!payload.branchId && !activeShift?.branch_id) {
         toast.error("Please select a branch");
         return;
       }
@@ -177,7 +177,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
           : undefined;
 
       const orderPayload = {
-        p_branch_id: payload?.branchId || branch_id,
+        p_branch_id: payload?.branchId || activeShift?.branch_id,
         p_customer_id: payload?.customerId,
         p_staff_id: userId,
         p_items: payload?.services,

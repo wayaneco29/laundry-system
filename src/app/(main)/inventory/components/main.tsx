@@ -9,6 +9,7 @@ import { Button, Select } from "@/app/components/common";
 import { getAllBranches } from "@/app/actions";
 import { getAllBranchStocks } from "@/app/actions/branch_stocks";
 import { useUserContext } from "@/app/context";
+import { useStaffShift } from "@/app/hooks/use-staff-shift";
 
 type MainInventoryPageProps = {
   initialData: Array<Record<string, any>>;
@@ -47,7 +48,8 @@ export function MainInventoryPage({
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
-  const { is_admin, branch_id } = useUserContext();
+  const { is_admin } = useUserContext();
+  const { activeShift } = useStaffShift();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -70,7 +72,7 @@ export function MainInventoryPage({
         page: currentPage,
         limit: itemsPerPage,
         search: debouncedSearch,
-        branchId: selectedBranch || branch_id || undefined,
+        branchId: selectedBranch || activeShift?.branch_id || undefined,
       });
 
       if (inventoryResult.data) {

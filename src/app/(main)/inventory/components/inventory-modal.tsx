@@ -7,6 +7,7 @@ import { Modal, Button, Select, Input } from "@/app/components/common";
 import { addNewStock } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useUserContext } from "@/app/context";
+import { useStaffShift } from "@/app/hooks/use-staff-shift";
 
 type InventoryFormData = {
   id: string | null;
@@ -30,7 +31,8 @@ export function InventoryModal({
   onClose,
 }: InventoryModalProps) {
   const { userId } = useCurrentUser();
-  const { is_admin, branch_id } = useUserContext();
+  const { is_admin } = useUserContext();
+  const { activeShift } = useStaffShift();
 
   const {
     control,
@@ -57,7 +59,7 @@ export function InventoryModal({
       }
 
       const result = await addNewStock({
-        branchId: is_admin ? data?.branchId : branch_id,
+        branchId: is_admin ? data?.branchId : activeShift?.branch_id,
         stockName: data.name.trim(),
         quantity: quantity,
         staff_id: userId!,

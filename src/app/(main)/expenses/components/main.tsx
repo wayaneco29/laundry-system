@@ -18,6 +18,7 @@ import {
   TableSkeleton,
 } from "../../dashboard/components/skeleton";
 import { useUserContext } from "@/app/context";
+import { useStaffShift } from "@/app/hooks/use-staff-shift";
 
 interface ExpensesMainProps {
   initialData: Array<Record<string, any>>;
@@ -58,7 +59,8 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   // Immediate search input value (not debounced)
   const [searchInputValue, setSearchInputValue] = useState("");
 
-  const { is_admin, branch_id } = useUserContext();
+  const { is_admin } = useUserContext();
+  const { activeShift } = useStaffShift();
 
   // Fetch initial non-expense data on mount
   useEffect(() => {
@@ -95,7 +97,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
       const result = await getAllExpenses({
         page: currentPage,
         limit: itemsPerPage,
-        branchId: branch_id || filters?.branch_id,
+        branchId: activeShift?.branch_id || filters?.branch_id,
         search: filters?.search || undefined,
       });
 
@@ -118,7 +120,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   };
 
   const fetchMonthlyExpense = async () => {
-    const branchId = filters?.branch_id || branch_id;
+    const branchId = filters?.branch_id || activeShift?.branch_id;
     const result = await getMonthlyExpense(branchId);
     if (result.data !== undefined) {
       setMonthlyExpense(result.data);
@@ -126,7 +128,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   };
 
   const fetchYearlyExpense = async () => {
-    const branchId = filters?.branch_id || branch_id;
+    const branchId = filters?.branch_id || activeShift?.branch_id;
 
     const result = await getYearlyExpense(branchId);
     if (result.data !== undefined) {

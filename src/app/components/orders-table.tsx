@@ -24,6 +24,7 @@ import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
 import "./loading-spinner.css";
 import { useToast } from "../hooks";
 import { useUserContext } from "../context";
+import { useStaffShift } from "../hooks/use-staff-shift";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
@@ -57,7 +58,8 @@ export const OrdersTable = ({
   );
   const isInitialMount = useRef(true);
 
-  const { branch_id, role_name } = useUserContext();
+  const { role_name } = useUserContext();
+  const { activeShift } = useStaffShift();
 
   const orderStatuses = ["Pending", "Ready for Pickup", "Picked up"];
   const paymentStatuses = ["Unpaid", "Paid"];
@@ -68,7 +70,7 @@ export const OrdersTable = ({
       const result = await getOrders({
         page,
         limit,
-        branchId: branch_id || undefined,
+        branchId: activeShift?.branch_id || undefined,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
       });
