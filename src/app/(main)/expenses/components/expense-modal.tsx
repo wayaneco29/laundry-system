@@ -12,6 +12,7 @@ import { upsertExpense } from "@/app/actions/expense";
 import { getAllBranches } from "@/app/actions/branch";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { useUserContext } from "@/app/context";
+import { useStaffShift } from "@/app/hooks/use-staff-shift";
 
 type ExpenseModalProps = {
   isOpen: boolean;
@@ -60,7 +61,8 @@ export function ExpenseModal({
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { userId } = useCurrentUser();
-  const { is_admin, branch_id } = useUserContext();
+  const { is_admin } = useUserContext();
+  const { activeShift } = useStaffShift();
   useEffect(() => {
     if (isOpen) {
       fetchBranches();
@@ -73,7 +75,7 @@ export function ExpenseModal({
           category: expense.category || "Supplies",
           expense_date:
             expense.expense_date || new Date().toISOString().split("T")[0],
-          branch_id: is_admin ? expense.branch_id || "" : branch_id,
+          branch_id: is_admin ? expense.branch_id || "" : activeShift?.branch_id || "",
         });
       } else {
         // Reset form for create mode
@@ -83,12 +85,12 @@ export function ExpenseModal({
           amount: "",
           category: "Supplies",
           expense_date: new Date().toISOString().split("T")[0],
-          branch_id: is_admin ? "" : branch_id,
+          branch_id: is_admin ? "" : activeShift?.branch_id || "",
         });
       }
       setErrors({});
     }
-  }, [isOpen, expense, mode]);
+  }, [isOpen, expense, mode, activeShift]);
 
   const fetchBranches = async () => {
     try {
@@ -151,7 +153,7 @@ export function ExpenseModal({
             p_amount: Number(formData.amount),
             p_category: formData.category as any,
             p_expense_date: formData.expense_date,
-            p_branch_id: is_admin ? branch?.id : branch_id,
+            p_branch_id: is_admin ? branch?.id : activeShift?.branch_id,
             p_created_by: userId!,
           })
         );
