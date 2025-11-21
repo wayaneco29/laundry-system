@@ -59,7 +59,7 @@ export function InventoryModal({
       }
 
       const result = await addNewStock({
-        branchId: is_admin ? data?.branchId : activeShift?.branch_id,
+        branchId: is_admin ? data?.branchId : (activeShift?.branch_id || ""),
         stockName: data.name.trim(),
         quantity: quantity,
         staff_id: userId!,
