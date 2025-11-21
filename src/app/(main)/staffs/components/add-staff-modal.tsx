@@ -147,32 +147,32 @@ export const AddStaffModal = ({
                 if (isUpdate) {
                   const { error } = await updateStaff({
                     p_staff_id: initialValues?.staff_id!,
-                    p_first_name: newData?.first_name,
-                    p_middle_name: newData?.middle_name,
-                    p_last_name: newData?.last_name,
-                    p_phone: newData?.phone,
-                    p_address: newData?.address,
-                    p_branch_ids: newData?.branch_ids,
+                    p_first_name: newData.first_name,
+                    p_middle_name: newData.middle_name,
+                    p_last_name: newData.last_name,
+                    p_phone: newData.phone,
+                    p_address: newData.address,
+                    p_branch_ids: newData.branch_ids as Array<string>,
                     p_updated_by: userId!,
                   });
 
                   if (error) throw error;
                 } else {
                   const { error } = await addNewStaff({
-                    p_first_name: newData?.first_name,
-                    p_middle_name: newData?.middle_name,
-                    p_last_name: newData?.last_name,
-                    p_phone: newData?.phone,
+                    p_first_name: newData.first_name,
+                    p_middle_name: newData.middle_name,
+                    p_last_name: newData.last_name,
+                    p_phone: newData.phone,
                     p_email:
-                      newData?.email ||
-                      `${newData?.first_name.toLowerCase()}@gmail.com`,
-                    p_address: newData?.address,
-                    p_employment_date: newData?.employment_date,
+                      newData.email ||
+                      `${newData.first_name.toLowerCase()}@gmail.com`,
+                    p_address: newData.address,
+                    p_employment_date: newData?.employment_date!,
                     p_created_by: userId!,
-                    p_username: newData?.username,
+                    p_username: newData?.username!,
                     p_password: newData?.password!,
-                    p_branch_ids: newData?.branch_ids,
-                    p_role_id: newData?.role_id,
+                    p_branch_ids: newData?.branch_ids as Array<string>,
+                    p_role_id: newData?.role_id!,
                   });
 
                   if (error) throw error;
@@ -249,7 +249,7 @@ export const AddStaffModal = ({
                       field?.onChange(values);
                     }}
                     onBlur={field.onBlur}
-                    value={field.value || []}
+                    value={(field.value || []) as any}
                     error={!!errors?.branch_ids}
                   />
                 </>
