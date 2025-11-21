@@ -167,7 +167,7 @@ export const StaffTable = ({
                       </div>
                     </div>
                   </td>
-                  <td className="sticky right-0 bg-white inline-flex items-start px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
+                  <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
                     <button
                       onClick={() => onEdit(staff)}
                       className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1 cursor-pointer"
