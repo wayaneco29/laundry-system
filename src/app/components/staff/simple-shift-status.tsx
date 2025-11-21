@@ -73,63 +73,113 @@ export function SimpleShiftStatus() {
         )}
       </button>
 
-      {/* Simple Shift Info Modal */}
+      {/* Beautiful Shift Info Modal */}
       {showModal &&
         mounted &&
         createPortal(
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[9999]">
-            <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4 shadow-xl">
-              {/* Header */}
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-900">
-                  Shift Information
-                </h3>
-                <button
-                  onClick={() => setShowModal(false)}
-                  className="p-1 hover:bg-gray-100 rounded-full transition-colors"
-                >
-                  <X className="w-5 h-5 text-gray-400" />
-                </button>
+          <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl max-w-md w-full mx-4 shadow-2xl transform transition-all animate-in zoom-in-95 duration-200 overflow-hidden">
+              {/* Header with Gradient */}
+              <div className="relative bg-gradient-to-r from-indigo-600 to-purple-600 p-6 text-white">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="p-2.5 bg-white/20 backdrop-blur-sm rounded-xl">
+                      <MapPin className="w-6 h-6" />
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-bold">Shift Information</h3>
+                      <p className="text-indigo-100 text-sm mt-0.5">
+                        Current shift details
+                      </p>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="p-2 hover:bg-white/20 rounded-full transition-colors"
+                  >
+                    <X className="w-5 h-5" />
+                  </button>
+                </div>
               </div>
 
               {/* Content */}
-              <div className="space-y-4">
-                {/* Branch */}
-                <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-                  <MapPin className="w-5 h-5 text-blue-600" />
-                  <div>
-                    <p className="text-xs text-gray-500">Branch</p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {activeShift.branch_name}
-                    </p>
+              <div className="p-6 space-y-4">
+                {/* Branch Card */}
+                <div className="relative overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-200 shadow-sm">
+                  <div className="absolute top-0 right-0 w-24 h-24 bg-blue-200/30 rounded-full -mr-12 -mt-12"></div>
+                  <div className="relative flex items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center shadow-lg">
+                        <MapPin className="w-6 h-6 text-white" />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-xs font-medium text-blue-600 uppercase tracking-wide mb-1">
+                        Branch Location
+                      </p>
+                      <p className="text-base font-bold text-gray-900">
+                        {activeShift.branch_name}
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                {/* Coworker */}
+                {/* Coworker Card */}
                 <div
-                  className={`flex items-center gap-3 p-3 rounded-lg ${
-                    hasPartner ? "bg-green-50" : "bg-gray-50"
+                  className={`relative overflow-hidden rounded-xl p-4 border-2 shadow-sm ${
+                    hasPartner
+                      ? "bg-gradient-to-br from-green-50 to-emerald-50 border-green-200"
+                      : "bg-gradient-to-br from-gray-50 to-slate-50 border-gray-200"
                   }`}
                 >
-                  {hasPartner ? (
-                    <Users className="w-5 h-5 text-green-600" />
-                  ) : (
-                    <UserCheck className="w-5 h-5 text-gray-500" />
-                  )}
-                  <div>
-                    <p className="text-xs text-gray-500">Coworker</p>
-                    <p className="text-sm font-semibold text-gray-900">
-                      {hasPartner ? activeShift.partner_name : "Working Solo"}
-                    </p>
+                  <div
+                    className={`absolute top-0 right-0 w-24 h-24 rounded-full -mr-12 -mt-12 ${
+                      hasPartner ? "bg-green-200/30" : "bg-gray-200/30"
+                    }`}
+                  ></div>
+                  <div className="relative flex items-center gap-4">
+                    <div className="flex-shrink-0">
+                      <div
+                        className={`w-12 h-12 rounded-xl flex items-center justify-center shadow-lg ${
+                          hasPartner
+                            ? "bg-gradient-to-br from-green-500 to-emerald-600"
+                            : "bg-gradient-to-br from-gray-400 to-gray-500"
+                        }`}
+                      >
+                        {hasPartner ? (
+                          <Users className="w-6 h-6 text-white" />
+                        ) : (
+                          <UserCheck className="w-6 h-6 text-white" />
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <p
+                        className={`text-xs font-medium uppercase tracking-wide mb-1 ${
+                          hasPartner ? "text-green-600" : "text-gray-500"
+                        }`}
+                      >
+                        {hasPartner ? "Working With" : "Working Mode"}
+                      </p>
+                      <p className="text-base font-bold text-gray-900">
+                        {hasPartner ? activeShift.partner_name : "Working Solo"}
+                      </p>
+                      {hasPartner && (
+                        <p className="text-xs text-green-600 mt-1 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></span>
+                          Team collaboration active
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Close Button */}
-              <div className="mt-6">
+              {/* Footer */}
+              <div className="px-6 pb-6">
                 <button
                   onClick={() => setShowModal(false)}
-                  className="w-full px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors"
+                  className="w-full px-4 py-3 bg-gradient-to-r from-gray-100 to-gray-200 hover:from-gray-200 hover:to-gray-300 text-gray-700 font-semibold rounded-xl transition-all shadow-sm hover:shadow-md transform hover:scale-[1.02]"
                 >
                   Close
                 </button>

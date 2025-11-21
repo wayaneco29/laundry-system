@@ -31,9 +31,7 @@ export function StaffPairingModal({
   refreshShiftStatus,
 }: StaffPairingModalProps) {
   const [availableStaff, setAvailableStaff] = useState<StaffView[]>([]);
-  const [selectedPartnerId, setSelectedPartnerId] = useState<string | null>(
-    null
-  );
+  const [selectedPartnerId, setSelectedPartnerId] = useState<string>("");
   const [selectedBranchId, setSelectedBranchId] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [isStartingShift, setIsStartingShift] = useState(false);
@@ -89,6 +87,11 @@ export function StaffPairingModal({
       return;
     }
 
+    if (!selectedPartnerId) {
+      toast.error("Please select a co-worker or choose to work solo");
+      return;
+    }
+
     try {
       setIsStartingShift(true);
 
@@ -96,7 +99,7 @@ export function StaffPairingModal({
       await startStaffShift({
         p_primary_staff_id: currentStaffId,
         p_branch_id: selectedBranchId,
-        p_partner_staff_id: selectedPartnerId || undefined,
+        p_partner_staff_id: selectedPartnerId === "solo" ? undefined : selectedPartnerId,
       });
 
       // Get the actual shift data from the database
@@ -106,13 +109,14 @@ export function StaffPairingModal({
         // Update the shift status with actual database data
         onShiftStarted(actualShiftData);
 
-        const partnerName = selectedPartnerId
-          ? availableStaff.find((s) => s.user_id === selectedPartnerId)
-              ?.full_name
-          : null;
+        const partnerName =
+          selectedPartnerId !== "solo"
+            ? availableStaff.find((s) => s.user_id === selectedPartnerId)
+                ?.full_name
+            : null;
 
         toast.success(
-          selectedPartnerId
+          selectedPartnerId !== "solo"
             ? `Shift started with ${partnerName}`
             : "Solo shift started successfully"
         );
@@ -130,7 +134,7 @@ export function StaffPairingModal({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-br from-black/60 via-black/50 to-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
+    <div className="fixed inset-0 bg-gradient-to-br from-black/70 via-black/60 to-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-in fade-in duration-200">
       <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl transform transition-all animate-in zoom-in-95 duration-200">
         {/* Header with Gradient */}
         <div className="relative bg-gradient-to-r from-blue-600 to-indigo-600 rounded-t-2xl p-6 text-white">
@@ -146,12 +150,6 @@ export function StaffPairingModal({
                 </p>
               </div>
             </div>
-            <button
-              onClick={onClose}
-              className="p-2 hover:bg-white/20 rounded-full transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
           </div>
 
           {/* Date Info */}
@@ -193,7 +191,7 @@ export function StaffPairingModal({
                   value={selectedBranchId}
                   onChange={(e) => {
                     setSelectedBranchId(e.target.value);
-                    setSelectedPartnerId(null);
+                    setSelectedPartnerId("");
                   }}
                   disabled={branches?.length === 1}
                   className={`w-full p-4 border-2 rounded-xl text-gray-900 bg-white shadow-sm transition-all ${
@@ -223,14 +221,7 @@ export function StaffPairingModal({
             </div>
           )}
 
-          {!selectedBranchId ? (
-            <div className="text-center py-12 bg-gray-50 rounded-xl">
-              <Users className="h-12 w-12 mx-auto mb-3 text-gray-300" />
-              <p className="text-gray-500 font-medium">
-                Please select a branch to continue
-              </p>
-            </div>
-          ) : loading ? (
+          {!selectedBranchId ? null : loading ? (
             <div className="flex flex-col items-center justify-center py-12 bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl">
               <div className="animate-spin rounded-full h-10 w-10 border-4 border-blue-200 border-t-blue-600"></div>
               <p className="mt-4 text-sm text-blue-600 font-medium">
@@ -244,16 +235,19 @@ export function StaffPairingModal({
                 <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                   <div className="w-2 h-2 bg-green-600 rounded-full"></div>
                   Choose Your Co-Worker
+                  <span className="text-red-500 ml-1">*</span>
                 </label>
                 <div className="relative">
                   <select
-                    value={selectedPartnerId || "solo"}
+                    value={selectedPartnerId}
                     onChange={(e) => {
-                      const value = e.target.value;
-                      setSelectedPartnerId(value === "solo" ? null : value);
+                      setSelectedPartnerId(e.target.value);
                     }}
                     className="w-full p-4 border-2 rounded-xl text-gray-900 bg-white shadow-sm cursor-pointer hover:border-green-300 hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all"
                   >
+                    <option value="" disabled>
+                      Select co-worker or work solo...
+                    </option>
                     <option value="solo">🎯 Work Solo (No Partner)</option>
                     {availableStaff.map((staff) => (
                       <option key={staff.user_id} value={staff.user_id}>
@@ -277,27 +271,29 @@ export function StaffPairingModal({
               >
                 {isStartingShift
                   ? "Starting Shift..."
-                  : selectedPartnerId
+                  : selectedPartnerId && selectedPartnerId !== "solo"
                   ? "Start Shift with Partner"
-                  : "Start Solo Shift"}
+                  : selectedPartnerId === "solo"
+                  ? "Start Solo Shift"
+                  : "Start Shift"}
               </Button>
             </>
           )}
 
           {/* Info Box */}
-          <div className="relative overflow-hidden bg-gradient-to-r from-amber-50 to-yellow-50 border-2 border-amber-200 rounded-xl p-4">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-amber-200/20 rounded-full -mr-10 -mt-10"></div>
+          <div className="relative overflow-hidden bg-gradient-to-r from-red-50 to-orange-50 border-2 border-red-200 rounded-xl p-4">
+            <div className="absolute top-0 right-0 w-20 h-20 bg-red-200/20 rounded-full -mr-10 -mt-10"></div>
             <div className="relative flex gap-3">
               <div className="flex-shrink-0 mt-0.5">
-                <div className="w-6 h-6 bg-amber-400 rounded-full flex items-center justify-center">
-                  <span className="text-xs font-bold text-white">ℹ</span>
+                <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center">
+                  <span className="text-xs font-bold text-white">!</span>
                 </div>
               </div>
               <div>
-                <p className="text-xs text-amber-900 leading-relaxed">
-                  <span className="font-semibold">Note:</span> Commission will
-                  be calculated based on your sales for this shift. You can end
-                  your shift anytime from the dashboard.
+                <p className="text-xs text-red-900 leading-relaxed">
+                  <span className="font-semibold">Required:</span> You must
+                  start your shift before creating orders. Commission will be
+                  calculated based on your sales for this shift.
                 </p>
               </div>
             </div>
