@@ -22,17 +22,6 @@ export default async function MainLayout(props: PropsWithChildren) {
   if (!user) {
     redirect("/login");
   }
-
-  // Transform branches array to branch_ids and branch_names arrays
-  if (logged_in_user && logged_in_user.branches) {
-    const branches = Array.isArray(logged_in_user.branches) ? logged_in_user.branches : [];
-    logged_in_user.branch_ids = branches.map((branch: any) => branch.id);
-    logged_in_user.branch_names = branches.map((branch: any) => branch.name);
-  } else if (logged_in_user) {
-    logged_in_user.branch_ids = [];
-    logged_in_user.branch_names = [];
-  }
-
   return (
     <UserContextProvided user={logged_in_user as any}>
       <PrinterProvider>

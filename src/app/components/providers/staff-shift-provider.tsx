@@ -7,11 +7,12 @@ import { StaffPairingModal } from "@/app/components/staff/staff-pairing-modal";
 import { ROLE_ADMIN } from "@/app/types";
 
 export default function StaffShiftProvider({ children }: PropsWithChildren) {
-  const user = useUserContext();
+  const { role_name, user_id, first_name, last_name, branches } =
+    useUserContext();
   const { activeShift, showPairingModal, setShowPairingModal, onShiftStarted } =
     useStaffShift();
 
-  const isStaff = user?.role_name !== ROLE_ADMIN;
+  const isStaff = role_name !== ROLE_ADMIN;
 
   return (
     <>
@@ -22,10 +23,9 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
         <StaffPairingModal
           isOpen={showPairingModal}
           onClose={() => setShowPairingModal(false)}
-          currentStaffId={user.user_id}
-          currentStaffName={`${user.first_name} ${user.last_name}`}
-          branchIds={user.branch_ids || []}
-          branchNames={user.branch_names || []}
+          currentStaffId={user_id}
+          currentStaffName={`${first_name} ${last_name}`}
+          branches={branches || []}
           onShiftStarted={onShiftStarted}
         />
       )}

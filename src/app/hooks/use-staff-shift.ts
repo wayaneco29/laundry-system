@@ -1,9 +1,12 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
-import { useUserContext } from '@/app/context/UserContext';
-import { getActiveStaffShift, checkStaffShiftStatus } from '@/app/actions/staff/shift_actions';
-import { ActiveStaffShift } from '@/app/types/database';
+import { useState, useEffect } from "react";
+import { useUserContext } from "@/app/context/UserContext";
+import {
+  getActiveStaffShift,
+  checkStaffShiftStatus,
+} from "@/app/actions/staff/shift_actions";
+import { ActiveStaffShift } from "@/app/types/database";
 
 interface StaffShiftHook {
   activeShift: ActiveStaffShift | null;
@@ -22,7 +25,7 @@ export function useStaffShift(): StaffShiftHook {
   const [isLoading, setIsLoading] = useState(true);
   const [showPairingModal, setShowPairingModal] = useState(false);
 
-  const isStaff = user?.role_name !== 'Admin'; // Assuming non-admin users are staff
+  const isStaff = user?.role_name !== "Admin"; // Assuming non-admin users are staff
 
   const refreshShiftStatus = async () => {
     if (!isStaff || !user?.user_id) {
@@ -33,10 +36,10 @@ export function useStaffShift(): StaffShiftHook {
     try {
       setIsLoading(true);
       const status = await checkStaffShiftStatus(user.user_id);
-      
+
       setActiveShift(status.shiftData);
       setNeedsPairing(status.needsPairing);
-      
+
       // Show pairing modal if staff needs to pair and modal isn't already shown
       if (status.needsPairing && !showPairingModal) {
         // Small delay to ensure UI is ready
@@ -45,7 +48,7 @@ export function useStaffShift(): StaffShiftHook {
         }, 1000);
       }
     } catch (error) {
-      console.error('Error checking staff shift status:', error);
+      console.error("Error checking staff shift status:", error);
       setActiveShift(null);
       setNeedsPairing(true);
     } finally {

@@ -16,8 +16,7 @@ interface StaffPairingModalProps {
   onClose: () => void;
   currentStaffId: string;
   currentStaffName: string;
-  branchIds: string[];
-  branchNames: string[];
+  branches: { id: string; name: string }[];
   onShiftStarted: (shiftData: any) => void;
 }
 
@@ -26,8 +25,7 @@ export function StaffPairingModal({
   onClose,
   currentStaffId,
   currentStaffName,
-  branchIds,
-  branchNames,
+  branches,
   onShiftStarted,
 }: StaffPairingModalProps) {
   const [availableStaff, setAvailableStaff] = useState<StaffView[]>([]);
@@ -40,10 +38,10 @@ export function StaffPairingModal({
 
   // Auto-select branch if there's only one
   useEffect(() => {
-    if (branchIds.length === 1) {
-      setSelectedBranchId(branchIds[0]);
+    if (branches?.length === 1) {
+      setSelectedBranchId(branches[0]?.id);
     }
-  }, [branchIds]);
+  }, [branches]);
 
   useEffect(() => {
     if (isOpen && selectedBranchId) {
@@ -101,14 +99,23 @@ export function StaffPairingModal({
         ? availableStaff.find((s) => s.user_id === selectedPartnerId)?.full_name
         : null;
 
-      const selectedBranchName = branchNames[branchIds.indexOf(selectedBranchId)];
+      const selectedBranchName = branches?.find(
+        (branch) => branch?.id === selectedBranchId
+      )?.name;
 
       toast.success(
         selectedPartnerId
           ? `Shift started with ${partnerName}`
           : "Solo shift started successfully"
       );
-
+      console.log({
+        shift_id: shiftData.shift_id,
+        partner_staff_id: selectedPartnerId,
+        partner_name: partnerName,
+        branch_id: selectedBranchId,
+        branch_name: selectedBranchName,
+        start_time: new Date().toISOString(),
+      });
       onShiftStarted({
         shift_id: shiftData.shift_id,
         partner_staff_id: selectedPartnerId,
@@ -162,7 +169,10 @@ export function StaffPairingModal({
             <div className="flex items-center gap-2 mb-2">
               <Clock className="h-4 w-4 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {selectedBranchId && branchNames[branchIds.indexOf(selectedBranchId)]} •{" "}
+                {selectedBranchId &&
+                  branches?.find((branch) => branch?.id === selectedBranchId)
+                    ?.name}{" "}
+                •{" "}
                 {new Date().toLocaleDateString("en-US", {
                   weekday: "long",
                   year: "numeric",
@@ -178,7 +188,7 @@ export function StaffPairingModal({
           </div>
 
           {/* Branch Selection */}
-          {branchIds.length > 0 && (
+          {branches?.length > 0 && (
             <div className="space-y-3 mb-6">
               <h3 className="font-medium text-gray-900">Select Branch</h3>
               <div className="relative">
@@ -188,9 +198,9 @@ export function StaffPairingModal({
                     setSelectedBranchId(e.target.value);
                     setSelectedPartnerId(null); // Reset partner selection when branch changes
                   }}
-                  disabled={branchIds.length === 1}
+                  disabled={branches?.length === 1}
                   className={`w-full p-3 border rounded-lg text-gray-900 bg-white ${
-                    branchIds.length === 1
+                    branches?.length === 1
                       ? "cursor-not-allowed opacity-75 bg-gray-50"
                       : "cursor-pointer hover:border-gray-300"
                   } focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent`}
@@ -200,13 +210,13 @@ export function StaffPairingModal({
                       Choose a branch...
                     </option>
                   )}
-                  {branchIds.map((branchId, index) => (
-                    <option key={branchId} value={branchId}>
-                      {branchNames[index]}
+                  {branches.map((branch) => (
+                    <option key={branch?.id} value={branch?.id}>
+                      {branch?.name}
                     </option>
                   ))}
                 </select>
-                {branchIds.length === 1 && (
+                {branches.length === 1 && (
                   <div className="mt-1 text-xs text-gray-500">
                     Auto-selected (only assigned branch)
                   </div>
@@ -228,7 +238,9 @@ export function StaffPairingModal({
             <>
               {/* Partner Selection */}
               <div className="space-y-3 mb-6">
-                <h3 className="font-medium text-gray-900">Choose Your Co-Worker</h3>
+                <h3 className="font-medium text-gray-900">
+                  Choose Your Co-Worker
+                </h3>
                 <div className="relative">
                   <select
                     value={selectedPartnerId || "solo"}
@@ -256,9 +268,7 @@ export function StaffPairingModal({
                   loading={isStartingShift}
                   fullWidth
                   leftIcon={
-                    !isStartingShift ? (
-                      <Users className="h-4 w-4" />
-                    ) : undefined
+                    !isStartingShift ? <Users className="h-4 w-4" /> : undefined
                   }
                 >
                   {isStartingShift

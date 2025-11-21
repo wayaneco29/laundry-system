@@ -61,7 +61,6 @@ export function ExpenseModal({
 
   const { userId } = useCurrentUser();
   const { is_admin, branch_id } = useUserContext();
-
   useEffect(() => {
     if (isOpen) {
       fetchBranches();
@@ -262,7 +261,12 @@ export function ExpenseModal({
             >
               Cancel
             </Button>
-            <Button type="submit" variant="primary" disabled={loading} onClick={handleSubmit}>
+            <Button
+              type="submit"
+              variant="primary"
+              disabled={loading}
+              onClick={handleSubmit}
+            >
               {loading
                 ? "Saving..."
                 : mode === "create"

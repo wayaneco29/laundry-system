@@ -15,8 +15,12 @@ export type UserType = {
   employment_date: string;
   role_id: string;
   role_name: string;
-  branch_ids: string[]; // Array of all assigned branches
-  branch_names: string[]; // Array of branch names
+  branches: {
+    id: string;
+    address: string;
+    name: string;
+    description: string;
+  }[];
   is_admin: boolean;
 };
 
@@ -30,7 +34,6 @@ export const UserContextProvided = ({
     <UserContext.Provider
       value={{ ...user, is_admin: user?.role_name === ROLE_ADMIN }}
     >
-      {" "}
       {children}{" "}
     </UserContext.Provider>
   );
