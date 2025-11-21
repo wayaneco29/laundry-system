@@ -113,7 +113,7 @@ export const AddStaffModal = ({
     };
 
     getInitialRoleID();
-  }, [showModal]);
+  }, [showModal, setValue]);
 
   return (
     <Modal
@@ -146,7 +146,7 @@ export const AddStaffModal = ({
               try {
                 if (isUpdate) {
                   const { error } = await updateStaff({
-                    p_staff_id: newData?.staff_id!,
+                    p_staff_id: initialValues?.staff_id!,
                     p_first_name: newData?.first_name,
                     p_middle_name: newData?.middle_name,
                     p_last_name: newData?.last_name,
