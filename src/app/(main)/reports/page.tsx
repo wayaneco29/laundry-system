@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import {
   getMonthSales,
   getMonthlySalesChart,
@@ -11,16 +12,22 @@ export default async function Page() {
   const {
     data: { branch_id },
   } = await getUserInfo();
+
+  // Get selected branch from cookie (user's selection) or fallback to user's default branch
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get("selected_branch_id")?.value;
+  const branchId = selectedBranchId || branch_id || undefined;
+
   const [
     monthlySalesData,
     chartData,
     monthlyCustomersCount,
     todayCustomersCount,
   ] = await Promise.all([
-    getMonthSales(branch_id || undefined),
-    getMonthlySalesChart(branch_id || undefined),
-    getMonthlyCustomers(branch_id || undefined),
-    getTodayCustomers(branch_id || undefined),
+    getMonthSales(branchId),
+    getMonthlySalesChart(branchId),
+    getMonthlyCustomers(branchId),
+    getTodayCustomers(branchId),
   ]);
 
   return (

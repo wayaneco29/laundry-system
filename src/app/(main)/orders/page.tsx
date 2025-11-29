@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { getOrders, getUserInfo } from "@/app/actions";
 import { OrdersPage } from "./components/main";
 
@@ -6,11 +7,16 @@ export default async function Page() {
     data: { branch_id },
   } = await getUserInfo();
 
+  // Get selected branch from cookie (user's selection) or fallback to user's default branch
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get("selected_branch_id")?.value;
+  const branchId = selectedBranchId || branch_id || undefined;
+
   // Fetch initial orders data on server-side
   const { data, count } = await getOrders({
-    branchId: branch_id || undefined,
+    branchId,
   });
-  console.log(branch_id);
+
   return <OrdersPage data={data || []} totalCount={count || 0} />;
 }
 

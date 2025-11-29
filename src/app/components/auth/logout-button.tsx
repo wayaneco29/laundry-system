@@ -71,6 +71,9 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
         return;
       }
 
+      // Clear selected branch cookie
+      document.cookie = "selected_branch_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+
       setIsLoading(false);
       setIsRedirecting(true);
       toast.success("Logout successful! Redirecting...");

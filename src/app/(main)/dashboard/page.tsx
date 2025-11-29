@@ -1,8 +1,10 @@
+import { cookies } from "next/headers";
 import {
   getMonthlyCustomers,
   getTodayCustomers,
   getMonthSales,
   getMonthlySalesChart,
+  getUserInfo,
 } from "@/app/actions";
 import { getRecentOrders } from "@/app/actions/order";
 import {
@@ -16,6 +18,16 @@ import { MainDashboardPage } from "./components/main";
 export default async function Page() {
   const currentYear = new Date().getFullYear();
 
+  // Get user info for default branch
+  const {
+    data: { branch_id },
+  } = await getUserInfo();
+
+  // Get selected branch from cookie (user's selection) or fallback to user's default branch
+  const cookieStore = await cookies();
+  const selectedBranchId = cookieStore.get("selected_branch_id")?.value;
+  const branchId = selectedBranchId || branch_id || undefined;
+
   // Fetch all data in parallel on server-side
   const [
     monthlyResult,
@@ -28,17 +40,18 @@ export default async function Page() {
     recentOrdersResult,
     expensesByCategoryResult,
   ] = await Promise.all([
-    getMonthlyCustomers(),
-    getTodayCustomers(),
-    getMonthSales(),
-    getMonthlySalesChart(),
+    getMonthlyCustomers(branchId),
+    getTodayCustomers(branchId),
+    getMonthSales(branchId),
+    getMonthlySalesChart(branchId),
     getAllBranches(),
-    getMonthlyExpense(),
-    getYearlyExpense(),
-    getRecentOrders(10),
+    getMonthlyExpense(branchId),
+    getYearlyExpense(branchId),
+    getRecentOrders(10, branchId),
     getExpensesByCategory({
       startDate: `${currentYear}-01-01`,
       endDate: `${currentYear}-12-31`,
+      branchId,
     }),
   ]);
 

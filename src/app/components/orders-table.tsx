@@ -86,7 +86,7 @@ export const OrdersTable = ({
     }
   };
 
-  // Only fetch new data when pagination/search/filter changes (skip initial mount)
+  // Only fetch new data when pagination/search/filter/branch changes (skip initial mount)
   useEffect(() => {
     // Skip the first render to avoid fetching data twice
     if (isInitialMount.current) {
@@ -104,6 +104,7 @@ export const OrdersTable = ({
     debouncedSearch,
     statusFilter,
     isDashboardView,
+    currentBranchId,
   ]);
 
   useEffect(() => {
