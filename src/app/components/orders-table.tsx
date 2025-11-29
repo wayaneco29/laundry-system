@@ -25,17 +25,29 @@ import "./loading-spinner.css";
 import { useToast } from "../hooks";
 import { useUserContext } from "../context";
 import { useStaffShift } from "../hooks/use-staff-shift";
+import { Datepicker } from "./common/datepicker";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
   totalCount?: number;
   isDashboardView?: boolean;
+  initialDate?: string;
 };
+
+// Helper to get today's date in local timezone as YYYY-MM-DD
+function getTodayDate(): string {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 export const OrdersTable = ({
   initialData = [],
   totalCount = 0,
   isDashboardView = false,
+  initialDate,
 }: OrdersTableProps) => {
   const toast = useToast();
   const router = useRouter();
@@ -49,6 +61,9 @@ export const OrdersTable = ({
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalItems, setTotalItems] = useState(totalCount);
   const [statusFilter, setStatusFilter] = useState("");
+  const [selectedDate, setSelectedDate] = useState(
+    initialDate || getTodayDate()
+  );
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [loadingOrderStatus, setLoadingOrderStatus] = useState<Set<string>>(
     new Set()
@@ -73,6 +88,8 @@ export const OrdersTable = ({
         branchId: currentBranchId || undefined,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
+        startDate: selectedDate ? `${selectedDate}T00:00:00` : undefined,
+        endDate: selectedDate ? `${selectedDate}T23:59:59` : undefined,
       });
 
       if (result.data) {
@@ -103,6 +120,7 @@ export const OrdersTable = ({
     itemsPerPage,
     debouncedSearch,
     statusFilter,
+    selectedDate,
     isDashboardView,
     currentBranchId,
   ]);
@@ -372,6 +390,16 @@ export const OrdersTable = ({
               className="w-full pl-11 h-12 text-base pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
             />
           </div>
+          <Datepicker
+            value={selectedDate}
+            onChange={(date) => {
+              setSelectedDate(date);
+              setCurrentPage(1);
+            }}
+            placeholder="Select date"
+            disabled={loading}
+            className="h-12 min-w-[170px]"
+          />
           <select
             value={statusFilter}
             onChange={(e) => handleStatusFilterChange(e.target.value)}

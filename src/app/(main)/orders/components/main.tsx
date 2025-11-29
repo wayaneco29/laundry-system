@@ -11,9 +11,10 @@ import { Button } from "@/app/components/common";
 type OrdersPageProps = {
   data: Array<any>;
   totalCount: number;
+  initialDate?: string;
 };
 
-export function OrdersPage({ data, totalCount }: OrdersPageProps) {
+export function OrdersPage({ data, totalCount, initialDate }: OrdersPageProps) {
   const router = useRouter();
 
   const [showModal, setShowModal] = useState<boolean>(false);
@@ -41,7 +42,11 @@ export function OrdersPage({ data, totalCount }: OrdersPageProps) {
 
       {/* Orders Table */}
       <div className="mt-2">
-        <OrdersTable initialData={data} totalCount={totalCount} />
+        <OrdersTable
+          initialData={data}
+          totalCount={totalCount}
+          initialDate={initialDate}
+        />
       </div>
 
       <OrderModal showModal={showModal} onClose={() => setShowModal(false)} />
