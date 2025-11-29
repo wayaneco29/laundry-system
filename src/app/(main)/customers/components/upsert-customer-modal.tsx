@@ -12,11 +12,13 @@ import { Modal, Button, Input } from "@/app/components/common";
 type UpsertCustomerModalProps = {
   showModal: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 };
 
 export const UpsertCustomerModal = ({
   showModal,
   onClose,
+  onSuccess,
 }: UpsertCustomerModalProps) => {
   const { userId } = useCurrentUser();
   const {
@@ -94,6 +96,7 @@ export const UpsertCustomerModal = ({
 
                 if (error) throw error;
 
+                onSuccess?.();
                 handleModalClose();
               } catch (_error) {
                 console.error(_error);

@@ -131,6 +131,7 @@ export function MainCustomerPage({
       <UpsertCustomerModal
         showModal={showModal}
         onClose={() => setShowModal(false)}
+        onSuccess={() => fetchCustomers(currentPage, itemsPerPage, debouncedSearch)}
       />
     </div>
   );
