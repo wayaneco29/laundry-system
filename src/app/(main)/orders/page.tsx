@@ -10,7 +10,7 @@ export default async function Page() {
   const { data, count } = await getOrders({
     branchId: branch_id || undefined,
   });
-
+  console.log(branch_id);
   return <OrdersPage data={data || []} totalCount={count || 0} />;
 }
 
