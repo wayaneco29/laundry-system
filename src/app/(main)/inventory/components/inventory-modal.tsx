@@ -32,7 +32,7 @@ export function InventoryModal({
 }: InventoryModalProps) {
   const { userId } = useCurrentUser();
   const { is_admin } = useUserContext();
-  const { activeShift } = useStaffShift();
+  const { currentBranchId } = useStaffShift();
 
   const {
     control,
@@ -59,7 +59,7 @@ export function InventoryModal({
       }
 
       const result = await addNewStock({
-        branchId: is_admin ? data?.branchId : (activeShift?.branch_id || ""),
+        branchId: is_admin ? data?.branchId : (currentBranchId || ""),
         stockName: data.name.trim(),
         quantity: quantity,
         staff_id: userId!,

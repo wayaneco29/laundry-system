@@ -11,6 +11,10 @@ interface StaffShiftContextType {
   setShowPairingModal: (show: boolean) => void;
   refreshShiftStatus: () => Promise<void>;
   onShiftStarted: (shiftData: ActiveStaffShift) => void;
+  /** The branch ID selected during login */
+  selectedBranchId: string | null;
+  /** The effective branch ID to use (prefers login selection, falls back to active shift) */
+  currentBranchId: string | null;
 }
 
 const StaffShiftContext = createContext<StaffShiftContextType | undefined>(

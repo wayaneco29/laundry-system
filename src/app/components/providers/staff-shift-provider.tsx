@@ -75,6 +75,10 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
     };
   }, [isStaff, user?.user_id]);
 
+  // Compute the effective branch ID: prefer login selection, fall back to active shift
+  const currentBranchId =
+    selectedBranchIdFromLogin || activeShift?.branch_id || null;
+
   const contextValue = {
     activeShift,
     needsPairing: isStaff && needsPairing,
@@ -83,6 +87,8 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
     setShowPairingModal,
     refreshShiftStatus,
     onShiftStarted,
+    selectedBranchId: selectedBranchIdFromLogin,
+    currentBranchId,
   };
 
   return (

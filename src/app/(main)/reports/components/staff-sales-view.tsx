@@ -29,16 +29,16 @@ export function StaffSalesView() {
   const { first_name, last_name, email, username } =
     useUserContext();
 
-  const { activeShift } = useStaffShift();
+  const { activeShift, currentBranchId } = useStaffShift();
 
   useEffect(() => {
     fetchDailySales();
-  }, [selectedDate, activeShift?.branch_id]);
+  }, [selectedDate, currentBranchId]);
 
   const fetchDailySales = async () => {
     setLoading(true);
     try {
-      const result = await getDailySales(selectedDate, activeShift?.branch_id);
+      const result = await getDailySales(selectedDate, currentBranchId || undefined);
       if (result.data) {
         setDailySalesData(result.data);
       }

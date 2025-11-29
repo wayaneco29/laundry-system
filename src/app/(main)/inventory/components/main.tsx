@@ -49,7 +49,7 @@ export function MainInventoryPage({
   const [debouncedSearch, setDebouncedSearch] = useState(search);
 
   const { is_admin } = useUserContext();
-  const { activeShift } = useStaffShift();
+  const { currentBranchId } = useStaffShift();
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -72,7 +72,7 @@ export function MainInventoryPage({
         page: currentPage,
         limit: itemsPerPage,
         search: debouncedSearch,
-        branchId: selectedBranch || activeShift?.branch_id || undefined,
+        branchId: selectedBranch || currentBranchId || undefined,
       });
 
       if (inventoryResult.data) {

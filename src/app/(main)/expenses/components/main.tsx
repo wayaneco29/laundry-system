@@ -60,7 +60,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const [searchInputValue, setSearchInputValue] = useState("");
 
   const { is_admin } = useUserContext();
-  const { activeShift } = useStaffShift();
+  const { currentBranchId } = useStaffShift();
 
   // Fetch initial non-expense data on mount
   useEffect(() => {
@@ -97,7 +97,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
       const result = await getAllExpenses({
         page: currentPage,
         limit: itemsPerPage,
-        branchId: activeShift?.branch_id || filters?.branch_id,
+        branchId: currentBranchId || filters?.branch_id,
         search: filters?.search || undefined,
       });
 
@@ -120,7 +120,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   };
 
   const fetchMonthlyExpense = async () => {
-    const branchId = filters?.branch_id || activeShift?.branch_id;
+    const branchId = filters?.branch_id || currentBranchId || undefined;
     const result = await getMonthlyExpense(branchId);
     if (result.data !== undefined) {
       setMonthlyExpense(result.data);
@@ -128,7 +128,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   };
 
   const fetchYearlyExpense = async () => {
-    const branchId = filters?.branch_id || activeShift?.branch_id;
+    const branchId = filters?.branch_id || currentBranchId || undefined;
 
     const result = await getYearlyExpense(branchId);
     if (result.data !== undefined) {

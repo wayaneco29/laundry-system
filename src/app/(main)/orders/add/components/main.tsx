@@ -52,7 +52,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const { is_admin } = useUserContext();
   const { userId } = useCurrentUser();
   const toast = useToast();
-  const { activeShift } = useStaffShift();
+  const { activeShift, currentBranchId } = useStaffShift();
   const { isConnected: isPrinterConnected } = usePrinterContext();
 
   const [showConfirmationModal, setShowConfirmationModal] =
@@ -66,7 +66,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
   const { control, handleSubmit, setValue, watch, reset, formState } = useForm({
     defaultValues: {
       customerId: "",
-      branchId: activeShift?.branch_id || "",
+      branchId: currentBranchId || "",
       services: [],
       modeOfPayment: "Cash",
       inventoryUsage: [],
@@ -147,7 +147,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         return;
       }
 
-      if (!payload.branchId && !activeShift?.branch_id) {
+      if (!payload.branchId && !currentBranchId) {
         toast.error("Please select a branch");
         return;
       }
@@ -177,7 +177,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
           : undefined;
 
       const orderPayload = {
-        p_branch_id: payload?.branchId || activeShift?.branch_id,
+        p_branch_id: payload?.branchId || currentBranchId,
         p_customer_id: payload?.customerId,
         p_staff_id: userId,
         p_items: payload?.services,

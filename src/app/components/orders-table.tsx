@@ -59,7 +59,7 @@ export const OrdersTable = ({
   const isInitialMount = useRef(true);
 
   const { role_name } = useUserContext();
-  const { activeShift } = useStaffShift();
+  const { currentBranchId } = useStaffShift();
 
   const orderStatuses = ["Pending", "Ready for Pickup", "Picked up"];
   const paymentStatuses = ["Unpaid", "Paid"];
@@ -70,7 +70,7 @@ export const OrdersTable = ({
       const result = await getOrders({
         page,
         limit,
-        branchId: activeShift?.branch_id || undefined,
+        branchId: currentBranchId || undefined,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
       });
