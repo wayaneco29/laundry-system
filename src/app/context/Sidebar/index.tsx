@@ -137,7 +137,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
             {minimize ? (
               <div className="w-10 h-10 rounded-lg flex items-center justify-center overflow-hidden">
                 <Image
-                  src="/logo.webp"
+                  src="/logo.svg"
                   alt="Laundry Logo"
                   width={40}
                   height={40}
@@ -145,18 +145,14 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                 />
               </div>
             ) : (
-              <div className="">
-                <div className="">
-                  <Image
-                    src="/logo.webp"
-                    alt="Laundry Logo"
-                    width={80}
-                    height={80}
-                  />
-                </div>
-                {/* <span className="text-[#11A4D2] text-xl font-bold">
-                  Laundry
-                </span> */}
+              <div className="px-4">
+                <Image
+                  src="/logo-horizontal.svg"
+                  alt="Laundry Logo"
+                  width={180}
+                  height={50}
+                  className="object-contain"
+                />
               </div>
             )}
           </div>

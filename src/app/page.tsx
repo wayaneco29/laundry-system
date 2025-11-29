@@ -1,6 +1,7 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/app/utils/supabase/server";
 import { LoginForm } from "./login-form";
+import Image from "next/image";
 
 export default async function LoginPage() {
   const supabase = await createClient();
@@ -17,20 +18,14 @@ export default async function LoginPage() {
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           {/* Logo and Header */}
           <div className="text-center mb-8">
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center mb-4">
-              <svg
-                className="w-8 h-8 text-white"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M12 15l-3-3h6l-3 3zM12 9l3 3H9l3-3z"
-                />
-              </svg>
+            <div className="mx-auto w-20 h-20 mb-4">
+              <Image
+                src="/logo.svg"
+                alt="Laundry Logo"
+                width={80}
+                height={80}
+                priority
+              />
             </div>
             <h1 className="text-2xl font-bold text-gray-900 mb-2">
               Welcome Back

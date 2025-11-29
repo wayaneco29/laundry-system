@@ -38,7 +38,7 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
           const day = String(today.getDate()).padStart(2, "0");
           const todayStr = `${year}-${month}-${day}`;
 
-          // End active shift where user is primary staff for today
+          // Now end the active shift
           let query = supabase
             .from("staff_shifts")
             .update({
@@ -70,9 +70,9 @@ export function LogoutButton({ children, className = "" }: LogoutButtonProps) {
         toast.error("Failed to logout. Please try again.");
         return;
       }
-
       // Clear selected branch cookie
-      document.cookie = "selected_branch_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
+      document.cookie =
+        "selected_branch_id=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
 
       setIsLoading(false);
       setIsRedirecting(true);
