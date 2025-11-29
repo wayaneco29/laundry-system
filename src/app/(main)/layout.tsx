@@ -4,7 +4,7 @@ import { createClient } from "@/app/utils/supabase/server";
 import { SidebarContextProvider, UserContextProvided } from "@/app/context";
 import StaffShiftProvider from "@/app/components/providers/staff-shift-provider";
 import { PrinterProvider } from "@/app/context/PrinterContext";
-import { loginUser } from "../actions/auth";
+import { getSelectedBranchId } from "../actions/auth";
 
 export default async function MainLayout(props: PropsWithChildren) {
   const supabase = await createClient();
@@ -22,8 +22,12 @@ export default async function MainLayout(props: PropsWithChildren) {
   if (!user) {
     redirect("/login");
   }
+
+  // Get the selected branch ID from the login cookie
+  const selectedBranchId = await getSelectedBranchId();
+
   return (
-    <UserContextProvided user={logged_in_user as any}>
+    <UserContextProvided user={logged_in_user as any} selectedBranchId={selectedBranchId}>
       <StaffShiftProvider>
         <PrinterProvider>
           <SidebarContextProvider>{props?.children}</SidebarContextProvider>

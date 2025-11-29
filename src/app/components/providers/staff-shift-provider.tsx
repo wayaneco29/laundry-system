@@ -19,6 +19,9 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
   const hasFetchedRef = useRef(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Get the selected branch ID from UserContext (set during login)
+  const selectedBranchIdFromLogin = user?.selected_branch_id || null;
+
   const refreshShiftStatus = async () => {
     if (!isStaff || !user?.user_id) {
       setIsLoading(false);
@@ -96,6 +99,7 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
           branches={user.branches || []}
           onShiftStarted={onShiftStarted}
           refreshShiftStatus={refreshShiftStatus}
+          selectedBranchIdFromLogin={selectedBranchIdFromLogin}
         />
       )}
     </StaffShiftContext.Provider>

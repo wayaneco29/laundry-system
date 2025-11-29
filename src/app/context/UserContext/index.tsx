@@ -22,17 +22,24 @@ export type UserType = {
     description: string;
   }[];
   is_admin: boolean;
+  /** The branch ID selected during login (for staff members) */
+  selected_branch_id?: string | null;
 };
 
 const UserContext = createContext<UserType | undefined>(undefined);
 
 export const UserContextProvided = ({
   user,
+  selectedBranchId,
   children,
-}: { user: UserType } & PropsWithChildren) => {
+}: { user: UserType; selectedBranchId?: string | null } & PropsWithChildren) => {
   return (
     <UserContext.Provider
-      value={{ ...user, is_admin: user?.role_name === ROLE_ADMIN }}
+      value={{
+        ...user,
+        is_admin: user?.role_name === ROLE_ADMIN,
+        selected_branch_id: selectedBranchId,
+      }}
     >
       {children}{" "}
     </UserContext.Provider>

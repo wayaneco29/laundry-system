@@ -19,6 +19,8 @@ interface StaffPairingModalProps {
   branches: { id: string; name: string }[];
   onShiftStarted: (shiftData: any) => void;
   refreshShiftStatus?: () => Promise<void>;
+  /** Pre-selected branch ID from login - hides branch selection when provided */
+  selectedBranchIdFromLogin?: string | null;
 }
 
 export function StaffPairingModal({
@@ -29,6 +31,7 @@ export function StaffPairingModal({
   branches,
   onShiftStarted,
   refreshShiftStatus,
+  selectedBranchIdFromLogin,
 }: StaffPairingModalProps) {
   const [availableStaff, setAvailableStaff] = useState<StaffView[]>([]);
   const [selectedPartnerId, setSelectedPartnerId] = useState<string>("");
@@ -36,12 +39,17 @@ export function StaffPairingModal({
   const [loading, setLoading] = useState(false);
   const [isStartingShift, setIsStartingShift] = useState(false);
 
-  // Auto-select branch if there's only one
+  // Branch is pre-selected from login
+  const hasBranchFromLogin = !!selectedBranchIdFromLogin;
+
+  // Auto-select branch: prioritize login selection, then single branch
   useEffect(() => {
-    if (branches?.length === 1) {
+    if (selectedBranchIdFromLogin) {
+      setSelectedBranchId(selectedBranchIdFromLogin);
+    } else if (branches?.length === 1) {
       setSelectedBranchId(branches[0]?.id);
     }
-  }, [branches]);
+  }, [branches, selectedBranchIdFromLogin]);
 
   useEffect(() => {
     if (isOpen && selectedBranchId) {
@@ -179,8 +187,8 @@ export function StaffPairingModal({
             </p>
           </div>
 
-          {/* Branch Selection */}
-          {branches?.length > 0 && (
+          {/* Branch Selection - Hidden when branch was selected during login */}
+          {!hasBranchFromLogin && branches?.length > 0 && (
             <div className="space-y-3">
               <label className="flex items-center gap-2 text-sm font-semibold text-gray-900">
                 <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
