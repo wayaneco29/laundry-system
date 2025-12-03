@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/app/utils/supabase/server";
+import { encryptPassword } from "@/app/utils/password";
 
 type UpdateOwnPasswordType = {
   current_password: string;
@@ -36,10 +37,13 @@ export const updateOwnPassword = async (payload: UpdateOwnPasswordType) => {
 
     if (updateError) throw updateError;
 
-    // Also update the password in app_users table
+    // Encrypt the password before storing in app_users table (reversible for admin viewing)
+    const encryptedPassword = encryptPassword(payload.new_password);
+
+    // Update the encrypted password in app_users table
     const { error: appUserError } = await supabase
       .from("app_users")
-      .update({ password: payload.new_password })
+      .update({ password: encryptedPassword })
       .eq("user_id", user.id);
 
     if (appUserError) throw appUserError;

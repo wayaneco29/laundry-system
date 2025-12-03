@@ -2,15 +2,16 @@
 
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as Yup from "yup";
-import { User, Phone, Mail, MapPin, Save, X, KeyIcon } from "lucide-react";
+import { User, Phone, Mail, MapPin, Save, X, KeyIcon, Eye, EyeOff } from "lucide-react";
 
 import { addNewStaff, updateStaff } from "@/app/actions";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input, Datepicker } from "@/app/components/common";
 import { useForm, Controller } from "react-hook-form";
 import { BranchProvider, RoleProvider } from "@/app/providers";
-import { useEffect } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { getRoleStaffID } from "@/app/actions/staff/get_staff_id_role";
+import { decryptPassword } from "@/app/utils/password";
 
 type AddStaffModalProps = {
   initialValues?: {
@@ -40,6 +41,16 @@ export const AddStaffModal = ({
   isUpdate = false,
 }: AddStaffModalProps) => {
   const { userId } = useCurrentUser();
+  const [showPassword, setShowPassword] = useState(false);
+
+  // Decrypt password for display when editing
+  const decryptedPassword = useMemo(() => {
+    if (isUpdate && initialValues?.password) {
+      return decryptPassword(initialValues.password);
+    }
+    return "";
+  }, [isUpdate, initialValues?.password]);
+
   const {
     reset,
     control,
@@ -207,22 +218,60 @@ export const AddStaffModal = ({
           />
         </div>
         <div className="col-span-1">
-          <Controller
-            control={control}
-            name="password"
-            render={({ field, formState: { errors } }) => (
-              <Input
-                type="password"
-                disabled={isSubmitting || isUpdate}
-                label="Password"
-                placeholder="Enter password"
-                error={!!errors.password}
-                icon={<KeyIcon />}
-                {...field}
-                value={field?.value || ""}
-              />
-            )}
-          />
+          {isUpdate ? (
+            <div>
+              <label className="block text-sm font-semibold mb-2 text-gray-700">
+                Password
+              </label>
+              <div className="relative w-full border rounded-lg bg-gray-50 border-gray-200">
+                <div className="flex items-center relative w-full">
+                  <div className="flex items-center justify-center h-full absolute left-2.5 w-5">
+                    <div className="text-gray-400 flex-shrink-0 [&>svg]:w-4 [&>svg]:h-4">
+                      <KeyIcon />
+                    </div>
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    disabled
+                    value={decryptedPassword}
+                    className="flex-1 py-3 pr-10 bg-transparent text-sm text-gray-900 h-full pl-[35px] focus:outline-none disabled:opacity-70 disabled:cursor-not-allowed"
+                  />
+                  <button
+                    type="button"
+                    tabIndex={-1}
+                    className="absolute right-2.5 cursor-pointer text-gray-400 hover:text-gray-600 focus:outline-none"
+                    onClick={() => setShowPassword((v) => !v)}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-5 h-5" />
+                    ) : (
+                      <Eye className="w-5 h-5" />
+                    )}
+                  </button>
+                </div>
+              </div>
+              <p className="mt-1 text-xs text-gray-500">
+                Use the &quot;Password&quot; button in the table to change password
+              </p>
+            </div>
+          ) : (
+            <Controller
+              control={control}
+              name="password"
+              render={({ field, formState: { errors } }) => (
+                <Input
+                  type="password"
+                  disabled={isSubmitting}
+                  label="Password"
+                  placeholder="Enter password"
+                  error={!!errors.password}
+                  icon={<KeyIcon />}
+                  {...field}
+                  value={field?.value || ""}
+                />
+              )}
+            />
+          )}
         </div>
       </div>
       <div className="grid grid-cols-1 mb-4">

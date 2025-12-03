@@ -3,6 +3,7 @@
 import { revalidateTag } from "next/cache";
 
 import { createAdminClient } from "@/app/utils/supabase/server";
+import { encryptPassword } from "@/app/utils/password";
 
 type AddNewStaffType = {
   p_first_name: string;
@@ -49,12 +50,15 @@ export const addNewStaff = async (payload: AddNewStaffType) => {
 
     if (staffError) throw staffError;
 
+    // Encrypt the password before storing in app_users table (reversible for admin viewing)
+    const encryptedPassword = encryptPassword(payload.p_password);
+
     // Insert MULTIPLE rows into app_users - one row per branch
     const appUsersRows = payload.p_branch_ids.map((branchId) => ({
       user_id: userId,
       username: payload.p_username,
       email: payload.p_email,
-      password: payload.p_password,
+      password: encryptedPassword,
       role_id: payload.p_role_id,
       branch_id: branchId,
       created_by: payload.p_created_by,
