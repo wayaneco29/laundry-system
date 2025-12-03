@@ -26,8 +26,8 @@ export default async function Page() {
   ] = await Promise.all([
     getMonthSales(branchId),
     getMonthlySalesChart(branchId),
-    getMonthlyCustomers(branchId),
-    getTodayCustomers(branchId),
+    getMonthlyCustomers(),
+    getTodayCustomers(),
   ]);
 
   return (

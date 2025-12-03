@@ -41,7 +41,7 @@ export default async function Page() {
     expensesByCategoryResult,
   ] = await Promise.all([
     getMonthlyCustomers(branchId),
-    getTodayCustomers(branchId),
+    getTodayCustomers(),
     getMonthSales(branchId),
     getMonthlySalesChart(branchId),
     getAllBranches(),

@@ -170,12 +170,8 @@ export function MainReportsPage({
           dateRange?.startDate,
           dateRange?.endDate
         ),
-        getMonthlyCustomers(
-          undefined,
-          dateRange?.startDate,
-          dateRange?.endDate
-        ),
-        getTodayCustomers(undefined),
+        getMonthlyCustomers(dateRange?.startDate, dateRange?.endDate),
+        getTodayCustomers(),
       ]);
 
       setInitialMonthlySalesData(xMonthlySalesData?.data);

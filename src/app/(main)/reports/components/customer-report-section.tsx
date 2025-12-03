@@ -95,7 +95,7 @@ export function CustomerReportSection({
         getCustomerDemographics(),
         getCustomerBehavior(dateRange.startDate, dateRange.endDate),
         getTopCustomers(10),
-        getMonthlyCustomers(undefined, dateRange.startDate, dateRange.endDate),
+        getMonthlyCustomers(dateRange.startDate, dateRange.endDate),
       ]);
 
       if (trafficResult.data) setDailyTraffic(trafficResult.data);

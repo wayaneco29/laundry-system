@@ -21,11 +21,7 @@ import {
   getYearlyExpense,
   getExpensesByCategory,
 } from "@/app/actions/expense";
-import {
-  StatCardSkeleton,
-  ChartSkeleton,
-  TableSkeleton,
-} from "./skeleton";
+import { StatCardSkeleton, ChartSkeleton, TableSkeleton } from "./skeleton";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), {
   ssr: false,
@@ -288,15 +284,13 @@ export function MainDashboardPage({
     initialMonthlySalesData
   );
   const [chartData, setChartData] = useState(initialChartData);
-  const [recentOrders, setRecentOrders] = useState<RecentOrder[]>(
-    initialRecentOrders
-  );
+  const [recentOrders, setRecentOrders] =
+    useState<RecentOrder[]>(initialRecentOrders);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(
     initialMonthlyExpense
   );
-  const [yearlyExpense, setYearlyExpense] = useState<number>(
-    initialYearlyExpense
-  );
+  const [yearlyExpense, setYearlyExpense] =
+    useState<number>(initialYearlyExpense);
   const [expensesByCategory, setExpensesByCategory] = useState<any[]>(
     initialExpensesByCategory
   );
@@ -350,8 +344,8 @@ export function MainDashboardPage({
         recentOrdersResult,
         expensesByCategoryResult,
       ] = await Promise.all([
-        getMonthlyCustomers(branchId),
-        getTodayCustomers(branchId),
+        getMonthlyCustomers(),
+        getTodayCustomers(),
         getMonthSales(branchId),
         getMonthlySalesChart(branchId),
         getMonthlyExpense(branchId),
@@ -689,7 +683,10 @@ export function MainDashboardPage({
             <div className="text-gray-700 font-bold text-lg sm:text-xl truncate">
               ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
             </div>
-            <div data-apexcharts="sales-chart" className="w-full overflow-hidden">
+            <div
+              data-apexcharts="sales-chart"
+              className="w-full overflow-hidden"
+            >
               <ReactApexChart
                 key={`sales-chart-${chartKey}-${selectedBranch}`}
                 options={dynamicChartOptions}

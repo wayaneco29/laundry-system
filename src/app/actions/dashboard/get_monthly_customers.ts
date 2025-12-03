@@ -3,11 +3,7 @@
 import { createClient } from "@/app/utils/supabase/server";
 import moment from "moment";
 
-export async function getMonthlyCustomers(
-  branchId?: string,
-  startDate?: Date,
-  endDate?: Date
-) {
+export async function getMonthlyCustomers(startDate?: Date, endDate?: Date) {
   const supabase = await createClient();
 
   try {
@@ -31,10 +27,6 @@ export async function getMonthlyCustomers(
       .select("*")
       .gte("created_at", monthStart)
       .lte("created_at", monthEnd);
-
-    if (branchId) {
-      query = query.eq("branch_id", branchId);
-    }
 
     const { data: monthlyCustomers, error } = await query.order("created_at", {
       ascending: false,
