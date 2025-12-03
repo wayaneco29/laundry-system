@@ -137,7 +137,6 @@ export const StaffTable = ({
                       <Users className="h-5 w-5 text-gray-400 mr-3" />
                       <div className="text-sm font-medium text-gray-900">
                         {staff.full_name}
-                        {console.log(staff)}
                       </div>
                     </div>
                   </td>
