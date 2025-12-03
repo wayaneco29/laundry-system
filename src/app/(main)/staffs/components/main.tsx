@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Plus, Search } from "lucide-react";
 
 import { AddStaffModal } from "./add-staff-modal";
+import { ChangePasswordModal } from "./change-password-modal";
 import { StaffTable } from "./staff-table";
 import { Button } from "@/app/components/common";
 
@@ -13,6 +14,11 @@ type MainStaffPageProps = {
 
 export function MainStaffPage({ initialData }: MainStaffPageProps) {
   const [showModal, setShowModal] = useState<boolean>(false);
+  const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
+  const [selectedStaffForPassword, setSelectedStaffForPassword] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
   const [isUpdate, setIsUpdate] = useState<boolean>(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -100,6 +106,13 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
               setIsUpdate(true);
               setShowModal(true);
             }}
+            onChangePassword={(staff) => {
+              setSelectedStaffForPassword({
+                id: staff?.user_id || staff?.staff_id,
+                name: staff?.full_name || `${staff?.first_name} ${staff?.last_name}`,
+              });
+              setShowPasswordModal(true);
+            }}
           />
         </div>
       </div>
@@ -125,6 +138,15 @@ export function MainStaffPage({ initialData }: MainStaffPageProps) {
           });
           setIsUpdate(false);
           setShowModal(false);
+        }}
+      />
+      <ChangePasswordModal
+        staffId={selectedStaffForPassword?.id || ""}
+        staffName={selectedStaffForPassword?.name || ""}
+        showModal={showPasswordModal}
+        onClose={() => {
+          setSelectedStaffForPassword(null);
+          setShowPasswordModal(false);
         }}
       />
     </div>

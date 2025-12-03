@@ -9,6 +9,7 @@ import {
   Calendar,
   Edit2,
   Loader2,
+  KeyIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Pagination } from "@/app/components/common/pagination";
@@ -18,6 +19,7 @@ type StaffTableProps = {
   initialData?: Array<Record<string, string>>;
   totalCount?: number;
   onEdit: (staff: Record<string, string>) => void;
+  onChangePassword: (staff: Record<string, string>) => void;
   search?: string;
 };
 
@@ -25,6 +27,7 @@ export const StaffTable = ({
   initialData = [],
   totalCount = 0,
   onEdit,
+  onChangePassword,
   search,
 }: StaffTableProps) => {
   const [data, setData] = useState(initialData || []);
@@ -168,13 +171,22 @@ export const StaffTable = ({
                     </div>
                   </td>
                   <td className="sticky right-0 bg-white px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
-                    <button
-                      onClick={() => onEdit(staff)}
-                      className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1 cursor-pointer"
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit
-                    </button>
+                    <div className="flex items-center gap-x-3">
+                      <button
+                        onClick={() => onEdit(staff)}
+                        className="text-blue-600 hover:text-blue-900 inline-flex items-center gap-x-1 cursor-pointer"
+                      >
+                        <Edit2 className="h-4 w-4" />
+                        Edit
+                      </button>
+                      <button
+                        onClick={() => onChangePassword(staff)}
+                        className="text-amber-600 hover:text-amber-900 inline-flex items-center gap-x-1 cursor-pointer"
+                      >
+                        <KeyIcon className="h-4 w-4" />
+                        Password
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

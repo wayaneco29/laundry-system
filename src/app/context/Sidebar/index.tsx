@@ -25,9 +25,11 @@ import {
   LogOut,
   Menu,
   X,
+  KeyIcon,
 } from "lucide-react";
 import { twMerge } from "tailwind-merge";
 import { LogoutButton } from "@/app/components/auth/logout-button";
+import { ChangeOwnPasswordModal } from "@/app/components/auth/change-own-password-modal";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { ROLE_ADMIN, ROLE_STAFF } from "@/app/types";
 import { useUserContext } from "../UserContext";
@@ -104,6 +106,8 @@ const ROUTES = [
 export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
   const [open, setOpen] = useState<boolean>(false);
   const [minimize, setMinimized] = useState<boolean>(false);
+  const [showUserDropdown, setShowUserDropdown] = useState<boolean>(false);
+  const [showPasswordModal, setShowPasswordModal] = useState<boolean>(false);
   const pathname = usePathname();
   const { user, loading: userLoading } = useCurrentUser();
   const { role_name } = useUserContext();
@@ -278,27 +282,61 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
               {/* Printer Status Indicator */}
               <PrinterStatusIndicator />
 
-              <div className="hidden sm:block text-right">
-                <div className="text-sm font-semibold text-slate-900">
-                  {userLoading
-                    ? "Loading..."
-                    : user?.user_metadata?.full_name || user?.email || "User"}
-                </div>
-                <div className="text-xs text-slate-500">
-                  {role_name === ROLE_ADMIN ? "Administrator" : "Staff"}
-                </div>
-              </div>
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-semibold text-sm">
-                  {userLoading
-                    ? "--"
-                    : user?.user_metadata?.full_name
-                    ? user.user_metadata.full_name
-                        .split(" ")
-                        .map((n: string) => n[0])
-                        .join("")
-                    : user?.email?.slice(0, 2)?.toUpperCase() || "U"}
-                </span>
+              <div className="relative">
+                <button
+                  onClick={() => setShowUserDropdown(!showUserDropdown)}
+                  className="flex items-center gap-2 hover:bg-slate-100 rounded-lg p-1 transition-colors duration-200"
+                >
+                  <div className="hidden sm:block text-right">
+                    <div className="text-sm font-semibold text-slate-900">
+                      {userLoading
+                        ? "Loading..."
+                        : user?.user_metadata?.full_name || user?.email || "User"}
+                    </div>
+                    <div className="text-xs text-slate-500">
+                      {role_name === ROLE_ADMIN ? "Administrator" : "Staff"}
+                    </div>
+                  </div>
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                    <span className="text-white font-semibold text-sm">
+                      {userLoading
+                        ? "--"
+                        : user?.user_metadata?.full_name
+                        ? user.user_metadata.full_name
+                            .split(" ")
+                            .map((n: string) => n[0])
+                            .join("")
+                        : user?.email?.slice(0, 2)?.toUpperCase() || "U"}
+                    </span>
+                  </div>
+                                  </button>
+
+                {/* User Dropdown Menu */}
+                {showUserDropdown && (
+                  <>
+                    <div
+                      className="fixed inset-0 z-40"
+                      onClick={() => setShowUserDropdown(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 z-50">
+                      <button
+                        onClick={() => {
+                          setShowUserDropdown(false);
+                          setShowPasswordModal(true);
+                        }}
+                        className="w-full px-4 py-2 text-left text-sm text-slate-700 hover:bg-slate-100 flex items-center gap-2 transition-colors duration-200"
+                      >
+                        <KeyIcon className="w-4 h-4" />
+                        Change Password
+                      </button>
+                      <div className="border-t border-slate-200 my-1" />
+                      <LogoutButton className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 flex items-center gap-2 transition-colors duration-200">
+                        <LogOut className="w-4 h-4" />
+                        Logout
+                      </LogoutButton>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -314,6 +352,12 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
           onClick={() => setOpen(false)}
         />
       )}
+
+      {/* Change Password Modal */}
+      <ChangeOwnPasswordModal
+        showModal={showPasswordModal}
+        onClose={() => setShowPasswordModal(false)}
+      />
     </SidebarContext.Provider>
   );
 };
