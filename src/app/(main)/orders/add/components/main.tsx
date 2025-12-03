@@ -17,6 +17,8 @@ import {
   CreditCard,
   AlertTriangle,
   ArrowLeft,
+  Clock,
+  Banknote,
 } from "lucide-react";
 import * as Yup from "yup";
 import { Button, Input, Select } from "@/app/components/common";
@@ -139,68 +141,70 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
     }));
   }, [customers]);
 
-  const onSubmit = handleSubmit(async (payload) => {
-    try {
-      // Validate required fields before submission
-      if (!payload.customerId) {
-        toast.error("Please select a customer");
-        return;
+  const prepareOrder = (paymentStatus: "Paid" | "Unpaid") => {
+    return handleSubmit(async (payload) => {
+      try {
+        // Validate required fields before submission
+        if (!payload.customerId) {
+          toast.error("Please select a customer");
+          return;
+        }
+
+        if (!payload.branchId && !currentBranchId) {
+          toast.error("Please select a branch");
+          return;
+        }
+
+        if (!payload.services || payload.services.length === 0) {
+          toast.error("Please select at least one service");
+          return;
+        }
+
+        if (!payload.modeOfPayment) {
+          toast.error("Please select a payment mode");
+          return;
+        }
+
+        if (!userId) {
+          toast.error("User not authenticated");
+          return;
+        }
+
+        // Transform inventory usage to match database function format
+        const inventoryUsagePayload =
+          payload?.inventoryUsage && payload.inventoryUsage.length > 0
+            ? payload.inventoryUsage.map((item: any) => ({
+                stock_id: item.id,
+                quantity: item.quantity,
+              }))
+            : undefined;
+
+        const orderPayload = {
+          p_branch_id: payload?.branchId || currentBranchId,
+          p_customer_id: payload?.customerId,
+          p_staff_id: userId,
+          p_items: payload?.services,
+          p_order_date: moment().toISOString(),
+          p_order_status: "Pending" as const,
+          p_payment_status: paymentStatus,
+          p_total_price: grossTotal,
+          p_mode_of_payment: payload?.modeOfPayment,
+          p_inventory_usage: inventoryUsagePayload,
+          p_co_staff_id: activeShift?.partner_staff_id || undefined,
+          p_staff_shift_id: activeShift?.shift_id || undefined,
+        };
+
+        // Store order data and show confirmation modal
+        setOrderData(orderPayload);
+        setShowConfirmationModal(true);
+      } catch (_error) {
+        console.error("Form validation error:", _error);
+        const errorMessage =
+          _error instanceof Error ? _error.message : "Failed to validate order";
+        toast.error(errorMessage);
       }
-
-      if (!payload.branchId && !currentBranchId) {
-        toast.error("Please select a branch");
-        return;
-      }
-
-      if (!payload.services || payload.services.length === 0) {
-        toast.error("Please select at least one service");
-        return;
-      }
-
-      if (!payload.modeOfPayment) {
-        toast.error("Please select a payment mode");
-        return;
-      }
-
-      if (!userId) {
-        toast.error("User not authenticated");
-        return;
-      }
-
-      // Transform inventory usage to match database function format
-      const inventoryUsagePayload =
-        payload?.inventoryUsage && payload.inventoryUsage.length > 0
-          ? payload.inventoryUsage.map((item: any) => ({
-              stock_id: item.id,
-              quantity: item.quantity,
-            }))
-          : undefined;
-
-      const orderPayload = {
-        p_branch_id: payload?.branchId || currentBranchId,
-        p_customer_id: payload?.customerId,
-        p_staff_id: userId,
-        p_items: payload?.services,
-        p_order_date: moment().toISOString(),
-        p_order_status: "Pending" as const,
-        p_payment_status: "Paid" as const,
-        p_total_price: grossTotal,
-        p_mode_of_payment: payload?.modeOfPayment,
-        p_inventory_usage: inventoryUsagePayload,
-        p_co_staff_id: activeShift?.partner_staff_id || undefined,
-        p_staff_shift_id: activeShift?.shift_id || undefined,
-      };
-
-      // Store order data and show confirmation modal
-      setOrderData(orderPayload);
-      setShowConfirmationModal(true);
-    } catch (_error) {
-      console.error("Form validation error:", _error);
-      const errorMessage =
-        _error instanceof Error ? _error.message : "Failed to validate order";
-      toast.error(errorMessage);
-    }
-  });
+    })();
+  };
 
   const handleConfirmOrder = async () => {
     if (!orderData) return;
@@ -218,9 +222,11 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
         ? ` and ${orderData.p_inventory_usage.length} inventory items deducted`
         : "";
 
-      toast.success(
-        `Order created and payment processed successfully${inventoryMessage}`
-      );
+      const paymentMessage = orderData.p_payment_status === "Paid"
+        ? "Order created and payment processed successfully"
+        : "Order created successfully (Payment pending)";
+
+      toast.success(`${paymentMessage}${inventoryMessage}`);
 
       // Reset form and close modal
       reset();
@@ -587,7 +593,7 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
 
           {/* Order Summary - Right Panel */}
           <div className="xl:col-span-1 order-1 xl:order-2">
-            <form onSubmit={onSubmit}>
+            <form onSubmit={(e) => e.preventDefault()}>
               <div className="bg-white rounded-xl shadow-sm overflow-hidden sticky top-8">
                 {/* Header with blue background */}
                 <div className="bg-blue-500 px-6 py-4">
@@ -878,8 +884,49 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                       </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-3">
+                    <div className="flex flex-col gap-3">
+                      {/* Pay Now and Pay Later buttons */}
+                      <div className="flex flex-col sm:flex-row gap-3">
+                        <Button
+                          type="button"
+                          onClick={() => prepareOrder("Unpaid")}
+                          disabled={formState?.isSubmitting}
+                          className="flex-1 min-h-[48px] focus:!ring-0 text-base bg-amber-500 hover:bg-amber-600 text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {formState?.isSubmitting ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <span>Processing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Clock className="w-5 h-5" />
+                              <span>Pay Later</span>
+                            </>
+                          )}
+                        </Button>
+                        <Button
+                          type="button"
+                          onClick={() => prepareOrder("Paid")}
+                          disabled={formState?.isSubmitting}
+                          className="flex-1 min-h-[48px] focus:!ring-0 text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                          {formState?.isSubmitting ? (
+                            <>
+                              <Loader2 className="w-5 h-5 animate-spin" />
+                              <span>Processing...</span>
+                            </>
+                          ) : (
+                            <>
+                              <Banknote className="w-5 h-5" />
+                              <span>Pay Now</span>
+                            </>
+                          )}
+                        </Button>
+                      </div>
+                      {/* Clear All button */}
                       <Button
+                        type="button"
                         onClick={() => {
                           setValue("services", []);
                           setValue("customerId", "");
@@ -891,26 +938,10 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                           }
                         }}
                         disabled={formState?.isSubmitting}
-                        className="flex-1 min-h-[48px] focus:!ring-0 text-base bg-red-500 hover:bg-red-600 text-white flex flex-row items-center justify-center space-x-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full min-h-[44px] focus:!ring-0 text-base bg-gray-100 hover:bg-gray-200 text-gray-700 flex flex-row items-center justify-center space-x-2 active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
                       >
-                        <Trash2 className="w-5 h-5" />
+                        <Trash2 className="w-4 h-4" />
                         <span>Clear All</span>
-                      </Button>
-                      <Button
-                        type="submit"
-                        className="flex-1 min-h-[48px] focus:!ring-0 text-base bg-green-500 hover:bg-green-600 text-white active:scale-95 transition-transform disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {formState?.isSubmitting ? (
-                          <>
-                            <Loader2 className="w-5 h-5 animate-spin" />
-                            <span>Processing Payment...</span>
-                          </>
-                        ) : (
-                          <>
-                            <CreditCard className="w-5 h-5" />
-                            <span>Pay & Confirm Order</span>
-                          </>
-                        )}
                       </Button>
                     </div>
                   </div>
@@ -1064,6 +1095,33 @@ export const MainAddPage = ({ data, branches = [] }: MainAddPageProps) => {
                     </div>
                     <p className="text-gray-900">
                       {orderData.p_mode_of_payment}
+                    </p>
+                  </div>
+
+                  {/* Payment Status */}
+                  <div className={twMerge(
+                    "rounded-lg p-4 border",
+                    orderData.p_payment_status === "Paid"
+                      ? "bg-green-50 border-green-200"
+                      : "bg-amber-50 border-amber-200"
+                  )}>
+                    <div className="flex items-center space-x-2 mb-2">
+                      {orderData.p_payment_status === "Paid" ? (
+                        <Banknote className="w-4 h-4 text-green-600" />
+                      ) : (
+                        <Clock className="w-4 h-4 text-amber-600" />
+                      )}
+                      <span className="text-sm font-medium text-gray-700">
+                        Payment Status
+                      </span>
+                    </div>
+                    <p className={twMerge(
+                      "font-semibold",
+                      orderData.p_payment_status === "Paid"
+                        ? "text-green-700"
+                        : "text-amber-700"
+                    )}>
+                      {orderData.p_payment_status === "Paid" ? "Pay Now" : "Pay Later (Unpaid)"}
                     </p>
                   </div>
 

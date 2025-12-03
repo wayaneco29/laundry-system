@@ -581,13 +581,13 @@ export function MainDashboardPage({
 
       {/* Stats Cards Section */}
       {statsLoading ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
           {Array.from({ length: 6 }).map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
           <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-violet-100 to-white">
             <div className="flex justify-between items-start">
               <div className="flex-1">
@@ -629,6 +629,21 @@ export function MainDashboardPage({
                 </div>
               </div>
               <div className="p-3 rounded-full bg-green-400 h-fit shrink-0">
+                <CurrencyDollarIcon className="h-6 w-6 text-white" />
+              </div>
+            </div>
+          </div>
+          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-amber-100 to-white">
+            <div className="flex justify-between items-start">
+              <div className="flex-1 min-w-0">
+                <div className="text-gray-700 text-sm font-medium">
+                  This Month Unpaid Sales
+                </div>
+                <div className="text-amber-600 text-xl sm:text-2xl font-bold mt-2 truncate">
+                  ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
+                </div>
+              </div>
+              <div className="p-3 rounded-full bg-amber-400 h-fit shrink-0">
                 <CurrencyDollarIcon className="h-6 w-6 text-white" />
               </div>
             </div>
