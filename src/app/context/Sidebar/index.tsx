@@ -73,7 +73,7 @@ const ROUTES = [
     path: "/services",
     label: "Services",
     icon: Package,
-    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
+    allowedRole: [ROLE_ADMIN],
   },
   {
     path: "/expenses",
