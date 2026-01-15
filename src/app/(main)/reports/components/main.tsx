@@ -34,6 +34,7 @@ import { SalesSectionSkeleton } from "./skeleton";
 import { Button } from "@/app/components/common";
 import { StaffSalesView } from "./staff-sales-view";
 import { useUserContext } from "@/app/context";
+import { ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF } from "@/app/types/role";
 
 type MainReportsPageProps = {
   monthlySalesData: MonthlySalesData | null;
@@ -48,10 +49,12 @@ export function MainReportsPage({
   monthlyCustomersCount,
   todayCustomersCount,
 }: MainReportsPageProps) {
-  const { is_admin } = useUserContext();
+  const { role_name } = useUserContext();
+  const isAdmin = role_name === ROLE_ADMIN;
+  const isManager = role_name === ROLE_MANAGER;
 
-  // If user is not admin (i.e., staff), show staff-specific view
-  if (!is_admin) {
+  // If user is staff, show staff-specific view
+  if (role_name === ROLE_STAFF) {
     return <StaffSalesView />;
   }
   const [initialMonthlySalesData, setInitialMonthlySalesData] =
@@ -73,7 +76,7 @@ export function MainReportsPage({
   const [exportData, setExportData] = useState<ExportData>({});
   const [isLoadingExport, setIsLoadingExport] = useState(false);
 
-  const tabs = [
+  const allTabs = [
     { id: "overview", name: "Overview", icon: ChartBarIcon },
     { id: "sales", name: "Sales Analytics", icon: CurrencyDollarIcon },
     { id: "customers", name: "Customer Analytics", icon: UsersIcon },
@@ -85,6 +88,11 @@ export function MainReportsPage({
     { id: "orders", name: "Order Reports", icon: DocumentArrowDownIcon },
     { id: "expenses", name: "Expense Reports", icon: BanknotesIcon },
   ];
+
+  // Filter out Sales Analytics tab for MANAGER role
+  const tabs = isManager
+    ? allTabs.filter((tab) => tab.id !== "sales")
+    : allTabs;
 
   const handleExportReport = async () => {
     setIsLoadingExport(true);
@@ -248,10 +256,11 @@ export function MainReportsPage({
               chartData={initialChartData}
               monthlyCustomersCount={initialMonthlyCustomerCount}
               todayCustomersCount={initialTodayCustomersCount}
+              isAdmin={isAdmin}
             />
           ))}
 
-        {activeTab === "sales" && (
+        {activeTab === "sales" && isAdmin && (
           <SalesReportSection
             monthlySalesData={monthlySalesData}
             chartData={chartData}
@@ -295,19 +304,22 @@ function OverviewSection({
   chartData,
   monthlyCustomersCount,
   todayCustomersCount,
+  isAdmin,
 }: {
   monthlySalesData: MonthlySalesData | null;
   chartData: MonthlySalesChartData | null;
   monthlyCustomersCount: number;
   todayCustomersCount: number;
+  isAdmin: boolean;
 }) {
-  const summaryCards = [
+  const allSummaryCards = [
     {
       title: "Total Revenue (This Month)",
       value: `₱${monthlySalesData?.totalSales?.toLocaleString() || "0"}`,
       icon: CurrencyDollarIcon,
       color: "from-green-100 to-green-50",
       iconColor: "bg-green-500",
+      requiresAdmin: true,
     },
     {
       title: "Paid Sales (This Month)",
@@ -315,6 +327,7 @@ function OverviewSection({
       icon: CurrencyDollarIcon,
       color: "from-blue-100 to-blue-50",
       iconColor: "bg-blue-500",
+      requiresAdmin: true,
     },
     {
       title: "Monthly Customers",
@@ -322,6 +335,7 @@ function OverviewSection({
       icon: UsersIcon,
       color: "from-purple-100 to-purple-50",
       iconColor: "bg-purple-500",
+      requiresAdmin: false,
     },
     {
       title: "Today's Customers",
@@ -329,8 +343,14 @@ function OverviewSection({
       icon: UsersIcon,
       color: "from-orange-100 to-orange-50",
       iconColor: "bg-orange-500",
+      requiresAdmin: false,
     },
   ];
+
+  // Filter cards based on role
+  const summaryCards = allSummaryCards.filter(
+    (card) => !card.requiresAdmin || isAdmin
+  );
 
   return (
     <div className="space-y-6">

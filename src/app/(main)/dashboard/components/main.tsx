@@ -7,6 +7,8 @@ import { ApexOptions } from "apexcharts";
 
 import { OrdersTable } from "@/app/components";
 import { Select } from "@/app/components/common";
+import { useUserContext } from "@/app/context/UserContext";
+import { ROLE_ADMIN } from "@/app/types/role";
 import {
   MonthlySalesData,
   MonthlySalesChartData,
@@ -270,6 +272,9 @@ export function MainDashboardPage({
   initialRecentOrders,
   initialExpensesByCategory,
 }: MainDashboardPage) {
+  const { role_name } = useUserContext();
+  const isAdmin = role_name === ROLE_ADMIN;
+
   const [statsLoading, setStatsLoading] = useState(false);
   const [chartsLoading, setChartsLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(false);
@@ -582,7 +587,7 @@ export function MainDashboardPage({
       {/* Stats Cards Section */}
       {statsLoading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
+          {Array.from({ length: isAdmin ? 6 : 3 }).map((_, i) => (
             <StatCardSkeleton key={i} />
           ))}
         </div>
@@ -618,51 +623,55 @@ export function MainDashboardPage({
               </div>
             </div>
           </div>
-          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-green-100 to-white">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <div className="text-gray-700 text-sm font-medium">
-                  This Month Paid Sales
-                </div>
-                <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
-                  ₱{monthlySalesData?.paidSales?.toLocaleString() || "0"}
-                </div>
-              </div>
-              <div className="p-3 rounded-full bg-green-400 h-fit shrink-0">
-                <CurrencyDollarIcon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-amber-100 to-white">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <div className="text-gray-700 text-sm font-medium">
-                  This Month Unpaid Sales
-                </div>
-                <div className="text-amber-600 text-xl sm:text-2xl font-bold mt-2 truncate">
-                  ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
+          {isAdmin && (
+            <>
+              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-green-100 to-white">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-700 text-sm font-medium">
+                      This Month Paid Sales
+                    </div>
+                    <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
+                      ₱{monthlySalesData?.paidSales?.toLocaleString() || "0"}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-full bg-green-400 h-fit shrink-0">
+                    <CurrencyDollarIcon className="h-6 w-6 text-white" />
+                  </div>
                 </div>
               </div>
-              <div className="p-3 rounded-full bg-amber-400 h-fit shrink-0">
-                <CurrencyDollarIcon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
-          <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-blue-100 to-white">
-            <div className="flex justify-between items-start">
-              <div className="flex-1 min-w-0">
-                <div className="text-gray-700 text-sm font-medium">
-                  This Month Total Sales
+              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-amber-100 to-white">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-700 text-sm font-medium">
+                      This Month Unpaid Sales
+                    </div>
+                    <div className="text-amber-600 text-xl sm:text-2xl font-bold mt-2 truncate">
+                      ₱{monthlySalesData?.unpaidSales?.toLocaleString() || "0"}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-full bg-amber-400 h-fit shrink-0">
+                    <CurrencyDollarIcon className="h-6 w-6 text-white" />
+                  </div>
                 </div>
-                <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
-                  ₱{monthlySalesData?.totalSales?.toLocaleString() || "0"}
+              </div>
+              <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-blue-100 to-white">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1 min-w-0">
+                    <div className="text-gray-700 text-sm font-medium">
+                      This Month Total Sales
+                    </div>
+                    <div className="text-gray-700 text-xl sm:text-2xl font-bold mt-2 truncate">
+                      ₱{monthlySalesData?.totalSales?.toLocaleString() || "0"}
+                    </div>
+                  </div>
+                  <div className="p-3 rounded-full bg-blue-400 h-fit shrink-0">
+                    <CurrencyDollarIcon className="h-6 w-6 text-white" />
+                  </div>
                 </div>
               </div>
-              <div className="p-3 rounded-full bg-blue-400 h-fit shrink-0">
-                <CurrencyDollarIcon className="h-6 w-6 text-white" />
-              </div>
-            </div>
-          </div>
+            </>
+          )}
           <div className="shadow-sm rounded-md p-4 bg-gradient-to-r from-red-100 to-white">
             <div className="flex justify-between items-start">
               <div className="flex-1 min-w-0">
@@ -683,41 +692,43 @@ export function MainDashboardPage({
 
       {/* Charts Section */}
       {chartsLoading ? (
-        <div className="grid grid-cols-1 xl:grid-cols-2 mt-6 gap-4">
-          <ChartSkeleton />
+        <div className={`grid grid-cols-1 ${isAdmin ? 'xl:grid-cols-2' : ''} mt-6 gap-4`}>
+          {isAdmin && <ChartSkeleton />}
           <ChartSkeleton />
         </div>
       ) : (
-        <div className="grid grid-cols-1 xl:grid-cols-2 mt-6 gap-4">
-          <div className="bg-white rounded-md p-4 shadow-md overflow-hidden">
-            <div className="flex justify-between items-center mb-2">
-              <div className="text-gray-700 font-medium text-base sm:text-lg">
-                Sales Overview
+        <div className={`grid grid-cols-1 ${isAdmin ? 'xl:grid-cols-2' : ''} mt-6 gap-4`}>
+          {isAdmin && (
+            <div className="bg-white rounded-md p-4 shadow-md overflow-hidden">
+              <div className="flex justify-between items-center mb-2">
+                <div className="text-gray-700 font-medium text-base sm:text-lg">
+                  Sales Overview
+                </div>
+              </div>
+              <div className="text-gray-700 font-bold text-lg sm:text-xl truncate">
+                ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
+              </div>
+              <div
+                data-apexcharts="sales-chart"
+                className="w-full overflow-hidden"
+              >
+                <ReactApexChart
+                  key={`sales-chart-${chartKey}-${selectedBranch}`}
+                  options={dynamicChartOptions}
+                  series={[
+                    {
+                      name: "",
+                      data: chartData?.monthlyData || [
+                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                      ],
+                    },
+                  ]}
+                  type="area"
+                  height={264}
+                />
               </div>
             </div>
-            <div className="text-gray-700 font-bold text-lg sm:text-xl truncate">
-              ₱{chartData?.totalYearSales?.toLocaleString() || "0"}
-            </div>
-            <div
-              data-apexcharts="sales-chart"
-              className="w-full overflow-hidden"
-            >
-              <ReactApexChart
-                key={`sales-chart-${chartKey}-${selectedBranch}`}
-                options={dynamicChartOptions}
-                series={[
-                  {
-                    name: "",
-                    data: chartData?.monthlyData || [
-                      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                    ],
-                  },
-                ]}
-                type="area"
-                height={264}
-              />
-            </div>
-          </div>
+          )}
           <div className="bg-white rounded-md p-4 shadow-md overflow-hidden">
             <div className="flex justify-between items-center mb-2">
               <div className="text-gray-700 font-medium text-base sm:text-lg">
