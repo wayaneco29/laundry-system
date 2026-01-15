@@ -21,11 +21,13 @@ import {
 } from "lucide-react";
 
 import { getOrders, updatePaymentStatus, updateOrderStatus } from "../actions";
+import { getAllBranches } from "../actions/branch";
 import "./loading-spinner.css";
 import { useToast } from "../hooks";
 import { useUserContext } from "../context";
 import { useStaffShift } from "../hooks/use-staff-shift";
 import { Datepicker } from "./common/datepicker";
+import { ROLE_ADMIN } from "../types";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
@@ -93,21 +95,44 @@ export const OrdersTable = ({
   const [loadingPaymentStatus, setLoadingPaymentStatus] = useState<Set<string>>(
     new Set()
   );
+  const [branches, setBranches] = useState<any[]>([]);
+  const [selectedBranchFilter, setSelectedBranchFilter] = useState<string>("");
   const isInitialMount = useRef(true);
 
   const { role_name } = useUserContext();
   const { currentBranchId } = useStaffShift();
 
+  const isAdmin = role_name === ROLE_ADMIN;
+
   const orderStatuses = ["Pending", "Ready for Pickup", "Picked up"];
   const paymentStatuses = ["Unpaid", "Paid"];
+
+  // Fetch branches for ADMIN
+  useEffect(() => {
+    if (isAdmin) {
+      const fetchBranches = async () => {
+        const result = await getAllBranches();
+        if (result.data) {
+          setBranches(result.data);
+        }
+      };
+      fetchBranches();
+    }
+  }, [isAdmin]);
 
   const fetchData = async (page: number, limit: number) => {
     setLoading(true);
     try {
+      // For ADMIN: use selected branch filter if set, otherwise show all
+      // For STAFF/MANAGER: use their current branch
+      const effectiveBranchId = isAdmin
+        ? selectedBranchFilter || undefined
+        : currentBranchId || undefined;
+
       const result = await getOrders({
         page,
         limit,
-        branchId: currentBranchId || undefined,
+        branchId: effectiveBranchId,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
         startDate: dateRange?.startDate
@@ -147,6 +172,7 @@ export const OrdersTable = ({
     debouncedSearch,
     statusFilter,
     dateRange,
+    selectedBranchFilter,
     isDashboardView,
     currentBranchId,
   ]);
@@ -441,6 +467,24 @@ export const OrdersTable = ({
               <option value="Ready for Pickup">Ready for Pickup</option>
               <option value="Picked up">Picked up</option>
             </select>
+            {isAdmin && (
+              <select
+                value={selectedBranchFilter}
+                onChange={(e) => {
+                  setSelectedBranchFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="px-4 py-3 h-12 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[150px]"
+                disabled={loading}
+              >
+                <option value="">All Branches</option>
+                {branches.map((branch) => (
+                  <option key={branch.id} value={branch.id}>
+                    {branch.name}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
           {dateRange && (
             <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
