@@ -11,6 +11,7 @@ import { Pagination } from "@/app/components/common/pagination";
 
 import { Loader2 } from "lucide-react";
 import { useUserContext } from "@/app/context";
+import { ROLE_ADMIN } from "@/app/types";
 
 type ExpenseTableProps = {
   data: Array<Record<string, any>>;
@@ -289,7 +290,7 @@ export function ExpenseTable({
               <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Date
               </th>
-              {role_name === "ADMIN" && (
+              {role_name === ROLE_ADMIN && (
                 <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                   Branch
                 </th>
@@ -374,7 +375,7 @@ export function ExpenseTable({
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                     {formatDate(expense.expense_date)}
                   </td>
-                  {role_name === "ADMIN" && (
+                  {role_name === ROLE_ADMIN && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {expense.branch_name || "All Branches"}
                     </td>

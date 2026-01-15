@@ -19,6 +19,7 @@ import { StaffSalesReport, ActiveStaffShift } from "@/app/types/database";
 import { formatCurrency } from "@/app/utils/format";
 import { toast } from "sonner";
 import moment from "moment";
+import { ROLE_ADMIN } from "@/app/types";
 
 export default function StaffReportMain() {
   const user = useUserContext();
@@ -29,7 +30,7 @@ export default function StaffReportMain() {
   const [activeShift, setActiveShift] = useState<ActiveStaffShift | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const isStaff = user?.role_name !== "Admin";
+  const isStaff = user?.role_name !== ROLE_ADMIN;
 
   useEffect(() => {
     loadReportData();

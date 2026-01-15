@@ -1,5 +1,6 @@
 "use server";
 
+import { ROLE_STAFF } from "@/app/types";
 import { createClient } from "@/app/utils/supabase/server";
 
 export async function getRoleStaffID() {
@@ -9,7 +10,7 @@ export async function getRoleStaffID() {
     const { data, error } = await supabase
       .from("roles")
       .select("id")
-      .eq("name", "STAFF")
+      .eq("name", ROLE_STAFF)
       .single();
 
     if (error) throw error;

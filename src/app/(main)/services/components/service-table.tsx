@@ -12,6 +12,7 @@ import { useState, useEffect } from "react";
 import { Pagination } from "@/app/components/common/pagination";
 import { getAllServices } from "@/app/actions";
 import { useUserContext } from "@/app/context";
+import { ROLE_ADMIN } from "@/app/types";
 
 type ServiceTableProps = {
   initialData: Array<Record<string, string>>;
@@ -86,7 +87,7 @@ export const ServiceTable = ({
               <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider min-w-40">
                 Service Name
               </th>
-              {role_name === "ADMIN" && (
+              {role_name === ROLE_ADMIN && (
                 <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                   Branch
                 </th>
@@ -134,7 +135,7 @@ export const ServiceTable = ({
                       </div>
                     </div>
                   </td>
-                  {role_name === "ADMIN" && (
+                  {role_name === ROLE_ADMIN && (
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="text-sm text-gray-900">
