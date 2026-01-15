@@ -107,12 +107,13 @@ export function DateFilterSection({
           <Datepicker
             value={dateRange.startDate.toISOString().split("T")[0]}
             onChange={(newDate) => {
-              onDateRangeChange({
-                ...dateRange,
-                startDate: new Date(newDate),
-              });
-
-              setSelected(null);
+              if (typeof newDate === "string") {
+                onDateRangeChange({
+                  ...dateRange,
+                  startDate: new Date(newDate),
+                });
+                setSelected(null);
+              }
             }}
             className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             // disableDate={(date) => date > new Date()}
@@ -121,12 +122,13 @@ export function DateFilterSection({
           <Datepicker
             value={dateRange.endDate.toISOString().split("T")[0]}
             onChange={(newDate) => {
-              onDateRangeChange({
-                ...dateRange,
-                endDate: new Date(newDate),
-              });
-
-              setSelected(null);
+              if (typeof newDate === "string") {
+                onDateRangeChange({
+                  ...dateRange,
+                  endDate: new Date(newDate),
+                });
+                setSelected(null);
+              }
             }}
             className="px-3 py-2 border text-gray-600 border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           />

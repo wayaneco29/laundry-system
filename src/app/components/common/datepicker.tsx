@@ -1,12 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, X } from "lucide-react";
+
+type SelectionMode = "single" | "multiple" | "month" | "range";
 
 interface DatePickerProps {
   label?: string;
-  value?: Date | string;
-  onChange: (date: string) => void;
+  value?: Date | string | string[];
+  onChange: (date: string | { startDate: string; endDate: string } | string[]) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -16,6 +18,7 @@ interface DatePickerProps {
   minDate?: string;
   maxDate?: string;
   disableDate?: (date: Date) => boolean;
+  mode?: SelectionMode;
 }
 
 export function Datepicker({
@@ -31,12 +34,16 @@ export function Datepicker({
   minDate,
   maxDate,
   disableDate,
+  mode = "single",
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    value ? new Date(value) : null
+    value && !Array.isArray(value) ? new Date(value as string) : null
   );
+  const [selectedDates, setSelectedDates] = useState<Date[]>([]);
+  const [rangeStart, setRangeStart] = useState<Date | null>(null);
+  const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<"bottom" | "top">(
     dropdownPlacement
   );
@@ -48,14 +55,21 @@ export function Datepicker({
 
   // Update selected date when value changes
   useEffect(() => {
-    if (value) {
-      const date = new Date(value);
+    if (mode === "multiple" && Array.isArray(value)) {
+      const dates = value.map((v) => new Date(v));
+      setSelectedDates(dates);
+      if (dates.length > 0) {
+        setCurrentMonth(new Date(dates[0].getFullYear(), dates[0].getMonth()));
+      }
+    } else if (value && !Array.isArray(value)) {
+      const date = new Date(value as string);
       setSelectedDate(date);
       setCurrentMonth(new Date(date.getFullYear(), date.getMonth()));
     } else {
       setSelectedDate(null);
+      setSelectedDates([]);
     }
-  }, [value]);
+  }, [value, mode]);
 
   // Calculate dropdown position to avoid overflow (modal-aware)
   useEffect(() => {
@@ -205,7 +219,24 @@ export function Datepicker({
   };
 
   const isDateSelected = (date: Date): boolean => {
+    if (mode === "multiple") {
+      return selectedDates.some((d) => d.toDateString() === date.toDateString());
+    }
+    if (mode === "range") {
+      return (
+        rangeStart?.toDateString() === date.toDateString() ||
+        rangeEnd?.toDateString() === date.toDateString()
+      );
+    }
     return selectedDate?.toDateString() === date.toDateString();
+  };
+
+  const isDateInRange = (date: Date): boolean => {
+    if (mode !== "range" || !rangeStart || !rangeEnd) return false;
+    const dateTime = date.getTime();
+    const startTime = rangeStart.getTime();
+    const endTime = rangeEnd.getTime();
+    return dateTime > startTime && dateTime < endTime;
   };
 
   const isToday = (date: Date): boolean => {
@@ -215,9 +246,82 @@ export function Datepicker({
   const handleDateSelect = (date: Date) => {
     if (isDateDisabled(date) || !isDateInCurrentMonth(date)) return;
 
-    setSelectedDate(date);
-    onChange(formatDateForInput(date));
+    if (mode === "multiple") {
+      const dateStr = date.toDateString();
+      const isAlreadySelected = selectedDates.some(
+        (d) => d.toDateString() === dateStr
+      );
+
+      let newDates: Date[];
+      if (isAlreadySelected) {
+        newDates = selectedDates.filter((d) => d.toDateString() !== dateStr);
+      } else {
+        newDates = [...selectedDates, date];
+      }
+
+      setSelectedDates(newDates);
+      onChange(newDates.map((d) => formatDateForInput(d)));
+    } else if (mode === "range") {
+      if (!rangeStart || (rangeStart && rangeEnd)) {
+        // Start new range
+        setRangeStart(date);
+        setRangeEnd(null);
+      } else {
+        // Complete the range
+        if (date < rangeStart) {
+          // If end date is before start, swap them
+          setRangeEnd(rangeStart);
+          setRangeStart(date);
+          onChange({
+            startDate: formatDateForInput(date),
+            endDate: formatDateForInput(rangeStart),
+          });
+        } else {
+          setRangeEnd(date);
+          onChange({
+            startDate: formatDateForInput(rangeStart),
+            endDate: formatDateForInput(date),
+          });
+        }
+      }
+    } else {
+      setSelectedDate(date);
+      onChange(formatDateForInput(date));
+      setIsOpen(false);
+    }
+  };
+
+  const handleSelectMonth = () => {
+    const year = currentMonth.getFullYear();
+    const month = currentMonth.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    onChange({
+      startDate: formatDateForInput(firstDay),
+      endDate: formatDateForInput(lastDay),
+    });
     setIsOpen(false);
+  };
+
+  const handleClearMultiple = () => {
+    setSelectedDates([]);
+    onChange([]);
+  };
+
+  const handleApplyMultiple = () => {
+    setIsOpen(false);
+  };
+
+  const handleClearRange = () => {
+    setRangeStart(null);
+    setRangeEnd(null);
+  };
+
+  const handleApplyRange = () => {
+    if (rangeStart && rangeEnd) {
+      setIsOpen(false);
+    }
   };
 
   const handleInputClick = () => {
@@ -265,9 +369,28 @@ export function Datepicker({
     return classes;
   };
 
+  const getDisplayValue = (): string => {
+    if (mode === "multiple") {
+      if (selectedDates.length === 0) return placeholder;
+      if (selectedDates.length === 1)
+        return formatDate(selectedDates[0]);
+      return `${selectedDates.length} dates selected`;
+    }
+    if (mode === "range") {
+      if (rangeStart && rangeEnd) {
+        return `${formatDate(rangeStart)} - ${formatDate(rangeEnd)}`;
+      }
+      if (rangeStart) {
+        return `${formatDate(rangeStart)} - ...`;
+      }
+      return placeholder;
+    }
+    return selectedDate ? formatDate(selectedDate) : placeholder;
+  };
+
   return (
     <div className="relative" ref={containerRef}>
-      {/* Input Field */}{" "}
+      {/* Input Field */}
       {label && (
         <label className="block text-sm font-semibold mb-2 text-gray-700">
           {label}
@@ -291,12 +414,36 @@ export function Datepicker({
           }`}
         />
         <span
-          className={`text-sm pl-2 ${
-            selectedDate ? "text-gray-900" : "text-gray-500"
+          className={`text-sm pl-2 flex-1 ${
+            (mode === "multiple"
+              ? selectedDates.length > 0
+              : mode === "range"
+              ? rangeStart !== null
+              : selectedDate)
+              ? "text-gray-900"
+              : "text-gray-500"
           }`}
         >
-          {selectedDate ? formatDate(selectedDate) : placeholder}
+          {getDisplayValue()}
         </span>
+        {((mode === "multiple" && selectedDates.length > 0) ||
+          (mode === "range" && rangeStart !== null)) &&
+          !disabled && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                if (mode === "multiple") {
+                  handleClearMultiple();
+                } else if (mode === "range") {
+                  handleClearRange();
+                }
+              }}
+              className="ml-2 p-1 hover:bg-gray-100 rounded-full transition-colors"
+            >
+              <X className="w-3 h-3 text-gray-400" />
+            </button>
+          )}
       </div>
       {/* Dropdown Calendar */}
       {isOpen && !disabled && (
@@ -363,6 +510,7 @@ export function Datepicker({
               {days.map((date, index) => {
                 const inCurrentMonth = isDateInCurrentMonth(date);
                 const selected = isDateSelected(date);
+                const inRange = isDateInRange(date);
                 const today = isToday(date);
                 const disabled = isDateDisabled(date);
 
@@ -379,6 +527,8 @@ export function Datepicker({
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                           : selected
                           ? "bg-blue-500 text-white font-medium shadow-md ring-2 ring-primary/20"
+                          : inRange
+                          ? "bg-blue-100 text-blue-900"
                           : today
                           ? "bg-blue-50 text-blue-600 font-medium ring-1 ring-blue-200"
                           : inCurrentMonth
@@ -403,31 +553,117 @@ export function Datepicker({
             </div>
 
             {/* Quick Actions */}
-            <div className="flex justify-between mt-4 pt-3 border-t border-gray-200">
-              <button
-                type="button"
-                onClick={() => {
-                  setSelectedDate(new Date());
-                  onChange(formatDateForInput(new Date()));
-                  setIsOpen(false);
-                }}
-                className="text-xs cursor-pointer text-primary hover:text-primary/80 font-medium"
-              >
-                Today
-              </button>
-              {selectedDate && (
+            <div className="flex flex-col gap-2 mt-4 pt-3 border-t border-gray-200">
+              {/* Month Selection Button */}
+              {mode === "month" && (
                 <button
                   type="button"
-                  onClick={() => {
-                    setSelectedDate(null);
-                    onChange("");
-                    setIsOpen(false);
-                  }}
-                  className="text-xs cursor-pointer text-gray-600 hover:text-gray-700 ml-2"
+                  onClick={handleSelectMonth}
+                  className="w-full py-2 px-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-md transition-colors"
                 >
-                  Clear
+                  Select This Month
                 </button>
               )}
+
+              {/* Range Mode Instructions */}
+              {mode === "range" && (
+                <div className="text-xs text-gray-600 text-center">
+                  {!rangeStart
+                    ? "Select start date"
+                    : !rangeEnd
+                    ? "Select end date"
+                    : "Range selected"}
+                </div>
+              )}
+
+              {/* Actions Row */}
+              <div className="flex justify-between">
+                {mode !== "month" && mode !== "range" && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      if (mode === "multiple") {
+                        const today = new Date();
+                        if (
+                          !selectedDates.some(
+                            (d) => d.toDateString() === today.toDateString()
+                          )
+                        ) {
+                          const newDates = [...selectedDates, today];
+                          setSelectedDates(newDates);
+                          onChange(newDates.map((d) => formatDateForInput(d)));
+                        }
+                      } else {
+                        setSelectedDate(new Date());
+                        onChange(formatDateForInput(new Date()));
+                        setIsOpen(false);
+                      }
+                    }}
+                    className="text-xs cursor-pointer text-primary hover:text-primary/80 font-medium"
+                  >
+                    {mode === "multiple" ? "Add Today" : "Today"}
+                  </button>
+                )}
+
+                <div className="flex gap-2 ml-auto">
+                  {mode === "multiple" ? (
+                    <>
+                      {selectedDates.length > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleClearMultiple}
+                          className="text-xs cursor-pointer text-gray-600 hover:text-gray-700"
+                        >
+                          Clear All
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={handleApplyMultiple}
+                        className="text-xs cursor-pointer text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        Apply
+                      </button>
+                    </>
+                  ) : mode === "range" ? (
+                    <>
+                      {rangeStart && (
+                        <button
+                          type="button"
+                          onClick={handleClearRange}
+                          className="text-xs cursor-pointer text-gray-600 hover:text-gray-700"
+                        >
+                          Clear
+                        </button>
+                      )}
+                      {rangeStart && rangeEnd && (
+                        <button
+                          type="button"
+                          onClick={handleApplyRange}
+                          className="text-xs cursor-pointer text-blue-600 hover:text-blue-700 font-medium"
+                        >
+                          Apply
+                        </button>
+                      )}
+                    </>
+                  ) : (
+                    selectedDate &&
+                    mode !== "month" && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSelectedDate(null);
+                          onChange("");
+                          setIsOpen(false);
+                        }}
+                        className="text-xs cursor-pointer text-gray-600 hover:text-gray-700"
+                      >
+                        Clear
+                      </button>
+                    )
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </>

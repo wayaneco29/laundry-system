@@ -63,8 +63,12 @@ export default function StaffReportMain() {
     }
   };
 
-  const handleDateChange = (newDate: string) => {
-    setSelectedDate(moment(newDate).toISOString());
+  const handleDateChange = (
+    newDate: string | { startDate: string; endDate: string } | string[]
+  ) => {
+    if (typeof newDate === "string") {
+      setSelectedDate(moment(newDate).toISOString());
+    }
   };
 
   const handleExportReport = async () => {

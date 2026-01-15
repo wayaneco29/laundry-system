@@ -49,8 +49,12 @@ export function StaffSalesView() {
     }
   };
 
-  const handleDateChange = (value: string) => {
-    setSelectedDate(new Date(value));
+  const handleDateChange = (
+    value: string | { startDate: string; endDate: string } | string[]
+  ) => {
+    if (typeof value === "string") {
+      setSelectedDate(new Date(value));
+    }
   };
 
   const formatCurrency = (amount: number) => {

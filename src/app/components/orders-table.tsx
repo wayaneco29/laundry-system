@@ -61,9 +61,31 @@ export const OrdersTable = ({
   const [itemsPerPage, setItemsPerPage] = useState(20);
   const [totalItems, setTotalItems] = useState(totalCount);
   const [statusFilter, setStatusFilter] = useState("");
-  const [selectedDate, setSelectedDate] = useState(
-    initialDate || getTodayDate()
-  );
+  // Initialize with current month
+  const getCurrentMonthRange = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const formatDate = (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+
+    return {
+      startDate: formatDate(firstDay),
+      endDate: formatDate(lastDay),
+    };
+  };
+
+  const [dateRange, setDateRange] = useState<{
+    startDate: string;
+    endDate: string;
+  } | null>(getCurrentMonthRange());
   const [editingCell, setEditingCell] = useState<string | null>(null);
   const [loadingOrderStatus, setLoadingOrderStatus] = useState<Set<string>>(
     new Set()
@@ -88,8 +110,12 @@ export const OrdersTable = ({
         branchId: currentBranchId || undefined,
         search: debouncedSearch || undefined,
         status: statusFilter || undefined,
-        startDate: selectedDate ? `${selectedDate}T00:00:00` : undefined,
-        endDate: selectedDate ? `${selectedDate}T23:59:59` : undefined,
+        startDate: dateRange?.startDate
+          ? `${dateRange.startDate}T00:00:00`
+          : undefined,
+        endDate: dateRange?.endDate
+          ? `${dateRange.endDate}T23:59:59`
+          : undefined,
       });
 
       if (result.data) {
@@ -120,7 +146,7 @@ export const OrdersTable = ({
     itemsPerPage,
     debouncedSearch,
     statusFilter,
-    selectedDate,
+    dateRange,
     isDashboardView,
     currentBranchId,
   ]);
@@ -379,39 +405,72 @@ export const OrdersTable = ({
     <div className="space-y-4">
       {/* Search and filters */}
       {!isDashboardView && (
-        <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-6">
-          <div className="relative flex-1 sm:max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search by order ID or customer name..."
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-11 h-12 text-base pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+        <>
+          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 mb-4">
+            <div className="relative flex-1 sm:max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+              <input
+                type="text"
+                placeholder="Search by order ID or customer name..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="w-full pl-11 h-12 text-base pr-4 py-3 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500"
+              />
+            </div>
+            <Datepicker
+              mode="range"
+              value=""
+              onChange={(result) => {
+                if (typeof result === "object" && "startDate" in result) {
+                  setDateRange(result);
+                  setCurrentPage(1);
+                }
+              }}
+              placeholder="Select date range"
+              disabled={loading}
+              className="h-12 min-w-[200px]"
             />
+            <select
+              value={statusFilter}
+              onChange={(e) => handleStatusFilterChange(e.target.value)}
+              className="px-4 py-3 h-12 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[150px]"
+              disabled={loading}
+            >
+              <option value="">All Status</option>
+              <option value="Pending">Pending</option>
+              <option value="Ready for Pickup">Ready for Pickup</option>
+              <option value="Picked up">Picked up</option>
+            </select>
           </div>
-          <Datepicker
-            value={selectedDate}
-            onChange={(date) => {
-              setSelectedDate(date);
-              setCurrentPage(1);
-            }}
-            placeholder="Select date"
-            disabled={loading}
-            className="h-12 min-w-[170px]"
-          />
-          <select
-            value={statusFilter}
-            onChange={(e) => handleStatusFilterChange(e.target.value)}
-            className="px-4 py-3 h-12 text-base border border-gray-300 rounded-lg focus:outline-none focus:ring-2 text-gray-700 focus:ring-blue-500 focus:border-blue-500 bg-white min-w-[150px]"
-            disabled={loading}
-          >
-            <option value="">All Status</option>
-            <option value="Pending">Pending</option>
-            <option value="Ready for Pickup">Ready for Pickup</option>
-            <option value="Picked up">Picked up</option>
-          </select>
-        </div>
+          {dateRange && (
+            <div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
+              <Calendar className="w-4 h-4" />
+              <span>
+                Showing orders from{" "}
+                <strong>
+                  {moment(dateRange.startDate, "YYYY-MM-DD").format(
+                    "MMM DD, YYYY"
+                  )}
+                </strong>{" "}
+                to{" "}
+                <strong>
+                  {moment(dateRange.endDate, "YYYY-MM-DD").format(
+                    "MMM DD, YYYY"
+                  )}
+                </strong>
+              </span>
+              <button
+                onClick={() => {
+                  setDateRange(null);
+                  setCurrentPage(1);
+                }}
+                className="ml-2 text-blue-600 hover:text-blue-800 underline"
+              >
+                Clear
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Table - Desktop View */}
