@@ -9,8 +9,7 @@ import { useCurrentUser } from "@/app/hooks/use-current-user";
 import { Modal, Button, Input, Datepicker } from "@/app/components/common";
 import { useForm, Controller } from "react-hook-form";
 import { BranchProvider, RoleProvider } from "@/app/providers";
-import { useEffect, useState, useMemo } from "react";
-import { getRoleStaffID } from "@/app/actions/staff/get_staff_id_role";
+import { useState, useMemo } from "react";
 import { decryptPassword } from "@/app/utils/password";
 
 type AddStaffModalProps = {
@@ -114,17 +113,6 @@ export const AddStaffModal = ({
 
     onClose();
   };
-  useEffect(() => {
-    const getInitialRoleID = async () => {
-      const { data } = await getRoleStaffID();
-
-      if (data) {
-        setValue("role_id", data);
-      }
-    };
-
-    getInitialRoleID();
-  }, [showModal, setValue]);
 
   return (
     <Modal
@@ -304,6 +292,33 @@ export const AddStaffModal = ({
                 </>
               );
             }}
+          />
+        </div>
+      </div>
+      <div className="grid grid-cols-1 mb-4">
+        <div className="col-span-1">
+          <Controller
+            control={control}
+            name="role_id"
+            render={({ field, formState: { errors } }) => (
+              <>
+                <label className="block text-sm font-semibold mb-2 text-gray-700">
+                  Role {!isUpdate && <span className="text-red-500">*</span>}
+                </label>
+                <RoleProvider
+                  excludeAdmin={true}
+                  placeholder="Select Role"
+                  onChange={(selectedOption: any) => {
+                    const value = selectedOption?.value || "";
+                    field?.onChange(value);
+                  }}
+                  onBlur={field.onBlur}
+                  value={field.value}
+                  error={!!errors?.role_id}
+                  disabled={isSubmitting || isUpdate}
+                />
+              </>
+            )}
           />
         </div>
       </div>

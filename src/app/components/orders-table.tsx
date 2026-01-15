@@ -26,7 +26,6 @@ import { useToast } from "../hooks";
 import { useUserContext } from "../context";
 import { useStaffShift } from "../hooks/use-staff-shift";
 import { Datepicker } from "./common/datepicker";
-import { ROLE_ADMIN } from "../types";
 
 type OrdersTableProps = {
   initialData?: Array<any>;
@@ -463,9 +462,9 @@ export const OrdersTable = ({
                             <Calendar className="h-3 w-3 mr-1 flex-shrink-0" />
                             {order?.created_at
                               ? moment(order.created_at).isValid()
-                                ? moment(order.created_at).format(
-                                    "MMM DD, YYYY"
-                                  )
+                                ? moment(order.created_at)
+                                    .utcOffset(0, false)
+                                    .format("MMM DD, YYYY")
                                 : "Invalid Date"
                               : "N/A"}
                           </div>
@@ -535,7 +534,7 @@ export const OrdersTable = ({
                       </div>
 
                       {/* Branch - Show for Admin */}
-                      {role_name === ROLE_ADMIN && order?.branch_name && (
+                      {role_name === "ADMIN" && order?.branch_name && (
                         <div className="flex items-center text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
                           <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
                           {order?.branch_name}
@@ -558,7 +557,7 @@ export const OrdersTable = ({
                     <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                       Customer
                     </th>
-                    {role_name === ROLE_ADMIN && (
+                    {role_name === "ADMIN" && (
                       <th className="bg-blue-600 px-6 py-3 text-left text-xs font-medium text-white uppercase tracking-wider">
                         Branch
                       </th>
@@ -610,9 +609,9 @@ export const OrdersTable = ({
                                 <Calendar className="h-4 w-4 mr-1" />
                                 {order?.created_at
                                   ? moment(order.created_at).isValid()
-                                    ? moment(order.created_at).format(
-                                        "MMM DD, YYYY"
-                                      )
+                                    ? moment(order.created_at)
+                                        .utcOffset(0, false)
+                                        .format("MMM DD, YYYY")
                                     : "Invalid Date"
                                   : "N/A"}
                               </div>
@@ -643,7 +642,7 @@ export const OrdersTable = ({
                             </div>
                           )}
                         </td>
-                        {role_name === ROLE_ADMIN && (
+                        {role_name === "ADMIN" && (
                           <td className="px-6 py-4 whitespace-nowrap bg-white">
                             <div className="flex items-center">
                               <MapPin className="h-4 w-4 text-gray-400 mr-2" />

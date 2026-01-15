@@ -1,19 +1,20 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { 
-  Users, 
-  Clock, 
-  Edit3, 
-  UserPlus, 
+import {
+  Users,
+  Clock,
+  Edit3,
+  UserPlus,
   UserMinus,
   CheckCircle,
-  AlertCircle 
+  AlertCircle
 } from 'lucide-react';
 import { useUserContext } from '@/app/context/UserContext';
 import { useStaffShift } from '@/app/hooks/use-staff-shift';
 import { Button } from '@/app/components/common';
 import { PartnerManagementModal } from './partner-management-modal';
+import { ROLE_STAFF } from '@/app/types';
 
 interface ShiftStatusCardProps {
   className?: string;
@@ -25,7 +26,7 @@ export function ShiftStatusCard({ className = '' }: ShiftStatusCardProps) {
   const [showPartnerModal, setShowPartnerModal] = useState(false);
   const [shiftDuration, setShiftDuration] = useState<string>('');
 
-  const isStaff = user?.role_name !== 'Admin';
+  const isStaff = user?.role_name === ROLE_STAFF;
 
   // Update shift duration every minute
   useEffect(() => {

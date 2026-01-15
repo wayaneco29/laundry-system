@@ -6,7 +6,7 @@ import { StaffShiftContext } from "@/app/hooks/use-staff-shift";
 import { StaffPairingModal } from "@/app/components/staff/staff-pairing-modal";
 import { checkStaffShiftStatus } from "@/app/actions/staff/shift_actions";
 import { ActiveStaffShift } from "@/app/types/database";
-import { ROLE_ADMIN } from "@/app/types";
+import { ROLE_STAFF } from "@/app/types";
 
 export default function StaffShiftProvider({ children }: PropsWithChildren) {
   const user = useUserContext();
@@ -15,7 +15,7 @@ export default function StaffShiftProvider({ children }: PropsWithChildren) {
   const [isLoading, setIsLoading] = useState(true);
   const [showPairingModal, setShowPairingModal] = useState(false);
 
-  const isStaff = user?.role_name !== ROLE_ADMIN;
+  const isStaff = user?.role_name === ROLE_STAFF;
   const hasFetchedRef = useRef(false);
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 

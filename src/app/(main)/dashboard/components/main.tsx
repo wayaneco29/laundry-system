@@ -9,6 +9,7 @@ import { OrdersTable } from "@/app/components";
 import { Select } from "@/app/components/common";
 import { useUserContext } from "@/app/context/UserContext";
 import { ROLE_ADMIN } from "@/app/types/role";
+import { ChartBarIcon, BanknotesIcon } from "@heroicons/react/24/outline";
 import {
   MonthlySalesData,
   MonthlySalesChartData,
@@ -418,6 +419,13 @@ export function MainDashboardPage({
     labels: donutChartLabels,
   };
 
+  // Check if data is empty
+  const isSalesDataEmpty =
+    !chartData?.monthlyData ||
+    chartData.monthlyData.every((value) => value === 0);
+  const isExpensesDataEmpty =
+    !expensesByCategory || expensesByCategory.length === 0;
+
   // Dynamic chart options based on data scale
   const dynamicChartOptions: ApexOptions = {
     chart: {
@@ -712,20 +720,32 @@ export function MainDashboardPage({
                 data-apexcharts="sales-chart"
                 className="w-full overflow-hidden"
               >
-                <ReactApexChart
-                  key={`sales-chart-${chartKey}-${selectedBranch}`}
-                  options={dynamicChartOptions}
-                  series={[
-                    {
-                      name: "",
-                      data: chartData?.monthlyData || [
-                        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                      ],
-                    },
-                  ]}
-                  type="area"
-                  height={264}
-                />
+                {isSalesDataEmpty ? (
+                  <div className="flex flex-col items-center justify-center h-[264px] text-gray-400">
+                    <ChartBarIcon className="h-16 w-16 mb-3" />
+                    <p className="text-sm font-medium text-gray-500">
+                      No Sales Data Available
+                    </p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      Sales data will appear here once you have transactions
+                    </p>
+                  </div>
+                ) : (
+                  <ReactApexChart
+                    key={`sales-chart-${chartKey}-${selectedBranch}`}
+                    options={dynamicChartOptions}
+                    series={[
+                      {
+                        name: "",
+                        data: chartData?.monthlyData || [
+                          0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                        ],
+                      },
+                    ]}
+                    type="area"
+                    height={264}
+                  />
+                )}
               </div>
             </div>
           )}
@@ -739,12 +759,24 @@ export function MainDashboardPage({
               ₱{yearlyExpense?.toLocaleString() || "0"}
             </div>
             <div className="w-full overflow-hidden">
-              <ReactApexChart
-                options={dynamicDonutChartOptions}
-                series={donutChartSeries}
-                type="donut"
-                height={264}
-              />
+              {isExpensesDataEmpty ? (
+                <div className="flex flex-col items-center justify-center h-[264px] text-gray-400">
+                  <BanknotesIcon className="h-16 w-16 mb-3" />
+                  <p className="text-sm font-medium text-gray-500">
+                    No Expenses Data Available
+                  </p>
+                  <p className="text-xs text-gray-400 mt-1">
+                    Expense data will appear here once you add expenses
+                  </p>
+                </div>
+              ) : (
+                <ReactApexChart
+                  options={dynamicDonutChartOptions}
+                  series={donutChartSeries}
+                  type="donut"
+                  height={264}
+                />
+              )}
             </div>
           </div>
         </div>

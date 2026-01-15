@@ -31,7 +31,7 @@ import { twMerge } from "tailwind-merge";
 import { LogoutButton } from "@/app/components/auth/logout-button";
 import { ChangeOwnPasswordModal } from "@/app/components/auth/change-own-password-modal";
 import { useCurrentUser } from "@/app/hooks/use-current-user";
-import { ROLE_ADMIN, ROLE_STAFF } from "@/app/types";
+import { ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF } from "@/app/types";
 import { useUserContext } from "../UserContext";
 import { SimpleShiftStatus } from "@/app/components/staff/simple-shift-status";
 import { PrinterStatusIndicator } from "@/app/components/printer/printer-status-indicator";
@@ -45,61 +45,61 @@ const ROUTES = [
     path: "/dashboard",
     label: "Dashboard",
     icon: Home,
-    allowedRole: [ROLE_ADMIN],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER],
   },
   {
     path: "/orders",
     label: "Orders",
     icon: ShoppingBag,
-    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   },
   {
     path: "/customers",
     label: "Customers",
     icon: Users,
-    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   },
   {
     path: "/staffs",
     label: "Staffs",
     icon: UserCheck,
-    allowedRole: [ROLE_ADMIN],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER],
   },
   {
     path: "/branches",
     label: "Branches",
     icon: Building2,
-    allowedRole: [ROLE_ADMIN],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER],
   },
   {
     path: "/services",
     label: "Services",
     icon: Package,
-    allowedRole: [ROLE_ADMIN],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER],
   },
   {
     path: "/expenses",
     label: "Expenses",
     icon: Receipt,
-    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   },
   {
     path: "/promos",
     label: "Promos",
     icon: Tag,
-    allowedRole: [ROLE_ADMIN],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER],
   },
   {
     path: "/inventory",
     label: "Inventory",
     icon: Archive,
-    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   },
   {
     path: "/reports",
     label: "Reports",
     icon: FileBarChart,
-    allowedRole: [ROLE_ADMIN, ROLE_STAFF],
+    allowedRole: [ROLE_ADMIN, ROLE_MANAGER, ROLE_STAFF],
   },
 ];
 
@@ -291,7 +291,9 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                     <div className="text-sm font-semibold text-slate-900">
                       {userLoading
                         ? "Loading..."
-                        : user?.user_metadata?.full_name || user?.email || "User"}
+                        : user?.user_metadata?.full_name ||
+                          user?.email ||
+                          "User"}
                     </div>
                     <div className="text-xs text-slate-500">
                       {role_name === ROLE_ADMIN ? "Administrator" : "Staff"}
@@ -309,7 +311,7 @@ export const SidebarContextProvider = ({ children }: PropsWithChildren) => {
                         : user?.email?.slice(0, 2)?.toUpperCase() || "U"}
                     </span>
                   </div>
-                                  </button>
+                </button>
 
                 {/* User Dropdown Menu */}
                 {showUserDropdown && (

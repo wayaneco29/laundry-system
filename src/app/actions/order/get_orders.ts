@@ -49,6 +49,7 @@ export const getOrders = async (options?: {
 
         const { data, error, count } = await query;
 
+        console.log(data, error);
         if (error) throw error?.message;
 
         return { data, error: null, count };
