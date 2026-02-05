@@ -644,6 +644,7 @@ export function MainDashboardPage({
               label="Filter by Branch"
               isSearchable={false}
               options={branchOptions}
+              containerClassName="h-10"
               value={selectedBranch}
               onChange={handleBranchChange}
               placeholder="Select branch..."

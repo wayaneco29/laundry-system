@@ -30,7 +30,7 @@ export const Select = ({
       (option: any) =>
         Array.isArray(value)
           ? value?.includes(option?.value)
-          : option?.value === value
+          : option?.value === value,
     );
     if (customizedValue) {
       return customizedValue;
@@ -66,7 +66,7 @@ export const Select = ({
               return {
                 ...base,
                 width: "100%",
-                height: "42px",
+                height: "48px",
                 minHeight: "42px",
                 borderRadius: "0.5rem",
                 borderColor: error ? "red" : "#ebe6e7",
