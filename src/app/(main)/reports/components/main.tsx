@@ -9,6 +9,7 @@ import {
   DocumentArrowDownIcon,
   FunnelIcon,
   BanknotesIcon,
+  ShoppingBagIcon,
 } from "@heroicons/react/24/outline";
 import {
   MonthlySalesData,
@@ -24,12 +25,14 @@ import { CustomerReportSection } from "./customer-report-section";
 import { InventoryReportSection } from "./inventory-report-section";
 import { OrderReportSection } from "./order-report-section";
 import { ExpenseReportSection } from "./expense-report-section";
+import { ServiceReportSection } from "./service-report-section";
 import { DateFilterSection } from "./date-filter-section";
 import { ExportModal } from "./export-modal";
 import { ExportData } from "@/app/utils/export-utils";
 import { getOrders } from "@/app/actions/order";
 import { getAllCustomers } from "@/app/actions/customer";
 import { getAllExpenses } from "@/app/actions/expense";
+import { getServicesConsumed } from "@/app/actions/service";
 import { SalesSectionSkeleton } from "./skeleton";
 import { Button } from "@/app/components/common";
 import { StaffSalesView } from "./staff-sales-view";
@@ -66,7 +69,7 @@ export function MainReportsPage({
   const [initialTodayCustomersCount, setInitialTodayCustomersCount] =
     useState<number>(todayCustomersCount);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "sales" | "customers" | "inventory" | "orders" | "expenses"
+    "overview" | "sales" | "customers" | "inventory" | "orders" | "expenses" | "services"
   >("overview");
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -87,6 +90,7 @@ export function MainReportsPage({
     },
     { id: "orders", name: "Order Reports", icon: DocumentArrowDownIcon },
     { id: "expenses", name: "Expense Reports", icon: BanknotesIcon },
+    { id: "services", name: "Services", icon: ShoppingBagIcon },
   ];
 
   // Filter out Sales Analytics tab for MANAGER role
@@ -146,6 +150,12 @@ export function MainReportsPage({
           }
         );
         data.expenses = filteredExpenses;
+      }
+
+      // Fetch services data
+      const servicesResponse = await getServicesConsumed();
+      if (servicesResponse.data) {
+        data.services = servicesResponse.data;
       }
 
       setExportData(data);
@@ -284,6 +294,10 @@ export function MainReportsPage({
 
         {activeTab === "expenses" && (
           <ExpenseReportSection dateRange={dateRange} />
+        )}
+
+        {activeTab === "services" && (
+          <ServiceReportSection dateRange={dateRange} />
         )}
       </div>
 

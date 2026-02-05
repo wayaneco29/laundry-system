@@ -17,7 +17,7 @@ interface ExportModalProps {
   activeTab: string;
 }
 
-type ReportType = "orders" | "customers" | "expenses" | "sales";
+type ReportType = "orders" | "customers" | "expenses" | "sales" | "services";
 
 export function ExportModal({
   isOpen,
@@ -37,6 +37,8 @@ export function ExportModal({
   if (data.expenses && data.expenses.length > 0)
     availableReports.push("expenses");
   if (data.sales) availableReports.push("sales");
+  if (data.services && data.services.length > 0)
+    availableReports.push("services");
 
   // Set default selection when modal opens
   useEffect(() => {
@@ -86,6 +88,9 @@ export function ExportModal({
       if (selectedReports.includes("sales") && data.sales) {
         filteredData.sales = data.sales;
       }
+      if (selectedReports.includes("services") && data.services) {
+        filteredData.services = data.services;
+      }
 
       const filename = `laundry_report_${activeTab}_${
         new Date().toISOString().split("T")[0]
@@ -109,6 +114,8 @@ export function ExportModal({
         return "Expenses Report";
       case "sales":
         return "Sales Summary";
+      case "services":
+        return "Services Report";
       default:
         return reportType;
     }
@@ -124,6 +131,8 @@ export function ExportModal({
         return data.expenses?.length || 0;
       case "sales":
         return data.sales ? 1 : 0;
+      case "services":
+        return data.services?.length || 0;
       default:
         return 0;
     }

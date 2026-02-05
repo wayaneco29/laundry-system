@@ -11,6 +11,7 @@ export interface ExportData {
   customers?: any[];
   expenses?: any[];
   sales?: any;
+  services?: any[];
   dateRange?: {
     startDate: Date;
     endDate: Date;
@@ -55,6 +56,10 @@ export const exportToExcel = (data: ExportData, filename: string) => {
         "Expenses Report",
         data.expenses ? `${data.expenses.length} expenses` : "No data",
       ],
+      [
+        "Services Report",
+        data.services ? `${data.services.length} services` : "No data",
+      ],
     ];
 
     const summarySheet = XLSX.utils.aoa_to_sheet(summaryData);
@@ -80,6 +85,13 @@ export const exportToExcel = (data: ExportData, filename: string) => {
     const expensesData = formatExpensesForExcel(data.expenses);
     const expensesSheet = XLSX.utils.json_to_sheet(expensesData);
     XLSX.utils.book_append_sheet(workbook, expensesSheet, "Expenses");
+  }
+
+  // Add services sheet
+  if (data.services && data.services.length > 0) {
+    const servicesData = formatServicesForExcel(data.services);
+    const servicesSheet = XLSX.utils.json_to_sheet(servicesData);
+    XLSX.utils.book_append_sheet(workbook, servicesSheet, "Services");
   }
 
   // Save the Excel file
@@ -262,6 +274,33 @@ export const exportToPDF = (data: ExportData, filename: string) => {
       headStyles: { fillColor: [59, 130, 246] },
       styles: { fontSize: 8 },
     });
+
+    yPosition = (doc as any).lastAutoTable.finalY + 10;
+  }
+
+  // Add services table
+  if (data.services && data.services.length > 0) {
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Services Report", 20, yPosition);
+    yPosition += 10;
+
+    const servicesData = data.services.map((service) => [
+      service.service_name || "",
+      service.category_name || "",
+      service.total_orders || 0,
+      service.total_quantity || 0,
+      `₱${service.total_revenue?.toLocaleString() || "0"}`,
+    ]);
+
+    autoTable(doc, {
+      startY: yPosition,
+      head: [["Service Name", "Category", "Total Orders", "Total Quantity", "Revenue"]],
+      body: servicesData,
+      theme: "grid",
+      headStyles: { fillColor: [59, 130, 246] },
+      styles: { fontSize: 8 },
+    });
   }
 
   // Save the PDF
@@ -307,6 +346,16 @@ export const formatExpensesForExcel = (expenses: any[]) => {
     Vendor: expense.vendor_name || "N/A",
     Date: new Date(expense.expense_date).toLocaleDateString(),
     "Created At": new Date(expense.created_at).toLocaleDateString(),
+  }));
+};
+
+export const formatServicesForExcel = (services: any[]) => {
+  return services.map((service) => ({
+    "Service Name": service.service_name || "N/A",
+    Category: service.category_name || "N/A",
+    "Total Orders": service.total_orders || 0,
+    "Total Quantity": service.total_quantity || 0,
+    Revenue: service.total_revenue || 0,
   }));
 };
 

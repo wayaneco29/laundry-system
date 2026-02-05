@@ -28,7 +28,7 @@ export function ReportsSkeleton() {
 
       {/* Tabs skeleton */}
       <div className="flex space-x-8 border-b border-gray-200 mb-4">
-        {Array.from({ length: 6 }).map((_, i) => (
+        {Array.from({ length: 7 }).map((_, i) => (
           <div key={i} className="h-8 w-32 bg-gray-200 rounded-t"></div>
         ))}
       </div>
@@ -138,6 +138,42 @@ export function InventorySectionSkeleton() {
         <ChartSkeleton />
       </div>
       <TableSkeleton />
+    </div>
+  );
+}
+
+// Services section skeleton
+export function ServiceReportSkeleton() {
+  return (
+    <div className="space-y-6">
+      {/* Summary cards skeleton */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <StatCardSkeleton key={i} />
+        ))}
+      </div>
+      {/* Table skeleton */}
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div className="p-6 border-b border-gray-200">
+          <div className="h-6 bg-gray-200 rounded w-48 mb-2"></div>
+          <div className="h-4 bg-gray-200 rounded w-64"></div>
+        </div>
+        <div className="p-6">
+          <div className="space-y-4">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={i} className="flex items-center space-x-4">
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+                  <div className="h-3 bg-gray-200 rounded w-1/6"></div>
+                </div>
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+                <div className="h-4 bg-gray-200 rounded w-16"></div>
+                <div className="h-4 bg-gray-200 rounded w-20"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
