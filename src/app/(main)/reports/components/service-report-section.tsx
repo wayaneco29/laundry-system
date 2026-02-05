@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CubeIcon, CurrencyDollarIcon, ShoppingBagIcon } from "@heroicons/react/24/outline";
-import { getServicesConsumed, getServicesSummary, ServiceConsumedData } from "@/app/actions/service";
+import {
+  CubeIcon,
+  CurrencyDollarIcon,
+  ShoppingBagIcon,
+} from "@heroicons/react/24/outline";
+import {
+  getServicesConsumed,
+  getServicesSummary,
+  ServiceConsumedData,
+} from "@/app/actions/service";
 import { ServiceReportSkeleton } from "./skeleton";
 
 type ServiceReportSectionProps = {
@@ -50,7 +58,9 @@ export function ServiceReportSection({ dateRange }: ServiceReportSectionProps) {
           setSummaryData(summaryResult.data);
         }
       } catch (err) {
-        setError(err instanceof Error ? err.message : "Failed to fetch services data");
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch services data",
+        );
       } finally {
         setLoading(false);
       }
@@ -127,9 +137,6 @@ export function ServiceReportSection({ dateRange }: ServiceReportSectionProps) {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Service Name
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Category
-                  </th>
                   <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Total Orders
                   </th>
@@ -147,11 +154,6 @@ export function ServiceReportSection({ dateRange }: ServiceReportSectionProps) {
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">
                         {service.service_name}
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-500">
-                        {service.category_name}
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm text-gray-900">

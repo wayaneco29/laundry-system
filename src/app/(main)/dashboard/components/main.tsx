@@ -626,13 +626,23 @@ export function MainDashboardPage({
         <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
           <Datepicker
             mode="range"
-            value={dateRange ?? undefined}
+            value={
+              dateRange
+                ? {
+                    startDate: new Date(dateRange.startDate),
+                    endDate: new Date(dateRange.endDate),
+                  }
+                : undefined
+            }
             label="Filter by Date"
             onChange={(result) => {
               if (result === null || result === undefined) {
                 setDateRange(getCurrentMonthRange());
               } else if (typeof result === "object" && "startDate" in result) {
-                setDateRange(result);
+                setDateRange({
+                  startDate: result.startDate,
+                  endDate: result.endDate,
+                });
               }
             }}
             placeholder="Select date range"

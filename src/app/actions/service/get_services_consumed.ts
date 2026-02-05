@@ -56,7 +56,6 @@ export const getServicesConsumed = async (options?: {
             serviceMap.set(serviceId, {
               service_id: serviceId,
               service_name: serviceName,
-              category_name: "N/A",
               total_orders: 0,
               total_quantity: 0,
               total_revenue: 0,
@@ -73,7 +72,7 @@ export const getServicesConsumed = async (options?: {
 
     // Convert map to array and sort by total orders (descending)
     const result = Array.from(serviceMap.values()).sort(
-      (a, b) => b.total_orders - a.total_orders
+      (a, b) => b.total_orders - a.total_orders,
     );
 
     return {
@@ -82,7 +81,8 @@ export const getServicesConsumed = async (options?: {
     };
   } catch (error) {
     console.error("getServicesConsumed", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return {
       data: [],
       error: errorMessage,
@@ -146,7 +146,8 @@ export const getServicesSummary = async (options?: {
     };
   } catch (error) {
     console.error("getServicesSummary", error);
-    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    const errorMessage =
+      error instanceof Error ? error.message : "Unknown error";
     return {
       data: {
         total_services_consumed: 0,

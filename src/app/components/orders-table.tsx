@@ -445,13 +445,23 @@ export const OrdersTable = ({
             </div>
             <Datepicker
               mode="range"
-              value={dateRange ?? undefined}
+              value={
+                dateRange
+                  ? {
+                      startDate: new Date(dateRange.startDate),
+                      endDate: new Date(dateRange.endDate),
+                    }
+                  : undefined
+              }
               onChange={(result) => {
                 if (result === null || result === undefined) {
                   setDateRange(getCurrentMonthRange());
                   setCurrentPage(1);
                 } else if (typeof result === "object" && "startDate" in result) {
-                  setDateRange(result);
+                  setDateRange({
+                    startDate: result.startDate,
+                    endDate: result.endDate,
+                  });
                   setCurrentPage(1);
                 }
               }}
