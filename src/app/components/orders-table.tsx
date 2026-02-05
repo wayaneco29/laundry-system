@@ -445,9 +445,12 @@ export const OrdersTable = ({
             </div>
             <Datepicker
               mode="range"
-              value=""
+              value={dateRange ?? undefined}
               onChange={(result) => {
-                if (typeof result === "object" && "startDate" in result) {
+                if (result === null || result === undefined) {
+                  setDateRange(getCurrentMonthRange());
+                  setCurrentPage(1);
+                } else if (typeof result === "object" && "startDate" in result) {
                   setDateRange(result);
                   setCurrentPage(1);
                 }
@@ -505,7 +508,7 @@ export const OrdersTable = ({
               </span>
               <button
                 onClick={() => {
-                  setDateRange(null);
+                  setDateRange(getCurrentMonthRange());
                   setCurrentPage(1);
                 }}
                 className="ml-2 text-blue-600 hover:text-blue-800 underline"

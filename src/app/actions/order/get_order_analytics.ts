@@ -302,7 +302,9 @@ export const getOrderPerformanceMetrics = async (
 
 export const getRecentOrders = async (
   limit: number = 10,
-  branchId?: string
+  branchId?: string,
+  startDate?: string,
+  endDate?: string
 ) => {
   const supabase = await createClient();
 
@@ -317,6 +319,14 @@ export const getRecentOrders = async (
 
     if (branchId && branchId !== "") {
       query = query.eq("branch_id", branchId);
+    }
+
+    if (startDate) {
+      query = query.gte("created_at", startDate);
+    }
+
+    if (endDate) {
+      query = query.lte("created_at", endDate);
     }
 
     const { data, error } = await query;

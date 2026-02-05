@@ -1,12 +1,15 @@
 "use client";
 
+import moment from "moment";
 import { useState, useEffect, useRef } from "react";
 import dynamic from "next/dynamic";
 import { UsersIcon, CurrencyDollarIcon } from "@heroicons/react/24/solid";
 import { ApexOptions } from "apexcharts";
+import { Calendar } from "lucide-react";
 
 import { OrdersTable } from "@/app/components";
 import { Select } from "@/app/components/common";
+import { Datepicker } from "@/app/components/common/datepicker";
 import { useUserContext } from "@/app/context/UserContext";
 import { ROLE_ADMIN } from "@/app/types/role";
 import { ChartBarIcon, BanknotesIcon } from "@heroicons/react/24/outline";
@@ -281,30 +284,56 @@ export function MainDashboardPage({
   const [tableLoading, setTableLoading] = useState(false);
   const [chartKey, setChartKey] = useState(0); // Force chart re-render
   const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(
-    initialMonthlyCustomersCount
+    initialMonthlyCustomersCount,
   );
   const [todayCustomersCount, setTodayCustomersCount] = useState(
-    initialTodayCustomersCount
+    initialTodayCustomersCount,
   );
   const [monthlySalesData, setMonthlySalesData] = useState(
-    initialMonthlySalesData
+    initialMonthlySalesData,
   );
   const [chartData, setChartData] = useState(initialChartData);
   const [recentOrders, setRecentOrders] =
     useState<RecentOrder[]>(initialRecentOrders);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(
-    initialMonthlyExpense
+    initialMonthlyExpense,
   );
   const [yearlyExpense, setYearlyExpense] =
     useState<number>(initialYearlyExpense);
   const [expensesByCategory, setExpensesByCategory] = useState<any[]>(
-    initialExpensesByCategory
+    initialExpensesByCategory,
   );
   const [branches, setBranches] = useState<any[]>(initialBranches);
   const [selectedBranch, setSelectedBranch] = useState<string>("");
   const isInitialMount = useRef(true);
 
-  // Fetch data when branch filter changes (skip initial mount)
+  // Initialize with current month
+  const getCurrentMonthRange = () => {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = now.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+
+    const formatDate = (date: Date) => {
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, "0");
+      const d = String(date.getDate()).padStart(2, "0");
+      return `${y}-${m}-${d}`;
+    };
+
+    return {
+      startDate: formatDate(firstDay),
+      endDate: formatDate(lastDay),
+    };
+  };
+
+  const [dateRange, setDateRange] = useState<{
+    startDate: string;
+    endDate: string;
+  }>(getCurrentMonthRange());
+
+  // Fetch data when branch filter or date range changes (skip initial mount)
   useEffect(() => {
     // Skip the first render to avoid fetching data twice
     if (isInitialMount.current) {
@@ -314,14 +343,14 @@ export function MainDashboardPage({
 
     // Fetch data for any branch change, including "All Branches" (empty string)
     fetchDashboardData();
-  }, [selectedBranch]);
+  }, [selectedBranch, dateRange]);
 
   // Force chart re-render when chart data changes
   useEffect(() => {
     // Force a small delay to ensure DOM is ready
     const timer = setTimeout(() => {
       const chartElement = document.querySelector(
-        '[data-apexcharts="sales-chart"]'
+        '[data-apexcharts="sales-chart"]',
       );
       if (chartElement) {
         window.dispatchEvent(new Event("resize"));
@@ -340,6 +369,15 @@ export function MainDashboardPage({
       const branchId = selectedBranch === "" ? undefined : selectedBranch;
 
       const currentYear = new Date().getFullYear();
+
+      // Convert string dates to Date objects for sales functions
+      const salesStartDate = dateRange?.startDate
+        ? new Date(dateRange.startDate)
+        : undefined;
+      const salesEndDate = dateRange?.endDate
+        ? new Date(dateRange.endDate)
+        : undefined;
+
       const [
         monthlyResult,
         todayResult,
@@ -352,14 +390,19 @@ export function MainDashboardPage({
       ] = await Promise.all([
         getMonthlyCustomers(),
         getTodayCustomers(),
-        getMonthSales(branchId),
-        getMonthlySalesChart(branchId),
-        getMonthlyExpense(branchId),
-        getYearlyExpense(branchId),
-        getRecentOrders(10, branchId),
+        getMonthSales(branchId, salesStartDate, salesEndDate),
+        getMonthlySalesChart(branchId, salesStartDate, salesEndDate),
+        getMonthlyExpense(branchId, dateRange?.startDate, dateRange?.endDate),
+        getYearlyExpense(branchId, dateRange?.startDate, dateRange?.endDate),
+        getRecentOrders(
+          10,
+          branchId,
+          dateRange?.startDate ? `${dateRange.startDate}T00:00:00` : undefined,
+          dateRange?.endDate ? `${dateRange.endDate}T23:59:59` : undefined,
+        ),
         getExpensesByCategory({
-          startDate: `${currentYear}-01-01`,
-          endDate: `${currentYear}-12-31`,
+          startDate: dateRange?.startDate || `${currentYear}-01-01`,
+          endDate: dateRange?.endDate || `${currentYear}-12-31`,
           branchId: branchId,
         }),
       ]);
@@ -408,10 +451,10 @@ export function MainDashboardPage({
 
   // Prepare dynamic donut chart data
   const donutChartSeries = expensesByCategory.map((item) =>
-    Number(item.total_amount || 0)
+    Number(item.total_amount || 0),
   );
   const donutChartLabels = expensesByCategory.map(
-    (item) => item.category_name || "Unknown"
+    (item) => item.category_name || "Unknown",
   );
 
   const dynamicDonutChartOptions = {
@@ -580,17 +623,59 @@ export function MainDashboardPage({
         <div className="text-center sm:text-start">
           <h1 className="text-gray-700 text-2xl font-medium">Dashboard</h1>
         </div>
-        <div className="w-full sm:w-64">
-          <Select
-            label="Filter by Branch"
-            isSearchable={false}
-            options={branchOptions}
-            value={selectedBranch}
-            onChange={handleBranchChange}
-            placeholder="Select branch..."
+        <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+          <Datepicker
+            mode="range"
+            value={dateRange ?? undefined}
+            label="Filter by Date"
+            onChange={(result) => {
+              if (result === null || result === undefined) {
+                setDateRange(getCurrentMonthRange());
+              } else if (typeof result === "object" && "startDate" in result) {
+                setDateRange(result);
+              }
+            }}
+            placeholder="Select date range"
+            disabled={statsLoading || chartsLoading || tableLoading}
+            className="h-12 min-w-[200px]"
           />
+          <div className="w-full sm:w-64">
+            <Select
+              label="Filter by Branch"
+              isSearchable={false}
+              options={branchOptions}
+              value={selectedBranch}
+              onChange={handleBranchChange}
+              placeholder="Select branch..."
+            />
+          </div>
         </div>
       </div>
+
+      {/* Date range display */}
+      {dateRange && (
+        <div className="flex items-center gap-2 mb-6 text-sm text-gray-600">
+          <Calendar className="w-4 h-4" />
+          <span>
+            Showing data from{" "}
+            <strong>
+              {moment(dateRange.startDate, "YYYY-MM-DD").format("MMM DD, YYYY")}
+            </strong>{" "}
+            to{" "}
+            <strong>
+              {moment(dateRange.endDate, "YYYY-MM-DD").format("MMM DD, YYYY")}
+            </strong>
+          </span>
+          <button
+            onClick={() => {
+              setDateRange(getCurrentMonthRange());
+            }}
+            className="ml-2 text-blue-600 hover:text-blue-800 underline"
+          >
+            Clear
+          </button>
+        </div>
+      )}
 
       {/* Stats Cards Section */}
       {statsLoading ? (
@@ -700,12 +785,16 @@ export function MainDashboardPage({
 
       {/* Charts Section */}
       {chartsLoading ? (
-        <div className={`grid grid-cols-1 ${isAdmin ? 'xl:grid-cols-2' : ''} mt-6 gap-4`}>
+        <div
+          className={`grid grid-cols-1 ${isAdmin ? "xl:grid-cols-2" : ""} mt-6 gap-4`}
+        >
           {isAdmin && <ChartSkeleton />}
           <ChartSkeleton />
         </div>
       ) : (
-        <div className={`grid grid-cols-1 ${isAdmin ? 'xl:grid-cols-2' : ''} mt-6 gap-4`}>
+        <div
+          className={`grid grid-cols-1 ${isAdmin ? "xl:grid-cols-2" : ""} mt-6 gap-4`}
+        >
           {isAdmin && (
             <div className="bg-white rounded-md p-4 shadow-md overflow-hidden">
               <div className="flex justify-between items-center mb-2">

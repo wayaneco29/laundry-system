@@ -7,8 +7,10 @@ type SelectionMode = "single" | "multiple" | "month" | "range";
 
 interface DatePickerProps {
   label?: string;
-  value?: Date | string | string[];
-  onChange: (date: string | { startDate: string; endDate: string } | string[]) => void;
+  value?: Date | string | string[] | { startDate: Date; endDate: Date };
+  onChange: (
+    date: string | { startDate: string; endDate: string } | string[],
+  ) => void;
   placeholder?: string;
   className?: string;
   disabled?: boolean;
@@ -38,17 +40,27 @@ export function Datepicker({
 }: DatePickerProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [currentMonth, setCurrentMonth] = useState(new Date());
+
+  // Initialize selectedDate based on mode and value type
+  const getInitialDate = (): Date | null => {
+    if (mode === "single" && typeof value === "string" && value !== "") {
+      const date = new Date(value);
+      return !isNaN(date.getTime()) ? date : null;
+    }
+    return null;
+  };
+
   const [selectedDate, setSelectedDate] = useState<Date | null>(
-    value && !Array.isArray(value) ? new Date(value as string) : null
+    getInitialDate(),
   );
   const [selectedDates, setSelectedDates] = useState<Date[]>([]);
   const [rangeStart, setRangeStart] = useState<Date | null>(null);
   const [rangeEnd, setRangeEnd] = useState<Date | null>(null);
   const [dropdownPosition, setDropdownPosition] = useState<"bottom" | "top">(
-    dropdownPlacement
+    dropdownPlacement,
   );
   const [dropdownAlignment, setDropdownAlignment] = useState<"left" | "right">(
-    "left"
+    "left",
   );
   const containerRef = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -61,13 +73,37 @@ export function Datepicker({
       if (dates.length > 0) {
         setCurrentMonth(new Date(dates[0].getFullYear(), dates[0].getMonth()));
       }
-    } else if (value && !Array.isArray(value)) {
-      const date = new Date(value as string);
-      setSelectedDate(date);
-      setCurrentMonth(new Date(date.getFullYear(), date.getMonth()));
-    } else {
+    } else if (
+      mode === "range" &&
+      typeof value === "object" &&
+      value !== null &&
+      "startDate" in value
+    ) {
+      if (value.startDate && value.endDate) {
+        setRangeStart(new Date(value.startDate));
+        setRangeEnd(new Date(value.endDate));
+      } else {
+        setRangeStart(null);
+        setRangeEnd(null);
+      }
+    } else if (
+      mode === "single" &&
+      value &&
+      typeof value === "string" &&
+      value !== ""
+    ) {
+      const date = new Date(value);
+      if (!isNaN(date.getTime())) {
+        setSelectedDate(date);
+        setCurrentMonth(new Date(date.getFullYear(), date.getMonth()));
+      } else {
+        setSelectedDate(null);
+      }
+    } else if (!value || value === "") {
       setSelectedDate(null);
       setSelectedDates([]);
+      setRangeStart(null);
+      setRangeEnd(null);
     }
   }, [value, mode]);
 
@@ -220,7 +256,9 @@ export function Datepicker({
 
   const isDateSelected = (date: Date): boolean => {
     if (mode === "multiple") {
-      return selectedDates.some((d) => d.toDateString() === date.toDateString());
+      return selectedDates.some(
+        (d) => d.toDateString() === date.toDateString(),
+      );
     }
     if (mode === "range") {
       return (
@@ -249,7 +287,7 @@ export function Datepicker({
     if (mode === "multiple") {
       const dateStr = date.toDateString();
       const isAlreadySelected = selectedDates.some(
-        (d) => d.toDateString() === dateStr
+        (d) => d.toDateString() === dateStr,
       );
 
       let newDates: Date[];
@@ -316,6 +354,7 @@ export function Datepicker({
   const handleClearRange = () => {
     setRangeStart(null);
     setRangeEnd(null);
+    onChange(null as unknown as { startDate: string; endDate: string });
   };
 
   const handleApplyRange = () => {
@@ -331,7 +370,7 @@ export function Datepicker({
       // Reset to selected date's month when opening
       if (selectedDate) {
         setCurrentMonth(
-          new Date(selectedDate.getFullYear(), selectedDate.getMonth())
+          new Date(selectedDate.getFullYear(), selectedDate.getMonth()),
         );
       } else {
         setCurrentMonth(new Date());
@@ -372,8 +411,7 @@ export function Datepicker({
   const getDisplayValue = (): string => {
     if (mode === "multiple") {
       if (selectedDates.length === 0) return placeholder;
-      if (selectedDates.length === 1)
-        return formatDate(selectedDates[0]);
+      if (selectedDates.length === 1) return formatDate(selectedDates[0]);
       return `${selectedDates.length} dates selected`;
     }
     if (mode === "range") {
@@ -415,11 +453,13 @@ export function Datepicker({
         />
         <span
           className={`text-sm pl-2 flex-1 ${
-            (mode === "multiple"
-              ? selectedDates.length > 0
-              : mode === "range"
-              ? rangeStart !== null
-              : selectedDate)
+            (
+              mode === "multiple"
+                ? selectedDates.length > 0
+                : mode === "range"
+                  ? rangeStart !== null
+                  : selectedDate
+            )
               ? "text-gray-900"
               : "text-gray-500"
           }`}
@@ -463,8 +503,8 @@ export function Datepicker({
                   setCurrentMonth(
                     new Date(
                       currentMonth.getFullYear(),
-                      currentMonth.getMonth() - 1
-                    )
+                      currentMonth.getMonth() - 1,
+                    ),
                   );
                 }}
                 className="p-1 hover:bg-gray-100 rounded-md transition-colors flex-shrink-0"
@@ -483,8 +523,8 @@ export function Datepicker({
                   setCurrentMonth(
                     new Date(
                       currentMonth.getFullYear(),
-                      currentMonth.getMonth() + 1
-                    )
+                      currentMonth.getMonth() + 1,
+                    ),
                   );
                 }}
                 className="p-1 hover:bg-gray-100 rounded-md transition-colors flex-shrink-0"
@@ -526,14 +566,14 @@ export function Datepicker({
                         disabled
                           ? "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200"
                           : selected
-                          ? "bg-blue-500 text-white font-medium shadow-md ring-2 ring-primary/20"
-                          : inRange
-                          ? "bg-blue-100 text-blue-900"
-                          : today
-                          ? "bg-blue-50 text-blue-600 font-medium ring-1 ring-blue-200"
-                          : inCurrentMonth
-                          ? "text-gray-900 hover:bg-gray-100 hover:ring-1 hover:ring-gray-200"
-                          : "text-gray-300"
+                            ? "bg-blue-500 text-white font-medium shadow-md ring-2 ring-primary/20"
+                            : inRange
+                              ? "bg-blue-100 text-blue-900"
+                              : today
+                                ? "bg-blue-50 text-blue-600 font-medium ring-1 ring-blue-200"
+                                : inCurrentMonth
+                                  ? "text-gray-900 hover:bg-gray-100 hover:ring-1 hover:ring-gray-200"
+                                  : "text-gray-300"
                       }
                       ${!disabled ? "cursor-pointer" : ""}
                       ${
@@ -571,8 +611,8 @@ export function Datepicker({
                   {!rangeStart
                     ? "Select start date"
                     : !rangeEnd
-                    ? "Select end date"
-                    : "Range selected"}
+                      ? "Select end date"
+                      : "Range selected"}
                 </div>
               )}
 
@@ -586,7 +626,7 @@ export function Datepicker({
                         const today = new Date();
                         if (
                           !selectedDates.some(
-                            (d) => d.toDateString() === today.toDateString()
+                            (d) => d.toDateString() === today.toDateString(),
                           )
                         ) {
                           const newDates = [...selectedDates, today];

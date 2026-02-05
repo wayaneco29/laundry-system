@@ -2,7 +2,11 @@
 
 import { createClient } from "@/app/utils/supabase/server";
 
-export const getMonthlyExpense = async (branchId?: string) => {
+export const getMonthlyExpense = async (
+  branchId?: string,
+  startDate?: string,
+  endDate?: string
+) => {
   const supabase = await createClient();
 
   try {
@@ -10,13 +14,13 @@ export const getMonthlyExpense = async (branchId?: string) => {
     const currentYear = currentDate.getFullYear();
     const currentMonth = currentDate.getMonth() + 1;
 
-    // Create start and end dates for the current month
-    const startDate = `${currentYear}-${currentMonth
+    // Create start and end dates for the current month (or use provided dates)
+    const defaultStartDate = `${currentYear}-${currentMonth
       .toString()
       .padStart(2, "0")}-01`;
     // Get the last day of the current month
     const lastDay = new Date(currentYear, currentMonth, 0).getDate();
-    const endDate = `${currentYear}-${currentMonth
+    const defaultEndDate = `${currentYear}-${currentMonth
       .toString()
       .padStart(2, "0")}-${lastDay.toString().padStart(2, "0")}`;
 
@@ -24,8 +28,8 @@ export const getMonthlyExpense = async (branchId?: string) => {
     let query = supabase
       .from("expenses")
       .select("*")
-      .gte("expense_date", startDate)
-      .lte("expense_date", endDate);
+      .gte("expense_date", startDate || defaultStartDate)
+      .lte("expense_date", endDate || defaultEndDate);
 
     // Apply branch filter if provided
     if (branchId) {
