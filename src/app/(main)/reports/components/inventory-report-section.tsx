@@ -25,10 +25,12 @@ type InventoryReportSectionProps = {
     startDate: Date;
     endDate: Date;
   };
+  branchId?: string;
 };
 
 export function InventoryReportSection({
   dateRange,
+  branchId,
 }: InventoryReportSectionProps) {
   const [stockLevels, setStockLevels] = useState<InventoryStockLevels | null>(
     null
@@ -40,17 +42,17 @@ export function InventoryReportSection({
 
   useEffect(() => {
     fetchInventoryData();
-  }, [dateRange]);
+  }, [dateRange, branchId]);
 
   const fetchInventoryData = async () => {
     setLoading(true);
     try {
       const [stockLevelsResult, categoryResult, alertsResult, itemsResult] =
         await Promise.all([
-          getInventoryStockLevels(),
-          getInventoryByCategory(),
-          getLowStockAlerts(),
-          getInventoryItems(undefined, 20),
+          getInventoryStockLevels(branchId),
+          getInventoryByCategory(branchId),
+          getLowStockAlerts(branchId),
+          getInventoryItems(branchId, 20),
         ]);
       if (stockLevelsResult.data) {
         setStockLevels(stockLevelsResult.data);

@@ -23,12 +23,14 @@ type SalesReportSectionProps = {
     startDate: Date;
     endDate: Date;
   };
+  branchId?: string;
 };
 
 export function SalesReportSection({
   monthlySalesData: initialMonthlySalesData,
   chartData: initialChartData,
   dateRange,
+  branchId,
 }: SalesReportSectionProps) {
   const [monthlySalesData, setMonthlySalesData] =
     useState<MonthlySalesData | null>(initialMonthlySalesData);
@@ -39,14 +41,14 @@ export function SalesReportSection({
 
   useEffect(() => {
     fetchSalesData();
-  }, [dateRange]);
+  }, [dateRange, branchId]);
 
   const fetchSalesData = async () => {
     setLoading(true);
     try {
       const [salesResult, chartResult] = await Promise.all([
-        getMonthSales(undefined, dateRange.startDate, dateRange.endDate),
-        getMonthlySalesChart(undefined, dateRange.startDate, dateRange.endDate),
+        getMonthSales(branchId, dateRange.startDate, dateRange.endDate),
+        getMonthlySalesChart(branchId, dateRange.startDate, dateRange.endDate),
       ]);
 
       if (salesResult.data) {

@@ -25,6 +25,7 @@ type OrderReportSectionProps = {
     startDate: Date;
     endDate: Date;
   };
+  branchId?: string;
 };
 
 // Helper to check if date range is 'This Year'
@@ -41,7 +42,7 @@ function isFullYearRange(startDate: Date, endDate: Date) {
   );
 }
 
-export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
+export function OrderReportSection({ dateRange, branchId }: OrderReportSectionProps) {
   const [statusBreakdown, setStatusBreakdown] = useState<
     OrderStatusBreakdown[]
   >([]);
@@ -54,17 +55,17 @@ export function OrderReportSection({ dateRange }: OrderReportSectionProps) {
 
   useEffect(() => {
     fetchOrderData();
-  }, [dateRange]);
+  }, [dateRange, branchId]);
 
   const fetchOrderData = async () => {
     setLoading(true);
     try {
       const [statusResult, volumeResult, metricsResult, ordersResult] =
         await Promise.all([
-          getOrderStatusBreakdown(dateRange.startDate, dateRange.endDate),
-          getDailyOrderVolume(dateRange.startDate, dateRange.endDate),
-          getOrderPerformanceMetrics(dateRange.startDate, dateRange.endDate),
-          getRecentOrders(10),
+          getOrderStatusBreakdown(dateRange.startDate, dateRange.endDate, branchId),
+          getDailyOrderVolume(dateRange.startDate, dateRange.endDate, branchId),
+          getOrderPerformanceMetrics(dateRange.startDate, dateRange.endDate, branchId),
+          getRecentOrders(10, branchId),
         ]);
 
       if (statusResult.data) {

@@ -34,6 +34,7 @@ type CustomerReportSectionProps = {
     startDate: Date;
     endDate: Date;
   };
+  branchId?: string;
 };
 
 // Helper to check if date range is 'This Year'
@@ -54,6 +55,7 @@ export function CustomerReportSection({
   monthlyCustomersCount: initialMonthlyCustomersCount,
   todayCustomersCount: initialTodayCustomersCount,
   dateRange,
+  branchId,
 }: CustomerReportSectionProps) {
   const [monthlyCustomersCount, setMonthlyCustomersCount] = useState(
     initialMonthlyCustomersCount
@@ -75,7 +77,7 @@ export function CustomerReportSection({
 
   useEffect(() => {
     fetchCustomerAnalytics();
-  }, [dateRange]);
+  }, [dateRange, branchId]);
 
   const fetchCustomerAnalytics = async () => {
     setLoading(true);
@@ -89,12 +91,12 @@ export function CustomerReportSection({
         topCustomersResult,
         monthlyCustomersResult,
       ] = await Promise.all([
-        getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate),
-        getCustomerRetentionMetrics(dateRange.startDate, dateRange.endDate),
-        getCustomerLifetimeValue(),
-        getCustomerDemographics(),
-        getCustomerBehavior(dateRange.startDate, dateRange.endDate),
-        getTopCustomers(10),
+        getDailyCustomerTraffic(dateRange.startDate, dateRange.endDate, branchId),
+        getCustomerRetentionMetrics(dateRange.startDate, dateRange.endDate, branchId),
+        getCustomerLifetimeValue(branchId),
+        getCustomerDemographics(branchId),
+        getCustomerBehavior(dateRange.startDate, dateRange.endDate, branchId),
+        getTopCustomers(10, branchId),
         getMonthlyCustomers(dateRange.startDate, dateRange.endDate),
       ]);
 

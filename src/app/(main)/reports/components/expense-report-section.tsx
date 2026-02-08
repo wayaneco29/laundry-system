@@ -24,6 +24,7 @@ type ExpenseReportSectionProps = {
     startDate: Date;
     endDate: Date;
   };
+  branchId?: string;
 };
 
 type ExpenseStats = {
@@ -51,7 +52,7 @@ type Expense = {
   created_at: string;
 };
 
-export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
+export function ExpenseReportSection({ dateRange, branchId }: ExpenseReportSectionProps) {
   const [expenseStats, setExpenseStats] = useState<ExpenseStats | null>(null);
   const [categoryData, setCategoryData] = useState<ExpenseCategory[]>([]);
   const [monthlyExpense, setMonthlyExpense] = useState<number>(0);
@@ -61,7 +62,7 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
 
   useEffect(() => {
     fetchExpenseData();
-  }, [dateRange]);
+  }, [dateRange, branchId]);
 
   const fetchExpenseData = async () => {
     setLoading(true);
@@ -76,16 +77,19 @@ export function ExpenseReportSection({ dateRange }: ExpenseReportSectionProps) {
         getExpenseStats({
           startDate: dateRange.startDate.toISOString().split("T")[0],
           endDate: dateRange.endDate.toISOString().split("T")[0],
+          branchId,
         }),
         getExpensesByCategory({
           startDate: dateRange.startDate.toISOString().split("T")[0],
           endDate: dateRange.endDate.toISOString().split("T")[0],
+          branchId,
         }),
-        getMonthlyExpense(),
-        getYearlyExpense(),
+        getMonthlyExpense(branchId),
+        getYearlyExpense(branchId),
         getAllExpenses({
           startDate: dateRange.startDate.toISOString().split("T")[0],
           endDate: dateRange.endDate.toISOString().split("T")[0],
+          branchId,
         }),
       ]);
 

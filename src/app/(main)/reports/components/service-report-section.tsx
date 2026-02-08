@@ -15,9 +15,10 @@ import { ServiceReportSkeleton } from "./skeleton";
 
 type ServiceReportSectionProps = {
   dateRange: { startDate: Date; endDate: Date };
+  branchId?: string;
 };
 
-export function ServiceReportSection({ dateRange }: ServiceReportSectionProps) {
+export function ServiceReportSection({ dateRange, branchId }: ServiceReportSectionProps) {
   const [servicesData, setServicesData] = useState<ServiceConsumedData[]>([]);
   const [summaryData, setSummaryData] = useState<{
     total_services_consumed: number;
@@ -42,8 +43,8 @@ export function ServiceReportSection({ dateRange }: ServiceReportSectionProps) {
           : undefined;
 
         const [servicesResult, summaryResult] = await Promise.all([
-          getServicesConsumed({ startDate, endDate }),
-          getServicesSummary({ startDate, endDate }),
+          getServicesConsumed({ startDate, endDate, branchId }),
+          getServicesSummary({ startDate, endDate, branchId }),
         ]);
 
         if (servicesResult.error) {
@@ -67,7 +68,7 @@ export function ServiceReportSection({ dateRange }: ServiceReportSectionProps) {
     };
 
     fetchServicesData();
-  }, [dateRange]);
+  }, [dateRange, branchId]);
 
   if (loading) {
     return <ServiceReportSkeleton />;

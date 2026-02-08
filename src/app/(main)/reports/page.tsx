@@ -6,6 +6,7 @@ import {
   getTodayCustomers,
   getUserInfo,
 } from "@/app/actions";
+import { getAllBranches } from "@/app/actions/branch";
 import { MainReportsPage } from "./components/main";
 
 export default async function Page() {
@@ -23,11 +24,13 @@ export default async function Page() {
     chartData,
     monthlyCustomersCount,
     todayCustomersCount,
+    branchesResult,
   ] = await Promise.all([
     getMonthSales(branchId),
     getMonthlySalesChart(branchId),
     getMonthlyCustomers(),
     getTodayCustomers(),
+    getAllBranches(),
   ]);
 
   return (
@@ -36,6 +39,7 @@ export default async function Page() {
       chartData={chartData.data}
       monthlyCustomersCount={monthlyCustomersCount.count || 0}
       todayCustomersCount={todayCustomersCount.count || 0}
+      initialBranches={branchesResult.data || []}
     />
   );
 }

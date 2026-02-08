@@ -20,6 +20,8 @@ import {
   getTodayCustomers,
 } from "@/app/actions";
 import { ApexChart } from "@/app/components/charts/apex-chart";
+import { Select } from "@/app/components/common";
+import { Building } from "lucide-react";
 import { SalesReportSection } from "./sales-report-section";
 import { CustomerReportSection } from "./customer-report-section";
 import { InventoryReportSection } from "./inventory-report-section";
@@ -44,6 +46,7 @@ type MainReportsPageProps = {
   chartData: MonthlySalesChartData | null;
   monthlyCustomersCount: number;
   todayCustomersCount: number;
+  initialBranches: any[];
 };
 
 export function MainReportsPage({
@@ -51,6 +54,7 @@ export function MainReportsPage({
   chartData,
   monthlyCustomersCount,
   todayCustomersCount,
+  initialBranches,
 }: MainReportsPageProps) {
   const { role_name } = useUserContext();
   const isAdmin = role_name === ROLE_ADMIN;
@@ -60,6 +64,9 @@ export function MainReportsPage({
   if (role_name === ROLE_STAFF) {
     return <StaffSalesView />;
   }
+
+  const [branches, setBranches] = useState<any[]>(initialBranches);
+  const [selectedBranch, setSelectedBranch] = useState<string>("");
   const [initialMonthlySalesData, setInitialMonthlySalesData] =
     useState<MonthlySalesData | null>(monthlySalesData);
   const [initialChartData, setInitialChartData] =
@@ -69,7 +76,13 @@ export function MainReportsPage({
   const [initialTodayCustomersCount, setInitialTodayCustomersCount] =
     useState<number>(todayCustomersCount);
   const [activeTab, setActiveTab] = useState<
-    "overview" | "sales" | "customers" | "inventory" | "orders" | "expenses" | "services"
+    | "overview"
+    | "sales"
+    | "customers"
+    | "inventory"
+    | "orders"
+    | "expenses"
+    | "services"
   >("overview");
   const [dateRange, setDateRange] = useState({
     startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
@@ -101,14 +114,16 @@ export function MainReportsPage({
   const handleExportReport = async () => {
     setIsLoadingExport(true);
     try {
+      const branchId = selectedBranch === "" ? undefined : selectedBranch;
+
       // Fetch data based on active tab and date range
       const data: ExportData = {
         dateRange: dateRange,
         sales: monthlySalesData,
       };
 
-      // Fetch orders data
-      const ordersResponse = await getOrders();
+      // Fetch orders data with branch filter
+      const ordersResponse = await getOrders({ branchId });
       if (ordersResponse.data) {
         // Filter orders by date range
         const filteredOrders = ordersResponse.data.filter((order: any) => {
@@ -131,23 +146,24 @@ export function MainReportsPage({
               customerDate >= dateRange.startDate &&
               customerDate <= dateRange.endDate
             );
-          }
+          },
         );
         data.customers = filteredCustomers;
       }
 
-      // Fetch expenses data
+      // Fetch expenses data with branch filter
       const expensesResponse = await getAllExpenses();
       if (expensesResponse.data) {
-        // Filter expenses by date range
+        // Filter expenses by date range and branch
         const filteredExpenses = expensesResponse.data.filter(
           (expense: any) => {
             const expenseDate = new Date(expense.expense_date);
-            return (
+            const matchesDate =
               expenseDate >= dateRange.startDate &&
-              expenseDate <= dateRange.endDate
-            );
-          }
+              expenseDate <= dateRange.endDate;
+            const matchesBranch = !branchId || expense.branch_id === branchId;
+            return matchesDate && matchesBranch;
+          },
         );
         data.expenses = filteredExpenses;
       }
@@ -171,22 +187,48 @@ export function MainReportsPage({
   // Add a loading state for overview
   const isOverviewLoading = !monthlySalesData || !chartData;
 
+  const handleBranchChange = (newValue: any) => {
+    let branchValue: string;
+
+    if (newValue === null) {
+      // When user clears the selection, default to "All Branches"
+      branchValue = "";
+    } else if (typeof newValue === "object" && newValue !== null) {
+      // React-select option object
+      branchValue = newValue.value || "";
+    } else {
+      // Direct string value
+      branchValue = newValue || "";
+    }
+
+    setSelectedBranch(branchValue);
+  };
+
+  const branchOptions = [
+    { label: "All Branches", value: "" },
+    ...branches.map((branch) => ({
+      label: branch.name,
+      value: branch.id,
+    })),
+  ];
+
   const [isLoading, setIsLoading] = useState<boolean>(isOverviewLoading);
 
   useEffect(() => {
     const getReportsData = async (dateRange: any) => {
       setIsLoading(true);
+      const branchId = selectedBranch === "" ? undefined : selectedBranch;
       const [
         xMonthlySalesData,
         xChartData,
         xMonthlyCustomersCount,
         xTodayCustomersCount,
       ] = await Promise.all([
-        getMonthSales(undefined, dateRange?.startDate, dateRange?.endDate),
+        getMonthSales(branchId, dateRange?.startDate, dateRange?.endDate),
         getMonthlySalesChart(
-          undefined,
+          branchId,
           dateRange?.startDate,
-          dateRange?.endDate
+          dateRange?.endDate,
         ),
         getMonthlyCustomers(dateRange?.startDate, dateRange?.endDate),
         getTodayCustomers(),
@@ -201,12 +243,12 @@ export function MainReportsPage({
     };
 
     getReportsData(dateRange);
-  }, [dateRange]);
+  }, [dateRange, selectedBranch]);
 
   return (
     <div className="flex flex-col gap-6 p-4 lg:p-8">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-bold text-slate-800 mb-2">
             Analytics & Reports
@@ -215,7 +257,18 @@ export function MainReportsPage({
             Comprehensive insights into your laundry business performance
           </p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex flex-col sm:flex-row gap-3">
+          {isAdmin && (
+            <div className="w-full sm:w-64">
+              <Select
+                isSearchable={false}
+                options={branchOptions}
+                value={selectedBranch}
+                onChange={handleBranchChange}
+                placeholder="Select branch..."
+              />
+            </div>
+          )}
           <Button
             leftIcon={<DocumentArrowDownIcon className="h-4 w-4" />}
             onClick={handleExportReport}
@@ -275,6 +328,7 @@ export function MainReportsPage({
             monthlySalesData={monthlySalesData}
             chartData={chartData}
             dateRange={dateRange}
+            branchId={selectedBranch === "" ? undefined : selectedBranch}
           />
         )}
 
@@ -283,21 +337,36 @@ export function MainReportsPage({
             monthlyCustomersCount={monthlyCustomersCount}
             todayCustomersCount={todayCustomersCount}
             dateRange={dateRange}
+            branchId={selectedBranch === "" ? undefined : selectedBranch}
           />
         )}
 
         {activeTab === "inventory" && (
-          <InventoryReportSection dateRange={dateRange} />
+          <InventoryReportSection
+            dateRange={dateRange}
+            branchId={selectedBranch === "" ? undefined : selectedBranch}
+          />
         )}
 
-        {activeTab === "orders" && <OrderReportSection dateRange={dateRange} />}
+        {activeTab === "orders" && (
+          <OrderReportSection
+            dateRange={dateRange}
+            branchId={selectedBranch === "" ? undefined : selectedBranch}
+          />
+        )}
 
         {activeTab === "expenses" && (
-          <ExpenseReportSection dateRange={dateRange} />
+          <ExpenseReportSection
+            dateRange={dateRange}
+            branchId={selectedBranch === "" ? undefined : selectedBranch}
+          />
         )}
 
         {activeTab === "services" && (
-          <ServiceReportSection dateRange={dateRange} />
+          <ServiceReportSection
+            dateRange={dateRange}
+            branchId={selectedBranch === "" ? undefined : selectedBranch}
+          />
         )}
       </div>
 
@@ -363,7 +432,7 @@ function OverviewSection({
 
   // Filter cards based on role
   const summaryCards = allSummaryCards.filter(
-    (card) => !card.requiresAdmin || isAdmin
+    (card) => !card.requiresAdmin || isAdmin,
   );
 
   return (
@@ -522,7 +591,7 @@ function OverviewSection({
                   ? Math.round(
                       (monthlySalesData.paidSales /
                         monthlySalesData.totalSales) *
-                        100
+                        100,
                     )
                   : 0}
                 %
@@ -537,7 +606,7 @@ function OverviewSection({
                 {monthlyCustomersCount > 0
                   ? Math.round(
                       (monthlySalesData?.totalSales || 0) /
-                        monthlyCustomersCount
+                        monthlyCustomersCount,
                     ).toLocaleString()
                   : "0"}
               </span>
