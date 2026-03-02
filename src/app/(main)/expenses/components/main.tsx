@@ -19,6 +19,7 @@ import {
 } from "../../dashboard/components/skeleton";
 import { useUserContext } from "@/app/context";
 import { useStaffShift } from "@/app/hooks/use-staff-shift";
+import { DateFilterSection } from "../../reports/components/date-filter-section";
 
 interface ExpensesMainProps {
   initialData: Array<Record<string, any>>;
@@ -49,12 +50,17 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
   const [selectedExpense, setSelectedExpense] = useState<any>(null);
 
   // Filter states
-  const [filters, setFilters] = useState<{ branch_id: string; search: string }>(
-    {
-      branch_id: "",
-      search: "",
-    }
-  );
+  const [filters, setFilters] = useState<{
+    branch_id: string;
+    search: string;
+  }>({
+    branch_id: "",
+    search: "",
+  });
+  const [dateRange, setDateRange] = useState({
+    startDate: new Date(new Date().getFullYear(), new Date().getMonth(), 1),
+    endDate: new Date(),
+  });
 
   // Immediate search input value (not debounced)
   const [searchInputValue, setSearchInputValue] = useState("");
@@ -74,7 +80,7 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
       return;
     }
     fetchExpenses();
-  }, [currentPage, itemsPerPage, filters.branch_id, filters.search]);
+  }, [currentPage, itemsPerPage, filters.branch_id, filters.search, dateRange]);
 
   const fetchInitialData = async () => {
     setLoading(true);
@@ -99,6 +105,8 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
         limit: itemsPerPage,
         branchId: currentBranchId || filters?.branch_id,
         search: filters?.search || undefined,
+        startDate: dateRange.startDate.toISOString().split("T")[0],
+        endDate: dateRange.endDate.toISOString().split("T")[0],
       });
 
       if (result.data) {
@@ -297,6 +305,12 @@ export function ExpensesMain({ initialData, initialCount }: ExpensesMainProps) {
           </div>
         </div>
       </div>
+
+      {/* Date Filter */}
+      <DateFilterSection
+        dateRange={dateRange}
+        onDateRangeChange={setDateRange}
+      />
 
       {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
