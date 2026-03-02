@@ -5,6 +5,7 @@ import { Plus, Package, AlertTriangle, Search } from "lucide-react";
 
 import { InventoryTable } from "./inventory-table";
 import { InventoryModal } from "./inventory-modal";
+import { InventoryHistoryModal } from "./inventory-history-modal";
 import { Button, Select } from "@/app/components/common";
 import { getAllBranches } from "@/app/actions";
 import { getAllBranchStocks } from "@/app/actions/branch_stocks";
@@ -37,6 +38,15 @@ export function MainInventoryPage({
     name: "",
     quantity: "",
     branchId: "",
+  });
+  const [historyModal, setHistoryModal] = useState<{
+    show: boolean;
+    stockId: string;
+    stockName: string;
+  }>({
+    show: false,
+    stockId: "",
+    stockName: "",
   });
   const [inventoryList, setInventoryList] = useState<Array<any>>(
     initialData || []
@@ -90,6 +100,14 @@ export function MainInventoryPage({
   const handleLimitChange = (newLimit: number) => {
     setItemsPerPage(newLimit);
     setCurrentPage(1);
+  };
+
+  const handleViewHistory = (item: Record<string, any>) => {
+    setHistoryModal({
+      show: true,
+      stockId: item.stock_id,
+      stockName: item.stock_name || "Unknown Item",
+    });
   };
 
   const lowStockItems = inventoryList.filter(
@@ -208,6 +226,7 @@ export function MainInventoryPage({
               });
               setShowModal(true);
             }}
+            onViewHistory={handleViewHistory}
           />
         </div>
       </div>
@@ -227,6 +246,16 @@ export function MainInventoryPage({
           });
           setShowModal(false);
         }}
+        onSuccess={fetchData}
+      />
+
+      <InventoryHistoryModal
+        show={historyModal.show}
+        stockId={historyModal.stockId}
+        stockName={historyModal.stockName}
+        onClose={() =>
+          setHistoryModal({ show: false, stockId: "", stockName: "" })
+        }
       />
     </div>
   );

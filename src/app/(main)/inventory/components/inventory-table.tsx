@@ -1,6 +1,6 @@
 "use client";
 
-import { Edit2, Package, AlertTriangle, Loader2 } from "lucide-react";
+import { Edit2, Package, AlertTriangle, Loader2, History } from "lucide-react";
 import { Pagination } from "@/app/components/common/pagination";
 
 type InventoryTableProps = {
@@ -12,6 +12,7 @@ type InventoryTableProps = {
   onPageChange: (page: number) => void;
   onLimitChange: (limit: number) => void;
   onEdit: (item: Record<string, any>) => void;
+  onViewHistory?: (item: Record<string, any>) => void;
 };
 
 export function InventoryTable({
@@ -23,6 +24,7 @@ export function InventoryTable({
   onPageChange,
   onLimitChange,
   onEdit,
+  onViewHistory,
 }: InventoryTableProps) {
   const getStockStatus = (quantity: number) => {
     if (quantity === 0) return "Out of Stock";
@@ -61,7 +63,7 @@ export function InventoryTable({
               <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider">
                 Status
               </th>
-              <th className="sticky right-0 px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
+              <th className="px-6 py-3 text-left text-xs font-medium bg-blue-600 text-white uppercase tracking-wider w-40">
                 Actions
               </th>
             </tr>
@@ -121,15 +123,27 @@ export function InventoryTable({
                       {getStockStatus(item.quantity || 0)}
                     </span>
                   </td>
-                  <td className="sticky right-0 bg-white hover:bg-gray-50 px-6 py-4 whitespace-nowrap text-sm font-medium shadow-sm">
-                    <button
-                      onClick={() => onEdit(item)}
-                      className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
-                      title={`Edit ${item.name || "item"}`}
-                    >
-                      <Edit2 className="h-4 w-4" />
-                      Edit
-                    </button>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                    <div className="flex items-center gap-2">
+                      {onViewHistory && (
+                        <button
+                          onClick={() => onViewHistory(item)}
+                          className="text-purple-600 hover:text-purple-900 hover:bg-purple-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
+                          title={`View history for ${item.stock_name || "item"}`}
+                        >
+                          <History className="h-4 w-4" />
+                          History
+                        </button>
+                      )}
+                      <button
+                        onClick={() => onEdit(item)}
+                        className="text-blue-600 hover:text-blue-900 hover:bg-blue-50 inline-flex items-center gap-x-1 px-2 py-1 rounded-md transition-colors duration-200"
+                        title={`Edit ${item.stock_name || "item"}`}
+                      >
+                        <Edit2 className="h-4 w-4" />
+                        Edit
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))

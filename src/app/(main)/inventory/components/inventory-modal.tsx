@@ -21,6 +21,7 @@ type InventoryModalProps = {
   initialValue: InventoryFormData;
   branches: Array<Record<string, unknown>>;
   onClose: () => void;
+  onSuccess?: () => void;
   onDelete?: (itemId: string, branchId: string) => void;
 };
 
@@ -29,6 +30,7 @@ export function InventoryModal({
   initialValue,
   branches,
   onClose,
+  onSuccess,
 }: InventoryModalProps) {
   const { userId } = useCurrentUser();
   const { is_admin } = useUserContext();
@@ -67,7 +69,7 @@ export function InventoryModal({
 
       if (result.success) {
         onClose();
-        window.location.reload(); // Refresh to show updated data
+        onSuccess?.();
       } else {
         alert(result.message || "Failed to save inventory item");
       }

@@ -31,6 +31,7 @@ export const addNewStock = async (payload: AddStocksType) => {
     revalidateTag("getAllBranches");
     revalidateTag("getBranch");
     revalidateTag("getAllBranchStocks");
+    revalidateTag("getInventoryHistory");
 
     return {
       success: true,
